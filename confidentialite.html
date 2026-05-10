@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+.legal-page { padding: 80px 0 96px; }
+.legal-grid { display: grid; grid-template-columns: 220px 1fr; gap: 64px; align-items: start; }
+.legal-sidebar { position: sticky; top: 96px; }
+.legal-sidebar-title { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 14px; }
+.legal-toc { display: flex; flex-direction: column; gap: 4px; }
+.toc-link {
+  font-size: 13px; color: var(--gray-700); text-decoration: none;
+  padding: 6px 10px; border-radius: 6px; transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.toc-link:hover { background: var(--gray-50); color: var(--green-700); }
+.toc-link.active { border-left-color: var(--green-600); color: var(--green-700); font-weight: 500; background: var(--green-50); }
+
+.legal-content { max-width: 680px; }
+.legal-section { margin-bottom: 48px; padding-bottom: 48px; border-bottom: 1px solid var(--gray-100); }
+.legal-section:last-child { border-bottom: none; margin-bottom: 0; }
+.legal-section-num { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--green-600); margin-bottom: 8px; }
+.legal-section h2 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--gray-900); margin-bottom: 16px; letter-spacing: -0.3px; }
+.legal-section p { font-size: 14px; color: var(--gray-700); line-height: 1.8; margin-bottom: 12px; }
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul { padding-left: 20px; margin: 12px 0; }
+.legal-section ul li { font-size: 14px; color: var(--gray-700); line-height: 1.7; margin-bottom: 6px; }
+.legal-section strong { color: var(--gray-900); font-weight: 500; }
+.legal-section a { color: var(--green-700); }
+
+.legal-meta {
+  font-size: 12px; color: var(--gray-400); margin-bottom: 48px;
+  display: flex; gap: 20px;
+}
+.legal-meta span { display: flex; align-items: center; gap: 5px; }
+
+.legal-nav-pages {
+  display: flex; gap: 10px; margin-bottom: 48px; flex-wrap: wrap;
+}
+.lnp-link {
+  font-size: 13px; padding: 7px 14px; border-radius: 99px;
+  border: 1px solid var(--gray-100); text-decoration: none;
+  color: var(--gray-700); transition: all 0.15s;
+}
+.lnp-link:hover { border-color: var(--green-600); color: var(--green-700); }
+.lnp-link.current { background: var(--green-50); border-color: var(--green-100); color: var(--green-700); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">KPIT<span>A</span>L</a>
+    <ul class="nav-links">
+      <li><a href="projets.html">Projets</a></li>
+      <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+      <li><a href="a-propos.html">À propos</a></li>
+      <li><a href="securite.html">Sécurité</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <a href="connexion.html" class="btn-login">Connexion</a>
+      <a href="inscription.html" class="btn-cta">Investir</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <p class="section-eyebrow">Documents légaux</p>
+    <h1>Politique de confidentialité</h1>
+    <p>Découvrez comment nous collectons, utilisons et protégeons vos données personnelles sur KPITAL.</p>
+  </div>
+</div>
+
+<section class="legal-page">
+  <div class="container legal-grid">
+
+    <div class="legal-sidebar">
+      <div class="legal-sidebar-title">Documents légaux</div>
+      <div class="legal-nav-pages" style="flex-direction:column;gap:4px;">
+        <a href="conditions.html" class="lnp-link">Conditions générales</a>
+        <a href="confidentialite.html" class="lnp-link current">Confidentialité</a>
+        <a href="mentions-legales.html" class="lnp-link">Mentions légales</a>
+      </div>
+      <div class="legal-sidebar-title">Sommaire</div>
+      <div class="legal-toc">
+        <a href="#collecte" class="toc-link active">1. Collecte des données</a>
+        <a href="#utilisation" class="toc-link">2. Utilisation des données</a>
+        <a href="#partage" class="toc-link">3. Partage des données</a>
+        <a href="#securite" class="toc-link">4. Sécurité des données</a>
+        <a href="#droits" class="toc-link">5. Vos droits</a>
+        <a href="#conservation" class="toc-link">6. Conservation des données</a>
+        <a href="#contact" class="toc-link">7. Contact</a>
+      </div>
+    </div>
+
+    <div class="legal-content">
+      <div class="legal-meta">
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Dernière mise à jour : 1er juillet 2026</span>
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> KPITAL Finance SARL · Lomé, Togo</span>
+      </div>
+
+      <div class="legal-section" id="collecte">
+        <div class="legal-section-num">Article 1</div>
+        <h2>Collecte des données personnelles</h2>
+        <p>KPITAL collecte des données personnelles dans le cadre de l'utilisation de sa plateforme. Ces données sont collectées de manière loyale et transparente.</p>
+        <p><strong>Données collectées lors de l'inscription :</strong></p>
+        <ul>
+          <li>Nom, prénom, adresse email, numéro de téléphone</li>
+          <li>Informations d'identification (pièce d'identité pour le KYC)</li>
+          <li>Informations bancaires (Mobile Money)</li>
+        </ul>
+        <p><strong>Données collectées lors de l'utilisation :</strong></p>
+        <ul>
+          <li>Historique des investissements et transactions</li>
+          <li>Interactions avec la plateforme (connexions, consultations)</li>
+          <li>Données techniques (adresse IP, navigateur, appareil)</li>
+        </ul>
+        <p>La collecte de ces données est nécessaire pour fournir nos services et assurer la sécurité des transactions.</p>
+      </div>
+
+      <div class="legal-section" id="utilisation">
+        <div class="legal-section-num">Article 2</div>
+        <h2>Utilisation des données personnelles</h2>
+        <p>Vos données personnelles sont utilisées pour :</p>
+        <ul>
+          <li>Créer et gérer votre compte utilisateur</li>
+          <li>Traiter vos investissements et transactions</li>
+          <li>Vérifier votre identité (procédure KYC)</li>
+          <li>Vous contacter concernant vos investissements</li>
+          <li>Améliorer nos services et la sécurité de la plateforme</li>
+          <li>Répondre à vos demandes et réclamations</li>
+          <li>Se conformer aux obligations légales et réglementaires</li>
+        </ul>
+        <p>Nous n'utilisons vos données que pour les finalités décrites ci-dessus et ne les traitons pas à d'autres fins sans votre consentement préalable.</p>
+      </div>
+
+      <div class="legal-section" id="partage">
+        <div class="legal-section-num">Article 3</div>
+        <h2>Partage des données personnelles</h2>
+        <p>KPITAL ne vend pas vos données personnelles à des tiers. Nous pouvons partager vos données dans les cas suivants :</p>
+        <ul>
+          <li><strong>Avec SEMOA :</strong> Pour la gestion des paiements et du séquestre</li>
+          <li><strong>Avec les autorités :</strong> En cas d'obligation légale ou judiciaire</li>
+          <li><strong>Avec nos prestataires :</strong> Pour des services techniques (hébergement, sécurité)</li>
+          <li><strong>Avec votre consentement :</strong> Dans d'autres cas spécifiques</li>
+        </ul>
+        <p>Tous nos partenaires sont soumis à des obligations de confidentialité strictes.</p>
+      </div>
+
+      <div class="legal-section" id="securite">
+        <div class="legal-section-num">Article 4</div>
+        <h2>Sécurité des données</h2>
+        <p>KPITAL met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données personnelles contre la perte, l'accès non autorisé, la modification ou la divulgation.</p>
+        <p>Ces mesures incluent :</p>
+        <ul>
+          <li>Chiffrement des données sensibles</li>
+          <li>Contrôles d'accès stricts</li>
+          <li>Surveillance continue des systèmes</li>
+          <li>Audits de sécurité réguliers</li>
+          <li>Formation du personnel</li>
+        </ul>
+        <p>Cependant, aucune méthode de transmission ou de stockage électronique n'est totalement sécurisée. Nous ne pouvons garantir une sécurité absolue.</p>
+      </div>
+
+      <div class="legal-section" id="droits">
+        <div class="legal-section-num">Article 5</div>
+        <h2>Vos droits concernant vos données</h2>
+        <p>Conformément à la loi sur la protection des données, vous disposez des droits suivants :</p>
+        <ul>
+          <li><strong>Droit d'accès :</strong> Connaître les données que nous détenons sur vous</li>
+          <li><strong>Droit de rectification :</strong> Corriger des données inexactes</li>
+          <li><strong>Droit à l'effacement :</strong> Supprimer vos données dans certaines conditions</li>
+          <li><strong>Droit à la limitation :</strong> Limiter le traitement de vos données</li>
+          <li><strong>Droit à la portabilité :</strong> Recevoir vos données dans un format structuré</li>
+          <li><strong>Droit d'opposition :</strong> Vous opposer au traitement de vos données</li>
+        </ul>
+        <p>Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@kpital.app">privacy@kpital.app</a>.</p>
+      </div>
+
+      <div class="legal-section" id="conservation">
+        <div class="legal-section-num">Article 6</div>
+        <h2>Conservation des données</h2>
+        <p>Nous conservons vos données personnelles uniquement pendant la durée nécessaire aux finalités pour lesquelles elles ont été collectées :</p>
+        <ul>
+          <li>Données de compte : Pendant la durée de votre inscription plus 5 ans après la clôture</li>
+          <li>Données de transaction : 10 ans pour les obligations fiscales et comptables</li>
+          <li>Données KYC : 5 ans après la fin de la relation</li>
+        </ul>
+        <p>Passé ces délais, vos données sont supprimées ou anonymisées.</p>
+      </div>
+
+      <div class="legal-section" id="contact">
+        <div class="legal-section-num">Article 7</div>
+        <h2>Contact et réclamations</h2>
+        <p>Pour toute question concernant cette politique de confidentialité ou vos données personnelles, contactez notre délégué à la protection des données :</p>
+        <p><strong>Email :</strong> <a href="mailto:privacy@kpital.app">privacy@kpital.app</a><br>
+        <strong>Adresse :</strong> KPITAL Finance SARL, Lomé, Togo</p>
+        <p>Vous pouvez également déposer une réclamation auprès de l'autorité de protection des données compétente.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo">KPIT<span>A</span>L</span>
+        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <div class="footer-semoa"><div style="width:6px;height:6px;border-radius:50%;background:var(--green-600);flex-shrink:0;"></div>Fonds sécurisés via SEMOA · CashPay</div>
+      </div>
+      <div class="footer-col"><h4>Plateforme</h4><ul><li><a href="projets.html">Projets</a></li><li><a href="comment-ca-marche.html">Comment ça marche</a></li><li><a href="securite.html">Sécurité</a></li><li><a href="soumettre.html">Soumettre un projet</a></li></ul></div>
+      <div class="footer-col"><h4>Investisseurs</h4><ul><li><a href="inscription.html">Inscription</a></li><li><a href="connexion.html">Connexion</a></li><li><a href="index.html#diaspora">Diaspora</a></li><li><a href="faq.html">FAQ</a></li></ul></div>
+      <div class="footer-col"><h4>Légal</h4><ul><li><a href="conditions.html">Conditions générales</a></li><li><a href="confidentialite.html">Confidentialité</a></li><li><a href="mentions-legales.html">Mentions légales</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <div class="footer-legal"><a href="conditions.html">Conditions générales</a><a href="confidentialite.html">Politique de confidentialité</a><a href="mentions-legales.html">Mentions légales</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('.legal-section');
+  const links = document.querySelectorAll('.toc-link');
+  let current = '';
+  sections.forEach(s => { if (s.getBoundingClientRect().top <= 130) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+});
+</script>
+</body>
+</html>
