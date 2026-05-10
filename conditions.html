@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditions générales — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+.legal-page { padding: 80px 0 96px; }
+.legal-grid { display: grid; grid-template-columns: 220px 1fr; gap: 64px; align-items: start; }
+.legal-sidebar { position: sticky; top: 96px; }
+.legal-sidebar-title { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 14px; }
+.legal-toc { display: flex; flex-direction: column; gap: 4px; }
+.toc-link {
+  font-size: 13px; color: var(--gray-700); text-decoration: none;
+  padding: 6px 10px; border-radius: 6px; transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.toc-link:hover { background: var(--gray-50); color: var(--green-700); }
+.toc-link.active { border-left-color: var(--green-600); color: var(--green-700); font-weight: 500; background: var(--green-50); }
+
+.legal-content { max-width: 680px; }
+.legal-section { margin-bottom: 48px; padding-bottom: 48px; border-bottom: 1px solid var(--gray-100); }
+.legal-section:last-child { border-bottom: none; margin-bottom: 0; }
+.legal-section-num { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--green-600); margin-bottom: 8px; }
+.legal-section h2 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--gray-900); margin-bottom: 16px; letter-spacing: -0.3px; }
+.legal-section p { font-size: 14px; color: var(--gray-700); line-height: 1.8; margin-bottom: 12px; }
+.legal-section p:last-child { margin-bottom: 0; }
+.legal-section ul { padding-left: 20px; margin: 12px 0; }
+.legal-section ul li { font-size: 14px; color: var(--gray-700); line-height: 1.7; margin-bottom: 6px; }
+.legal-section strong { color: var(--gray-900); font-weight: 500; }
+.legal-section a { color: var(--green-700); }
+
+.legal-meta {
+  font-size: 12px; color: var(--gray-400); margin-bottom: 48px;
+  display: flex; gap: 20px;
+}
+.legal-meta span { display: flex; align-items: center; gap: 5px; }
+
+.legal-nav-pages {
+  display: flex; gap: 10px; margin-bottom: 48px; flex-wrap: wrap;
+}
+.lnp-link {
+  font-size: 13px; padding: 7px 14px; border-radius: 99px;
+  border: 1px solid var(--gray-100); text-decoration: none;
+  color: var(--gray-700); transition: all 0.15s;
+}
+.lnp-link:hover { border-color: var(--green-600); color: var(--green-700); }
+.lnp-link.current { background: var(--green-50); border-color: var(--green-100); color: var(--green-700); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">KPIT<span>A</span>L</a>
+    <ul class="nav-links">
+      <li><a href="projets.html">Projets</a></li>
+      <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+      <li><a href="a-propos.html">À propos</a></li>
+      <li><a href="securite.html">Sécurité</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <button class="btn-login">Connexion</button>
+      <button class="btn-cta">Investir</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <p class="section-eyebrow">Documents légaux</p>
+    <h1>Conditions générales<br>d'utilisation</h1>
+    <p>Lisez attentivement ces conditions avant d'utiliser la plateforme KPITAL.</p>
+  </div>
+</div>
+
+<section class="legal-page">
+  <div class="container legal-grid">
+
+    <div class="legal-sidebar">
+      <div class="legal-sidebar-title">Documents légaux</div>
+      <div class="legal-nav-pages" style="flex-direction:column;gap:4px;">
+        <a href="conditions.html" class="lnp-link current">Conditions générales</a>
+        <a href="confidentialite.html" class="lnp-link">Confidentialité</a>
+        <a href="mentions-legales.html" class="lnp-link">Mentions légales</a>
+      </div>
+      <div class="legal-sidebar-title">Sommaire</div>
+      <div class="legal-toc">
+        <a href="#definitions" class="toc-link active">1. Définitions</a>
+        <a href="#objet" class="toc-link">2. Objet</a>
+        <a href="#acces" class="toc-link">3. Accès à la plateforme</a>
+        <a href="#investisseurs" class="toc-link">4. Investisseurs</a>
+        <a href="#porteurs" class="toc-link">5. Porteurs de projet</a>
+        <a href="#risques" class="toc-link">6. Risques</a>
+        <a href="#sequestre" class="toc-link">7. Séquestre SEMOA</a>
+        <a href="#commission" class="toc-link">8. Commission</a>
+        <a href="#responsabilite" class="toc-link">9. Responsabilité</a>
+        <a href="#resiliation" class="toc-link">10. Résiliation</a>
+        <a href="#droit" class="toc-link">11. Droit applicable</a>
+      </div>
+    </div>
+
+    <div class="legal-content">
+      <div class="legal-meta">
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Dernière mise à jour : 1er juillet 2026</span>
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> KPITAL Finance SARL · Lomé, Togo</span>
+      </div>
+
+      <div class="legal-section" id="definitions">
+        <div class="legal-section-num">Article 1</div>
+        <h2>Définitions</h2>
+        <p>Dans les présentes Conditions Générales d'Utilisation (CGU), les termes suivants ont la signification indiquée ci-dessous :</p>
+        <ul>
+          <li><strong>« KPITAL »</strong> désigne la société KPITAL Finance SARL, immatriculée au RCCM de Lomé, éditrice et opératrice de la plateforme.</li>
+          <li><strong>« Plateforme »</strong> désigne le site web kpital.app et l'application mobile KPITAL ainsi que tous les services associés.</li>
+          <li><strong>« Investisseur »</strong> désigne toute personne physique ou morale ayant créé un compte sur la Plateforme dans l'intention de participer au financement de projets.</li>
+          <li><strong>« Porteur de projet »</strong> désigne toute personne physique ou morale ayant soumis un projet à KPITAL en vue d'un financement participatif.</li>
+          <li><strong>« SEMOA »</strong> désigne la société prestataire de services de paiement et de séquestre partenaire de KPITAL, agréée par les autorités de régulation compétentes de l'UEMOA.</li>
+          <li><strong>« Projet »</strong> désigne toute opportunité d'investissement publiée sur la Plateforme après validation par KPITAL.</li>
+          <li><strong>« ROI »</strong> (Return On Investment) désigne le rendement annuel estimé associé à chaque Projet.</li>
+          <li><strong>« Séquestre »</strong> désigne le compte dédié ouvert par SEMOA pour chaque Projet, dans lequel les fonds des Investisseurs sont conservés jusqu'au remboursement.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section" id="objet">
+        <div class="legal-section-num">Article 2</div>
+        <h2>Objet</h2>
+        <p>Les présentes CGU ont pour objet de définir les conditions et modalités d'accès et d'utilisation de la Plateforme KPITAL par ses utilisateurs, qu'ils soient Investisseurs ou Porteurs de projet.</p>
+        <p>KPITAL est une plateforme d'intermédiation en financement participatif (crowdfunding). KPITAL ne réalise pas d'opérations de crédit au sens de la réglementation bancaire et n'est pas un établissement de crédit. Les fonds collectés transitent exclusivement par SEMOA dans le cadre d'une convention de séquestre.</p>
+      </div>
+
+      <div class="legal-section" id="acces">
+        <div class="legal-section-num">Article 3</div>
+        <h2>Accès à la plateforme</h2>
+        <p>L'accès à la Plateforme est réservé aux personnes physiques majeures (18 ans ou plus) et aux personnes morales régulièrement constituées. L'inscription est gratuite pour les Investisseurs.</p>
+        <p>L'utilisateur garantit l'exactitude des informations fournies lors de l'inscription et s'engage à les maintenir à jour. Toute création de compte au nom d'un tiers sans mandat exprès est interdite.</p>
+        <p>KPITAL se réserve le droit de suspendre ou supprimer tout compte en cas de violation des présentes CGU, de fraude avérée ou soupçonnée, ou de mise en danger de la plateforme ou d'autres utilisateurs.</p>
+      </div>
+
+      <div class="legal-section" id="investisseurs">
+        <div class="legal-section-num">Article 4</div>
+        <h2>Conditions applicables aux Investisseurs</h2>
+        <p><strong>4.1 KYC.</strong> Tout Investisseur doit compléter le processus de vérification d'identité (KYC) opéré par SEMOA avant de pouvoir effectuer son premier investissement. Ce processus implique la fourniture de documents d'identité valides.</p>
+        <p><strong>4.2 Investissement.</strong> L'Investisseur peut investir sur les Projets publiés dans la limite des montants affichés sur la Plateforme. L'investissement minimum est de 10 000 FCFA, sauf mention contraire sur la fiche Projet.</p>
+        <p><strong>4.3 Irrévocabilité.</strong> Tout investissement validé est irrévocable. L'Investisseur ne peut pas retirer ses fonds avant l'échéance du Projet, sauf en cas d'échec de la collecte (remboursement intégral dans ce cas).</p>
+        <p><strong>4.4 Remboursement.</strong> À échéance du Projet, SEMOA procède au remboursement du capital augmenté du ROI calculé prorata temporis, directement sur le Mobile Money enregistré par l'Investisseur.</p>
+        <p><strong>4.5 Frais.</strong> Aucun frais d'inscription ni de commission sur les gains n'est prélevé par KPITAL auprès des Investisseurs. Les frais Mobile Money standard de l'opérateur de l'Investisseur s'appliquent aux transactions.</p>
+      </div>
+
+      <div class="legal-section" id="porteurs">
+        <div class="legal-section-num">Article 5</div>
+        <h2>Conditions applicables aux Porteurs de projet</h2>
+        <p><strong>5.1 Soumission.</strong> La soumission d'un Projet implique l'acceptation du processus de validation en 4 étapes (scoring, visite terrain, comité expert, dépôt caution). KPITAL se réserve le droit de refuser tout Projet sans avoir à justifier sa décision.</p>
+        <p><strong>5.2 Véracité.</strong> Le Porteur garantit l'exactitude et la sincérité de l'ensemble des informations et documents fournis. Toute falsification entraîne la résiliation immédiate du contrat et peut donner lieu à des poursuites.</p>
+        <p><strong>5.3 Caution.</strong> Avant tout décaissement, le Porteur dépose une caution auprès de SEMOA selon les modalités convenues (bien immobilier, aval tiers, co-signature institutionnelle). Cette caution est exécutable en cas de défaut.</p>
+        <p><strong>5.4 Commission.</strong> KPITAL prélève une commission de 4% sur le montant total de la collecte réussie, perçue par SEMOA avant le premier décaissement. 5% supplémentaires alimentent le fonds de réserve commun géré par SEMOA.</p>
+        <p><strong>5.5 Rapports.</strong> Le Porteur s'engage à fournir un rapport mensuel d'avancement accompagné de photos terrain, sous peine de suspension des décaissements en cours.</p>
+      </div>
+
+      <div class="legal-section" id="risques">
+        <div class="legal-section-num">Article 6</div>
+        <h2>Risques et avertissements</h2>
+        <p>L'investissement sur la Plateforme comporte des risques, notamment :</p>
+        <ul>
+          <li>La perte partielle ou totale du capital investi en cas de défaillance du Porteur ;</li>
+          <li>L'absence de liquidité : les fonds sont bloqués jusqu'à l'échéance du Projet ;</li>
+          <li>Le risque de marché : les conditions économiques peuvent affecter la performance du Projet ;</li>
+          <li>Le risque de défaut : le Porteur peut ne pas être en mesure de rembourser les Investisseurs.</li>
+        </ul>
+        <p>Les mécanismes de protection (séquestre, fonds de réserve, caution) réduisent ces risques mais ne les éliminent pas. Les rendements indiqués sont des estimations et ne constituent pas une garantie. Les performances passées ne préjugent pas des performances futures.</p>
+        <p><strong>Il est recommandé de ne jamais investir plus que ce que vous êtes prêt à perdre et de diversifier vos investissements.</strong></p>
+      </div>
+
+      <div class="legal-section" id="sequestre">
+        <div class="legal-section-num">Article 7</div>
+        <h2>Séquestre et gestion des fonds</h2>
+        <p>Les fonds des Investisseurs sont conservés dans des comptes séquestre dédiés par Projet, ouverts et gérés exclusivement par SEMOA. KPITAL n'a pas accès unilatéral à ces fonds.</p>
+        <p>Les fonds du fonds de réserve commun sont également gérés par SEMOA et font l'objet d'un audit indépendant trimestriel, dont les résultats sont publiés sur la Plateforme.</p>
+        <p>En cas de fermeture ou de cessation d'activité de KPITAL, SEMOA continue d'administrer les comptes selon les conventions en vigueur et procède aux remboursements aux Investisseurs selon les échéances prévues.</p>
+      </div>
+
+      <div class="legal-section" id="commission">
+        <div class="legal-section-num">Article 8</div>
+        <h2>Structure tarifaire</h2>
+        <p>La structure tarifaire de KPITAL est la suivante :</p>
+        <ul>
+          <li><strong>Investisseurs :</strong> Inscription gratuite. Aucune commission sur les gains. Frais Mobile Money de l'opérateur à la charge de l'Investisseur.</li>
+          <li><strong>Porteurs de projet :</strong> Soumission gratuite. Commission de 4% sur la collecte réussie. Contribution de 5% au fonds de réserve SEMOA. Soit 91% du montant collecté versé au Porteur.</li>
+        </ul>
+        <p>KPITAL se réserve le droit de modifier sa structure tarifaire avec un préavis de 30 jours notifié aux utilisateurs enregistrés.</p>
+      </div>
+
+      <div class="legal-section" id="responsabilite">
+        <div class="legal-section-num">Article 9</div>
+        <h2>Limitation de responsabilité</h2>
+        <p>KPITAL agit en qualité d'intermédiaire et ne peut être tenu responsable des pertes subies par les Investisseurs du fait de la défaillance d'un Porteur de projet, dès lors que les procédures de vérification et les mécanismes de protection prévus aux présentes ont été correctement mis en œuvre.</p>
+        <p>KPITAL ne garantit pas la disponibilité ininterrompue de la Plateforme et ne peut être tenu responsable des dommages liés à une interruption de service, dans la limite permise par la loi applicable.</p>
+        <p>La responsabilité de KPITAL est limitée au montant des commissions effectivement perçues auprès du Porteur de projet concerné au cours des 12 mois précédant le fait générateur du dommage.</p>
+      </div>
+
+      <div class="legal-section" id="resiliation">
+        <div class="legal-section-num">Article 10</div>
+        <h2>Résiliation et suspension</h2>
+        <p>L'Investisseur peut fermer son compte à tout moment depuis les paramètres de son profil, sous réserve qu'aucun investissement actif ne soit en cours. En cas d'investissements actifs, la fermeture prendra effet à l'échéance du dernier Projet.</p>
+        <p>KPITAL peut résilier ou suspendre tout compte en cas de : violation des CGU, fraude, fourniture de fausses informations, comportement préjudiciable à la Plateforme ou à ses utilisateurs. La résiliation est notifiée par email avec un préavis de 5 jours ouvrés, sauf urgence.</p>
+      </div>
+
+      <div class="legal-section" id="droit">
+        <div class="legal-section-num">Article 11</div>
+        <h2>Droit applicable et juridiction</h2>
+        <p>Les présentes CGU sont soumises au droit de la République Togolaise. Tout litige relatif à leur interprétation ou à leur exécution sera soumis, à défaut de règlement amiable dans un délai de 30 jours, à la compétence des tribunaux de Lomé, Togo.</p>
+        <p>Pour tout contact relatif aux présentes CGU : <a href="mailto:legal@kpital.app">legal@kpital.app</a></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo">KPIT<span>A</span>L</span>
+        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <div class="footer-semoa"><div style="width:6px;height:6px;border-radius:50%;background:var(--green-600);flex-shrink:0;"></div>Fonds sécurisés via SEMOA · CashPay</div>
+      </div>
+      <div class="footer-col"><h4>Plateforme</h4><ul><li><a href="projets.html">Projets</a></li><li><a href="comment-ca-marche.html">Comment ça marche</a></li><li><a href="securite.html">Sécurité</a></li><li><a href="soumettre.html">Soumettre un projet</a></li></ul></div>
+      <div class="footer-col"><h4>Investisseurs</h4><ul><li><a href="inscription.html">Inscription</a></li><li><a href="connexion.html">Connexion</a></li><li><a href="index.html#diaspora">Diaspora</a></li><li><a href="faq.html">FAQ</a></li></ul></div>
+      <div class="footer-col"><h4>Légal</h4><ul><li><a href="conditions.html">Conditions générales</a></li><li><a href="confidentialite.html">Confidentialité</a></li><li><a href="mentions-legales.html">Mentions légales</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <div class="footer-legal"><a href="conditions.html">Conditions générales</a><a href="confidentialite.html">Politique de confidentialité</a><a href="mentions-legales.html">Mentions légales</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('.legal-section');
+  const links = document.querySelectorAll('.toc-link');
+  let current = '';
+  sections.forEach(s => { if (s.getBoundingClientRect().top <= 130) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+});
+</script>
+</body>
+</html>

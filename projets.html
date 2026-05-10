@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projets — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+/* ── FILTERS ── */
+.filters-bar {
+  position: sticky; top: 64px; z-index: 90;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-100);
+  padding: 16px 0;
+}
+.filters-inner {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.filter-label { font-size: 12px; color: var(--gray-400); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-right: 4px; }
+.filter-btn {
+  font-size: 13px; color: var(--gray-700);
+  background: transparent; border: 1px solid var(--gray-100);
+  padding: 6px 14px; border-radius: 99px;
+  cursor: pointer; font-family: var(--sans);
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--gray-400); color: var(--gray-900); }
+.filter-btn.active {
+  background: var(--green-700); border-color: var(--green-700);
+  color: var(--white);
+}
+.filter-sep { width: 1px; height: 20px; background: var(--gray-100); flex-shrink: 0; }
+.results-count { margin-left: auto; font-size: 13px; color: var(--gray-400); }
+
+/* ── PROJECTS SECTION ── */
+.projects-section { padding: 48px 0 96px; }
+.projects-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+
+/* PROJECT CARD */
+.project-card {
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.project-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  border-color: var(--green-100);
+}
+.card-top {
+  height: 140px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 16px;
+  position: relative;
+}
+.card-cat-badge {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 99px;
+  border: 1px solid currentColor;
+  backdrop-filter: blur(4px);
+}
+.cat-immo   { color: var(--green-700); background: rgba(225,245,238,0.9); }
+.cat-commerce { color: var(--gold-700); background: rgba(250,238,218,0.9); }
+.cat-agri   { color: #3D6E27; background: rgba(234,243,222,0.9); }
+.cat-pme    { color: #2563EB; background: rgba(230,241,251,0.9); }
+.cat-impact { color: #534AB7; background: rgba(238,237,254,0.9); }
+.note-badge {
+  font-size: 13px; font-weight: 600;
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.note-a  { background: rgba(225,245,238,0.95); color: var(--green-700); }
+.note-b  { background: rgba(250,238,218,0.95); color: var(--gold-700); }
+.note-bp { background: rgba(230,241,251,0.95); color: #2563EB; }
+
+.card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.card-name {
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 400; color: var(--gray-900);
+  line-height: 1.25; margin-bottom: 4px;
+}
+.card-location {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--gray-400); margin-bottom: 16px;
+}
+.card-metrics {
+  display: flex; gap: 0;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 16px;
+}
+.metric-item {
+  flex: 1; padding: 10px 12px; text-align: center;
+  border-right: 1px solid var(--gray-100);
+}
+.metric-item:last-child { border-right: none; }
+.metric-val {
+  font-family: var(--serif);
+  font-size: 18px; color: var(--green-700); font-style: italic; font-weight: 400;
+}
+.metric-label { font-size: 10px; color: var(--gray-400); letter-spacing: 0.3px; margin-top: 2px; text-transform: uppercase; }
+.card-progress { margin-bottom: 16px; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-pct { font-size: 12px; font-weight: 500; color: var(--green-700); }
+.progress-remain { font-size: 11px; color: var(--gray-400); }
+.progress-track { height: 5px; background: var(--gray-50); border-radius: 99px; overflow: hidden; }
+.progress-fill-card { height: 100%; background: var(--green-600); border-radius: 99px; }
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px; border-top: 1px solid var(--gray-50);
+  margin-top: auto;
+}
+.card-min {
+  font-size: 12px; color: var(--gray-400);
+}
+.card-min strong { color: var(--gray-700); font-weight: 500; }
+.btn-invest {
+  font-size: 13px; font-weight: 500;
+  background: var(--green-700); color: var(--white);
+  border: none; padding: 8px 16px; border-radius: var(--radius);
+  cursor: pointer; font-family: var(--sans);
+  transition: background 0.2s;
+}
+.btn-invest:hover { background: var(--green-800); }
+
+/* Empty state / coming soon card */
+.card-soon {
+  background: var(--gray-50);
+  border: 1px dashed var(--gray-100);
+  border-radius: var(--radius-lg);
+  padding: 40px 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; min-height: 340px;
+  color: var(--gray-400);
+}
+.card-soon-icon { color: var(--gray-100); margin-bottom: 16px; }
+.card-soon h4 { font-size: 14px; font-weight: 500; color: var(--gray-400); margin-bottom: 6px; }
+.card-soon p { font-size: 13px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">KPIT<span>A</span>L</a>
+    <ul class="nav-links">
+      <li><a href="projets.html" class="active">Projets</a></li>
+      <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+      <li><a href="securite.html">Sécurité</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <button class="btn-login">Connexion</button>
+      <button class="btn-cta">Investir</button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <p class="section-eyebrow">Projets disponibles</p>
+    <h1>Investissez dans<br>des projets réels</h1>
+    <p>Chaque projet est vérifié sur le terrain avant publication. Filtrez par type, durée ou niveau de risque.</p>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="container filters-inner">
+    <span class="filter-label">Type</span>
+    <button class="filter-btn active" onclick="filterProjects('all', this)">Tous</button>
+    <button class="filter-btn" onclick="filterProjects('immo', this)">Immobilier</button>
+    <button class="filter-btn" onclick="filterProjects('commerce', this)">Commerce</button>
+    <button class="filter-btn" onclick="filterProjects('agri', this)">Agriculture</button>
+    <button class="filter-btn" onclick="filterProjects('pme', this)">PME</button>
+    <button class="filter-btn" onclick="filterProjects('impact', this)">Impact</button>
+    <div class="filter-sep"></div>
+    <span class="filter-label">Note</span>
+    <button class="filter-btn" onclick="filterNote('A', this)">Note A</button>
+    <button class="filter-btn" onclick="filterNote('B', this)">Note B</button>
+    <span class="results-count" id="count">6 projets</span>
+  </div>
+</div>
+
+<!-- PROJECTS GRID -->
+<div class="projects-section">
+  <div class="container">
+    <div class="projects-grid" id="grid">
+
+      <!-- Projet 1: Immobilier -->
+      <div class="project-card" data-type="immo" data-note="A">
+        <div class="card-top" style="background:linear-gradient(135deg,#0F6E5610,#E1F5EE);">
+          <span class="card-cat-badge cat-immo">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+            Immobilier
+          </span>
+          <div class="note-badge note-a">A</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Villa Tokoin — Location longue durée</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Tokoin, Lomé
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val">11%</div>
+              <div class="metric-label">ROI / an</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">24</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">4,5M</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct">73% financé</span>
+              <span class="progress-remain">1,2M restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:73%"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>10 000 FCFA</strong></div>
+            <button class="btn-invest">Investir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projet 2: Commerce -->
+      <div class="project-card" data-type="commerce" data-note="B">
+        <div class="card-top" style="background:linear-gradient(135deg,#BA751710,#FAEEDA);">
+          <span class="card-cat-badge cat-commerce">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Commerce
+          </span>
+          <div class="note-badge note-b">B</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Stock tissu wax — Import Lomé</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Grand Marché, Lomé
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val">18%</div>
+              <div class="metric-label">ROI / an</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">4</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">1,2M</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct">45% financé</span>
+              <span class="progress-remain">660K restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:45%"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>10 000 FCFA</strong></div>
+            <button class="btn-invest">Investir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projet 3: Agriculture -->
+      <div class="project-card" data-type="agri" data-note="B">
+        <div class="card-top" style="background:linear-gradient(135deg,#3D6E2710,#EAF3DE);">
+          <span class="card-cat-badge cat-agri">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M12 22V12"/><path d="M12 12C9 9.5 5.5 9 3 10c0 4.5 3 8 9 10z"/></svg>
+            Agriculture
+          </span>
+          <div class="note-badge" style="background:rgba(234,243,222,0.95);color:#3D6E27;">B+</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Campagne maïs — Région des Plateaux</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Kpalimé, Région des Plateaux
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val">24%</div>
+              <div class="metric-label">ROI / an</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">6</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">800K</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct">88% financé</span>
+              <span class="progress-remain">96K restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:88%"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>10 000 FCFA</strong></div>
+            <button class="btn-invest">Investir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projet 4: Commerce -->
+      <div class="project-card" data-type="commerce" data-note="A">
+        <div class="card-top" style="background:linear-gradient(135deg,#BA751710,#FAEEDA);">
+          <span class="card-cat-badge cat-commerce">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Commerce
+          </span>
+          <div class="note-badge note-a">A−</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Épicerie moderne Adéwi</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Hédzranawoé, Lomé
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val">16%</div>
+              <div class="metric-label">ROI / an</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">6</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">600K</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct">22% financé</span>
+              <span class="progress-remain">468K restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:22%"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>10 000 FCFA</strong></div>
+            <button class="btn-invest">Investir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projet 5: PME -->
+      <div class="project-card" data-type="pme" data-note="B">
+        <div class="card-top" style="background:linear-gradient(135deg,#2563EB10,#E6F1FB);">
+          <span class="card-cat-badge cat-pme">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            PME
+          </span>
+          <div class="note-badge note-b">B</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Extension atelier menuiserie Koffi</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Adétikopé, Lomé
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val">14%</div>
+              <div class="metric-label">ROI / an</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">12</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">2,8M</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct">10% financé</span>
+              <span class="progress-remain">2,52M restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:10%"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>25 000 FCFA</strong></div>
+            <button class="btn-invest">Investir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projet 6: Impact -->
+      <div class="project-card" data-type="impact" data-note="A">
+        <div class="card-top" style="background:linear-gradient(135deg,#534AB710,#EEEDFE);">
+          <span class="card-cat-badge cat-impact">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Impact
+          </span>
+          <div class="note-badge" style="background:rgba(238,237,254,0.95);color:#534AB7;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">École primaire communautaire — Kpalimé</div>
+          <div class="card-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Kpalimé, Région des Plateaux
+          </div>
+          <div class="card-metrics">
+            <div class="metric-item">
+              <div class="metric-val" style="font-size:14px;font-style:normal;color:#534AB7;">Impact</div>
+              <div class="metric-label">ROI social</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">18</div>
+              <div class="metric-label">Mois</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">5M</div>
+              <div class="metric-label">Objectif FCFA</div>
+            </div>
+          </div>
+          <div class="card-progress">
+            <div class="progress-header">
+              <span class="progress-pct" style="color:#534AB7;">58% financé</span>
+              <span class="progress-remain">2,1M restants</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill-card" style="width:58%;background:#534AB7;"></div></div>
+          </div>
+          <div class="card-footer">
+            <div class="card-min">Min <strong>10 000 FCFA</strong></div>
+            <button class="btn-invest" style="background:#534AB7;">Contribuer →</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+
+    <!-- Soumettre CTA -->
+    <div style="margin-top:48px;padding:36px;background:var(--gray-50);border-radius:var(--radius-lg);border:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:32px;">
+      <div>
+        <p style="font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--green-600);margin-bottom:8px;">Vous avez un projet ?</p>
+        <h3 style="font-family:var(--serif);font-size:26px;font-weight:400;color:var(--gray-900);margin-bottom:8px;letter-spacing:-0.3px;">Soumettez-le à KPITAL</h3>
+        <p style="font-size:14px;color:var(--gray-700);max-width:440px;">Immobilier, commerce, agriculture ou PME — si votre projet est solide et vérifiable, KPITAL peut vous financer.</p>
+      </div>
+      <a href="soumettre.html" class="btn-primary-lg" style="white-space:nowrap;">Soumettre un projet</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo">KPIT<span>A</span>L</span>
+        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <div class="footer-semoa">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--green-600);flex-shrink:0;"></div>
+          Fonds sécurisés via SEMOA · CashPay
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Plateforme</h4>
+        <ul>
+          <li><a href="projets.html">Projets</a></li>
+          <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+          <li><a href="securite.html">Sécurité</a></li>
+          <li><a href="soumettre.html">Soumettre un projet</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Investisseurs</h4>
+        <ul>
+          <li><a href="#">Inscription</a></li>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="index.html#diaspora">Diaspora</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Société</h4>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Conditions</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <div class="footer-legal">
+        <a href="#">Conditions générales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">Mentions légales</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function filterProjects(type, btn) {
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    if (['all','immo','commerce','agri','pme','impact'].some(t => b.getAttribute('onclick')?.includes(`'${t}'`))) {
+      b.classList.remove('active');
+    }
+  });
+  btn.classList.add('active');
+
+  const cards = document.querySelectorAll('.project-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const show = type === 'all' || card.dataset.type === type;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('count').textContent = visible + ' projet' + (visible > 1 ? 's' : '');
+}
+
+function filterNote(note, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes('filterNote')) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+
+  const cards = document.querySelectorAll('.project-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const show = card.dataset.note.startsWith(note);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('count').textContent = visible + ' projet' + (visible > 1 ? 's' : '');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscription — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+body { background: var(--gray-50); }
+
+.auth-nav {
+  padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--white); border-bottom: 1px solid var(--gray-100);
+}
+.auth-nav-right { font-size: 13px; color: var(--gray-400); }
+.auth-nav-right a { color: var(--green-700); text-decoration: none; font-weight: 500; }
+
+/* PROGRESS BAR TOP */
+.onboard-progress {
+  background: var(--white); border-bottom: 1px solid var(--gray-100);
+  padding: 0 40px;
+}
+.progress-steps {
+  display: flex; max-width: 640px; margin: 0 auto;
+}
+.progress-step {
+  flex: 1; padding: 16px 8px; text-align: center;
+  font-size: 12px; color: var(--gray-400); position: relative;
+  border-bottom: 2px solid var(--gray-100);
+  transition: color 0.2s, border-color 0.2s;
+}
+.progress-step.active { color: var(--green-700); border-bottom-color: var(--green-700); font-weight: 500; }
+.progress-step.done { color: var(--green-600); border-bottom-color: var(--green-100); }
+.ps-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gray-100); color: var(--gray-400);
+  font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 5px;
+}
+.progress-step.active .ps-num { background: var(--green-700); color: var(--white); }
+.progress-step.done .ps-num { background: var(--green-50); color: var(--green-700); }
+
+/* MAIN */
+.onboard-main {
+  min-height: calc(100vh - 130px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 48px 24px 96px;
+}
+.onboard-card {
+  width: 100%; max-width: 540px;
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.onboard-header { padding: 36px 40px 0; }
+.onboard-step-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--green-600); margin-bottom: 8px;
+}
+.onboard-title {
+  font-family: var(--serif); font-size: 26px; font-weight: 400;
+  color: var(--gray-900); letter-spacing: -0.4px; margin-bottom: 6px;
+}
+.onboard-sub { font-size: 14px; color: var(--gray-400); }
+.onboard-body { padding: 28px 40px; }
+
+/* FORM FIELDS */
+.field { margin-bottom: 18px; }
+.field-label {
+  display: block; font-size: 13px; font-weight: 500;
+  color: var(--gray-700); margin-bottom: 6px;
+}
+.field-label .req { color: #E05B3A; }
+.field-input, .field-select {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--gray-100); border-radius: var(--radius);
+  font-size: 14px; font-family: var(--sans); color: var(--gray-900);
+  background: var(--white); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input:focus, .field-select:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(15,110,86,0.08);
+}
+.field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888780' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.field-hint { font-size: 12px; color: var(--gray-400); margin-top: 5px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* PROFILE TYPE SELECTOR */
+.profile-selector { display: flex; gap: 12px; margin-bottom: 24px; }
+.profile-option {
+  flex: 1; border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-lg); padding: 20px 16px; text-align: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.profile-option:hover { border-color: var(--green-100); background: var(--green-50); }
+.profile-option.selected { border-color: var(--green-700); background: var(--green-50); }
+.profile-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--gray-100); color: var(--gray-400);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+  transition: all 0.15s;
+}
+.profile-option.selected .profile-icon { background: var(--green-50); color: var(--green-700); }
+.profile-name { font-size: 14px; font-weight: 500; color: var(--gray-900); margin-bottom: 3px; }
+.profile-desc { font-size: 12px; color: var(--gray-400); line-height: 1.4; }
+
+/* MOMO SELECTOR */
+.momo-selector { display: flex; gap: 10px; }
+.momo-opt {
+  flex: 1; border: 1.5px solid var(--gray-100); border-radius: var(--radius);
+  padding: 12px; display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.momo-opt:hover { border-color: var(--gray-400); }
+.momo-opt.selected { border-color: var(--green-700); background: var(--green-50); }
+.momo-badge-lg {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; color: var(--white);
+}
+.momo-opt-label { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+.momo-opt-sub { font-size: 11px; color: var(--gray-400); }
+
+/* KYC UPLOAD */
+.kyc-box {
+  border: 1.5px dashed var(--gray-100); border-radius: var(--radius);
+  padding: 20px; text-align: center; cursor: pointer;
+  transition: all 0.15s;
+}
+.kyc-box:hover { border-color: var(--green-600); background: var(--green-50); }
+.kyc-box input { display: none; }
+.kyc-icon { color: var(--gray-400); margin: 0 auto 8px; }
+.kyc-box p { font-size: 13px; color: var(--gray-400); }
+.kyc-box strong { color: var(--gray-700); }
+
+/* CONSENT */
+.consent-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--gray-50);
+}
+.consent-item:last-child { border-bottom: none; }
+.consent-item input[type="checkbox"] { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: var(--green-700); }
+.consent-item label { font-size: 13px; color: var(--gray-700); line-height: 1.5; cursor: pointer; }
+.consent-item label a { color: var(--green-700); text-decoration: none; }
+
+/* SUCCESS STATE */
+.success-panel {
+  padding: 48px 40px; text-align: center;
+}
+.success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--green-50); color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-title {
+  font-family: var(--serif); font-size: 28px; font-weight: 400;
+  color: var(--gray-900); margin-bottom: 10px; letter-spacing: -0.4px;
+}
+.success-sub { font-size: 15px; color: var(--gray-700); line-height: 1.65; margin-bottom: 32px; }
+.success-steps { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 32px; }
+.success-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--gray-50);
+  border-radius: var(--radius); border: 1px solid var(--gray-100);
+}
+.success-step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--green-50); color: var(--green-700);
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.success-step p { font-size: 13px; color: var(--gray-700); }
+
+/* FOOTER NAV */
+.onboard-footer {
+  padding: 20px 40px; border-top: 1px solid var(--gray-100);
+  background: var(--gray-50);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.btn-back-sm {
+  font-size: 13px; color: var(--gray-700); font-family: var(--sans);
+  background: transparent; border: 1px solid var(--gray-100);
+  padding: 9px 18px; border-radius: var(--radius); cursor: pointer;
+  transition: border-color 0.2s;
+}
+.btn-back-sm:hover { border-color: var(--gray-400); }
+.btn-next-sm {
+  font-size: 14px; font-weight: 500; font-family: var(--sans);
+  background: var(--green-700); color: var(--white);
+  border: none; padding: 10px 24px; border-radius: var(--radius);
+  cursor: pointer; transition: background 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-next-sm:hover { background: var(--green-800); }
+</style>
+</head>
+<body>
+
+<!-- MINI NAV -->
+<div class="auth-nav">
+  <a href="index.html" class="logo" style="font-family:var(--serif);font-size:20px;color:var(--green-700);text-decoration:none;">KPIT<span style="color:var(--gold-600);">A</span>L</a>
+  <div class="auth-nav-right">Déjà un compte ? <a href="connexion.html">Se connecter →</a></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="onboard-progress">
+  <div class="progress-steps">
+    <div class="progress-step active" id="ps1">
+      <div class="ps-num">1</div>Profil
+    </div>
+    <div class="progress-step" id="ps2">
+      <div class="ps-num">2</div>Identité
+    </div>
+    <div class="progress-step" id="ps3">
+      <div class="ps-num">3</div>Mobile Money
+    </div>
+    <div class="progress-step" id="ps4">
+      <div class="ps-num">4</div>Confirmation
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="onboard-main">
+  <div class="onboard-card">
+
+    <!-- STEP 1: PROFIL -->
+    <div id="step1">
+      <div class="onboard-header">
+        <div class="onboard-step-label">Étape 1 sur 4</div>
+        <div class="onboard-title">Quel est votre profil ?</div>
+        <div class="onboard-sub">Choisissez comment vous souhaitez utiliser KPITAL.</div>
+      </div>
+      <div class="onboard-body">
+        <div class="profile-selector">
+          <div class="profile-option selected" id="prof-invest" onclick="selectProfile('invest')">
+            <div class="profile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+            </div>
+            <div class="profile-name">Investisseur</div>
+            <div class="profile-desc">Je veux placer mon argent dans des projets vérifiés</div>
+          </div>
+          <div class="profile-option" id="prof-porteur" onclick="selectProfile('porteur')">
+            <div class="profile-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="profile-name">Porteur de projet</div>
+            <div class="profile-desc">J'ai un projet et je cherche un financement participatif</div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Prénom <span class="req">*</span></label>
+            <input class="field-input" type="text" placeholder="Kofi">
+          </div>
+          <div class="field">
+            <label class="field-label">Nom <span class="req">*</span></label>
+            <input class="field-input" type="text" placeholder="Amevor">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Email <span class="req">*</span></label>
+          <input class="field-input" type="email" placeholder="kofi@email.com">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Mot de passe <span class="req">*</span></label>
+          <input class="field-input" type="password" placeholder="Minimum 8 caractères">
+          <div class="field-hint">Au moins 8 caractères, une majuscule, un chiffre.</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Pays de résidence <span class="req">*</span></label>
+          <select class="field-select">
+            <option>Togo</option>
+            <option>France</option>
+            <option>Allemagne</option>
+            <option>Belgique</option>
+            <option>Canada</option>
+            <option>États-Unis</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="onboard-footer">
+        <span style="font-size:13px;color:var(--gray-400);">Inscription 100% gratuite</span>
+        <button class="btn-next-sm" onclick="goStep(2)">Continuer <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: IDENTITE -->
+    <div id="step2" style="display:none;">
+      <div class="onboard-header">
+        <div class="onboard-step-label">Étape 2 sur 4 — Vérification KYC</div>
+        <div class="onboard-title">Vérifiez votre identité</div>
+        <div class="onboard-sub">Requis par SEMOA pour la sécurité de votre compte et de vos fonds.</div>
+      </div>
+      <div class="onboard-body">
+        <div class="field">
+          <label class="field-label">Type de document <span class="req">*</span></label>
+          <select class="field-select">
+            <option>Carte Nationale d'Identité (CNI)</option>
+            <option>Passeport</option>
+            <option>Titre de séjour</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Numéro du document <span class="req">*</span></label>
+          <input class="field-input" type="text" placeholder="Ex: TG-2024-XXXXXXX">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Date de naissance <span class="req">*</span></label>
+            <input class="field-input" type="date">
+          </div>
+          <div class="field">
+            <label class="field-label">Nationalité <span class="req">*</span></label>
+            <select class="field-select">
+              <option>Togolaise</option>
+              <option>Française</option>
+              <option>Béninoise</option>
+              <option>Ghanéenne</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Photo du document (recto) <span class="req">*</span></label>
+          <label class="kyc-box">
+            <input type="file" accept=".jpg,.png,.pdf">
+            <div class="kyc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <p><strong>Recto du document</strong> · JPG, PNG, PDF · Max 10 Mo</p>
+          </label>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label class="field-label">Photo du document (verso) <span class="req">*</span></label>
+          <label class="kyc-box">
+            <input type="file" accept=".jpg,.png,.pdf">
+            <div class="kyc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <p><strong>Verso du document</strong> · JPG, PNG, PDF · Max 10 Mo</p>
+          </label>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:var(--green-50);border-radius:var(--radius);border:1px solid var(--green-100);display:flex;gap:8px;align-items:flex-start;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-700)" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p style="font-size:12px;color:var(--green-700);line-height:1.5;">Vos documents sont transmis à <strong>SEMOA</strong> uniquement pour le KYC. Ils ne sont pas stockés par KPITAL.</p>
+        </div>
+      </div>
+      <div class="onboard-footer">
+        <button class="btn-back-sm" onclick="goStep(1)">← Retour</button>
+        <button class="btn-next-sm" onclick="goStep(3)">Continuer <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 3: MOBILE MONEY -->
+    <div id="step3" style="display:none;">
+      <div class="onboard-header">
+        <div class="onboard-step-label">Étape 3 sur 4</div>
+        <div class="onboard-title">Votre Mobile Money</div>
+        <div class="onboard-sub">Ce numéro recevra vos remboursements et ROI à échéance.</div>
+      </div>
+      <div class="onboard-body">
+        <div class="field">
+          <label class="field-label">Opérateur <span class="req">*</span></label>
+          <div class="momo-selector">
+            <div class="momo-opt selected" id="tmoney" onclick="selectMomo('tmoney')">
+              <span class="momo-badge-lg" style="background:#E85D26;">T</span>
+              <div>
+                <div class="momo-opt-label">T-Money</div>
+                <div class="momo-opt-sub">Togocel</div>
+              </div>
+            </div>
+            <div class="momo-opt" id="flooz" onclick="selectMomo('flooz')">
+              <span class="momo-badge-lg" style="background:#0077C8;">F</span>
+              <div>
+                <div class="momo-opt-label">Flooz</div>
+                <div class="momo-opt-sub">Moov Africa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Numéro Mobile Money <span class="req">*</span></label>
+          <input class="field-input" type="tel" placeholder="+228 9X XX XX XX">
+          <div class="field-hint">Entrez le numéro associé à votre compte Mobile Money.</div>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label class="field-label">Code de confirmation SMS <span class="req">*</span></label>
+          <div style="display:flex;gap:10px;">
+            <input class="field-input" type="text" placeholder="XXXXXX" style="flex:1;letter-spacing:4px;font-size:18px;font-weight:500;">
+            <button style="font-size:13px;font-weight:500;font-family:var(--sans);background:var(--gray-50);border:1px solid var(--gray-100);padding:0 16px;border-radius:var(--radius);cursor:pointer;white-space:nowrap;color:var(--gray-700);">Envoyer le code</button>
+          </div>
+          <div class="field-hint">Un code à 6 chiffres a été envoyé sur votre numéro.</div>
+        </div>
+
+        <!-- WALLET INTRO -->
+        <div style="margin-top:24px;padding:20px;background:var(--gold-50);border-radius:var(--radius-lg);border:1px solid #F0D08A;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:var(--white);border:1px solid #F0D08A;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold-600);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--gold-700);margin-bottom:4px;">KPITAL Wallet — bientôt disponible</div>
+              <p style="font-size:13px;color:var(--gold-700);line-height:1.55;">Rechargez votre wallet une fois et investissez sur plusieurs projets sans frais Mobile Money répétés. Vos ROI arrivent directement dans votre wallet pour être réinvestis instantanément.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="onboard-footer">
+        <button class="btn-back-sm" onclick="goStep(2)">← Retour</button>
+        <button class="btn-next-sm" onclick="goStep(4)">Finaliser <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 4: CONFIRMATION -->
+    <div id="step4" style="display:none;">
+      <div class="onboard-header">
+        <div class="onboard-step-label">Étape 4 sur 4 — Finalisation</div>
+        <div class="onboard-title">Presque terminé</div>
+        <div class="onboard-sub">Lisez et acceptez les conditions avant de créer votre compte.</div>
+      </div>
+      <div class="onboard-body">
+        <div style="margin-bottom:20px;">
+          <div class="consent-item">
+            <input type="checkbox" id="c1">
+            <label for="c1">J'accepte les <a href="conditions.html">Conditions générales d'utilisation</a> de KPITAL Finance.</label>
+          </div>
+          <div class="consent-item">
+            <input type="checkbox" id="c2">
+            <label for="c2">J'accepte la <a href="confidentialite.html">Politique de confidentialité</a> et le traitement de mes données par SEMOA pour la vérification KYC.</label>
+          </div>
+          <div class="consent-item">
+            <input type="checkbox" id="c3">
+            <label for="c3">Je comprends que tout investissement comporte des risques, y compris la perte partielle ou totale du capital, et que les rendements passés ne garantissent pas les rendements futurs.</label>
+          </div>
+          <div class="consent-item">
+            <input type="checkbox" id="c4">
+            <label for="c4">J'accepte de recevoir les notifications de compte par SMS et email (rapports, jalons, remboursements). Désactivable à tout moment depuis les paramètres.</label>
+          </div>
+        </div>
+
+        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100);">
+          <div style="font-size:12px;font-weight:500;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Récapitulatif</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-400);">Profil</span>
+              <span style="font-weight:500;color:var(--gray-900);" id="recap-profil">Investisseur</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-400);">Frais d'inscription</span>
+              <span style="font-weight:500;color:var(--green-700);">Gratuit</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-400);">KYC SEMOA</span>
+              <span style="font-weight:500;color:var(--gold-600);">En attente de validation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="onboard-footer">
+        <button class="btn-back-sm" onclick="goStep(3)">← Retour</button>
+        <button class="btn-next-sm" onclick="goStep(5)" style="background:var(--green-700);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Créer mon compte
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 5: SUCCESS -->
+    <div id="step5" style="display:none;">
+      <div class="success-panel">
+        <div class="success-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Compte créé avec succès</div>
+        <p class="success-sub">Bienvenue sur KPITAL. Votre KYC est en cours de vérification par SEMOA — cela prend généralement moins de 24 heures.</p>
+        <div class="success-steps">
+          <div class="success-step">
+            <div class="success-step-num" style="background:var(--green-50);color:var(--green-700);">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p>Compte créé · Email de confirmation envoyé</p>
+          </div>
+          <div class="success-step">
+            <div class="success-step-num" style="background:var(--gold-50);color:var(--gold-600);">2</div>
+            <p>KYC SEMOA — en cours · Résultat sous 24h</p>
+          </div>
+          <div class="success-step">
+            <div class="success-step-num">3</div>
+            <p>Accès complet au dashboard et aux projets</p>
+          </div>
+        </div>
+        <a href="projets.html" class="btn-primary-lg" style="justify-content:center;width:100%;">Explorer les projets →</a>
+        <div style="margin-top:12px;">
+          <a href="dashboard.html" style="font-size:13px;color:var(--gray-400);text-decoration:none;">Accéder à mon dashboard →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentProfile = 'invest';
+let currentMomo = 'tmoney';
+
+function selectProfile(p) {
+  currentProfile = p;
+  document.getElementById('prof-invest').classList.toggle('selected', p === 'invest');
+  document.getElementById('prof-porteur').classList.toggle('selected', p === 'porteur');
+  document.getElementById('recap-profil').textContent = p === 'invest' ? 'Investisseur' : 'Porteur de projet';
+}
+
+function selectMomo(m) {
+  currentMomo = m;
+  document.getElementById('tmoney').classList.toggle('selected', m === 'tmoney');
+  document.getElementById('flooz').classList.toggle('selected', m === 'flooz');
+}
+
+function goStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    if (el) el.style.display = i === n ? '' : 'none';
+    const tab = document.getElementById('ps' + i);
+    if (tab) {
+      tab.classList.remove('active', 'done');
+      if (i < n) tab.classList.add('done');
+      else if (i === n) tab.classList.add('active');
+    }
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

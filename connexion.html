@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+body { background: var(--gray-50); }
+.auth-page {
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.auth-nav {
+  padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--white); border-bottom: 1px solid var(--gray-100);
+}
+.auth-nav-right { font-size: 13px; color: var(--gray-400); }
+.auth-nav-right a { color: var(--green-700); text-decoration: none; font-weight: 500; }
+
+.auth-main {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+}
+
+/* LEFT PANEL */
+.auth-left {
+  background: var(--green-900);
+  padding: 64px 56px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.auth-left-top {}
+.auth-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--green-100);
+  margin-bottom: 24px;
+}
+.auth-headline {
+  font-family: var(--serif); font-size: 38px; font-weight: 400;
+  color: var(--white); line-height: 1.15; letter-spacing: -0.6px;
+  margin-bottom: 20px;
+}
+.auth-headline em { color: var(--green-100); font-style: italic; }
+.auth-sub { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.7; }
+
+.auth-stats { display: flex; flex-direction: column; gap: 16px; }
+.auth-stat {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; border-radius: var(--radius);
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+}
+.auth-stat-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); color: var(--green-100);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.auth-stat-val { font-family: var(--serif); font-size: 22px; color: var(--white); font-weight: 400; line-height: 1; }
+.auth-stat-label { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+/* RIGHT PANEL */
+.auth-right {
+  display: flex; align-items: center; justify-content: center;
+  padding: 64px 56px;
+}
+.auth-form-wrap { width: 100%; max-width: 380px; }
+.auth-form-title {
+  font-family: var(--serif); font-size: 28px; font-weight: 400;
+  color: var(--gray-900); letter-spacing: -0.4px; margin-bottom: 6px;
+}
+.auth-form-sub { font-size: 14px; color: var(--gray-400); margin-bottom: 32px; }
+
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.auth-label {
+  display: block; font-size: 13px; font-weight: 500;
+  color: var(--gray-700); margin-bottom: 6px;
+}
+.auth-input {
+  width: 100%; padding: 12px 14px;
+  border: 1px solid var(--gray-100); border-radius: var(--radius);
+  font-size: 14px; font-family: var(--sans); color: var(--gray-900);
+  background: var(--white); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(15,110,86,0.08);
+}
+.auth-input-wrap { position: relative; }
+.auth-input-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--gray-400);
+}
+.auth-input.with-icon { padding-left: 40px; }
+
+.auth-options {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: -4px;
+}
+.auth-remember {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--gray-700); cursor: pointer;
+}
+.auth-remember input { accent-color: var(--green-700); }
+.auth-forgot { font-size: 13px; color: var(--green-700); text-decoration: none; }
+.auth-forgot:hover { text-decoration: underline; }
+
+.btn-auth {
+  width: 100%; padding: 13px;
+  background: var(--green-700); color: var(--white);
+  border: none; border-radius: var(--radius);
+  font-size: 15px; font-weight: 500; font-family: var(--sans);
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-auth:hover { background: var(--green-800); }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: var(--gray-400);
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--gray-100);
+}
+
+/* Mobile Money login */
+.momo-btn {
+  width: 100%; padding: 12px;
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: var(--radius); font-size: 14px; font-family: var(--sans);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: var(--gray-700); transition: border-color 0.2s;
+}
+.momo-btn:hover { border-color: var(--gray-400); }
+.momo-badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 4px; color: var(--white);
+}
+
+.auth-footer {
+  text-align: center; margin-top: 24px;
+  font-size: 13px; color: var(--gray-400);
+}
+.auth-footer a { color: var(--green-700); text-decoration: none; font-weight: 500; }
+
+.auth-security {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--gray-400); justify-content: center;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body class="auth-page">
+
+<!-- MINI NAV -->
+<div class="auth-nav">
+  <a href="index.html" class="logo" style="font-family:var(--serif);font-size:20px;color:var(--green-700);text-decoration:none;">KPIT<span style="color:var(--gold-600);">A</span>L</a>
+  <div class="auth-nav-right">Pas encore de compte ? <a href="inscription.html">S'inscrire gratuitement →</a></div>
+</div>
+
+<div class="auth-main">
+
+  <!-- LEFT -->
+  <div class="auth-left">
+    <div class="auth-left-top">
+      <div class="auth-eyebrow">Espace investisseur</div>
+      <h1 class="auth-headline">Votre capital,<br>vos <em>projets</em></h1>
+      <p class="auth-sub">Connectez-vous pour accéder à votre portefeuille, suivre vos projets en cours et découvrir les nouvelles opportunités.</p>
+    </div>
+    <div class="auth-stats">
+      <div class="auth-stat">
+        <div class="auth-stat-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="auth-stat-val">100%</div>
+          <div class="auth-stat-label">Fonds sécurisés via séquestre SEMOA</div>
+        </div>
+      </div>
+      <div class="auth-stat">
+        <div class="auth-stat-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="auth-stat-val">8–28%</div>
+          <div class="auth-stat-label">ROI annuel selon le type de projet</div>
+        </div>
+      </div>
+      <div class="auth-stat">
+        <div class="auth-stat-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+        </div>
+        <div>
+          <div class="auth-stat-val">10 000 FCFA</div>
+          <div class="auth-stat-label">Ticket minimum · T-Money · Flooz</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <div class="auth-form-title">Connexion</div>
+      <div class="auth-form-sub">Entrez votre email ou numéro Mobile Money</div>
+
+      <div class="auth-form">
+        <div>
+          <label class="auth-label">Email ou numéro Mobile Money</label>
+          <div class="auth-input-wrap">
+            <div class="auth-input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <input class="auth-input with-icon" type="text" placeholder="votre@email.com ou +228 9X XX XX XX" autofocus>
+          </div>
+        </div>
+
+        <div>
+          <label class="auth-label">Mot de passe</label>
+          <div class="auth-input-wrap">
+            <div class="auth-input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <input class="auth-input with-icon" type="password" placeholder="••••••••">
+          </div>
+        </div>
+
+        <div class="auth-options">
+          <label class="auth-remember">
+            <input type="checkbox"> Se souvenir de moi
+          </label>
+          <a href="#" class="auth-forgot">Mot de passe oublié ?</a>
+        </div>
+
+        <button class="btn-auth">Se connecter →</button>
+
+        <div class="auth-divider">ou continuer avec</div>
+
+        <button class="momo-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+          Connexion via code SMS
+          <span class="momo-badge" style="background:#E85D26;">T-Money</span>
+          <span class="momo-badge" style="background:#0077C8;">Flooz</span>
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a href="inscription.html">Créer un compte gratuit</a>
+      </div>
+
+      <div class="auth-security">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Connexion sécurisée · KYC SEMOA · Données chiffrées
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

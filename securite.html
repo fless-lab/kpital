@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sécurité — KPITAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kpital.css">
+<style>
+/* ── TRUST BAR ── */
+.trust-bar {
+  background: var(--green-50); border-bottom: 1px solid var(--green-100);
+  padding: 14px 0;
+}
+.trust-inner {
+  display: flex; align-items: center; justify-content: center; gap: 40px;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--green-700); font-weight: 500;
+}
+
+/* ── LAYER SECTIONS ── */
+.layer-section { padding: 80px 0; }
+.layer-section:nth-child(even) { background: var(--gray-50); }
+.layer-section:nth-child(odd) { background: var(--white); }
+
+.layer-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.layer-grid.reverse { direction: rtl; }
+.layer-grid.reverse > * { direction: ltr; }
+
+.layer-num {
+  font-family: var(--serif); font-size: 80px; color: var(--green-50);
+  line-height: 1; margin-bottom: -16px; font-weight: 400;
+}
+.layer-grid.reverse .layer-num { color: var(--gray-100); }
+.layer-icon-large {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: var(--green-50); color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+}
+.layer-icon-large.gold { background: var(--gold-50); color: var(--gold-600); }
+.layer-icon-large.dark { background: rgba(4,52,44,0.08); color: var(--green-900); }
+.layer-title {
+  font-family: var(--serif); font-size: 30px; font-weight: 400;
+  color: var(--gray-900); line-height: 1.2; margin-bottom: 14px;
+  letter-spacing: -0.4px;
+}
+.layer-desc {
+  font-size: 15px; color: var(--gray-700); line-height: 1.75;
+  margin-bottom: 24px;
+}
+.layer-details { display: flex; flex-direction: column; gap: 12px; }
+.layer-detail-row {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.detail-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--green-50); color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.detail-check.gold { background: var(--gold-50); color: var(--gold-600); }
+.detail-text { font-size: 14px; color: var(--gray-700); line-height: 1.55; }
+.detail-text strong { color: var(--gray-900); font-weight: 500; }
+
+/* VISUAL PANEL */
+.visual-panel {
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg); padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+.visual-panel.dark-bg {
+  background: var(--green-900); border-color: transparent;
+}
+.vp-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 20px;
+}
+.vp-label.light { color: rgba(255,255,255,0.4); }
+.flow-step {
+  display: flex; align-items: center; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid var(--gray-50);
+}
+.flow-step:last-child { border-bottom: none; }
+.flow-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.flow-icon.green { background: var(--green-50); color: var(--green-700); }
+.flow-icon.gold { background: var(--gold-50); color: var(--gold-600); }
+.flow-icon.dark { background: rgba(255,255,255,0.08); color: var(--green-100); }
+.flow-arrow { color: var(--gray-100); flex-shrink: 0; }
+.flow-body h5 { font-size: 13px; font-weight: 500; color: var(--gray-900); margin-bottom: 1px; }
+.flow-body p { font-size: 12px; color: var(--gray-400); }
+.flow-body.dark h5 { color: var(--white); }
+.flow-body.dark p { color: rgba(255,255,255,0.45); }
+
+/* SEMOA DETAIL BOX */
+.semoa-box {
+  background: var(--white); border-radius: var(--radius-lg);
+  overflow: hidden; border: 1px solid var(--gray-100);
+}
+.semoa-header {
+  background: var(--green-900); padding: 24px 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+.semoa-header h4 { font-size: 16px; font-weight: 500; color: var(--white); }
+.semoa-header p { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.semoa-logo-placeholder {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.6); flex-shrink: 0;
+}
+.semoa-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; }
+.semoa-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--gray-700);
+}
+.semoa-row svg { color: var(--green-600); flex-shrink: 0; }
+
+/* AUDIT SECTION */
+.audit-section {
+  padding: 80px 0; background: var(--green-900);
+}
+.audit-section .section-eyebrow { color: var(--green-100); }
+.audit-section .section-title { color: var(--white); }
+.audit-section .section-sub { color: rgba(255,255,255,0.6); }
+.audit-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;
+}
+.audit-card {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-lg); padding: 28px;
+  transition: background 0.2s;
+}
+.audit-card:hover { background: rgba(255,255,255,0.08); }
+.audit-icon { color: var(--green-100); margin-bottom: 16px; }
+.audit-title { font-size: 16px; font-weight: 500; color: var(--white); margin-bottom: 8px; }
+.audit-text { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.65; }
+.audit-freq {
+  margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px; color: var(--green-100); font-weight: 500;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* RISK SECTION */
+.risk-section { padding: 80px 0; background: var(--white); }
+.risk-intro {
+  max-width: 620px; font-size: 15px; color: var(--gray-700);
+  line-height: 1.75; margin-bottom: 48px;
+}
+.risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.risk-card {
+  border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
+  padding: 24px; position: relative; overflow: hidden;
+}
+.risk-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.risk-low  .risk-bar { background: var(--green-600); }
+.risk-med  .risk-bar { background: var(--gold-400); }
+.risk-high .risk-bar { background: #E05B3A; }
+.risk-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.8px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.risk-low .risk-label  { color: var(--green-600); }
+.risk-med .risk-label  { color: var(--gold-600); }
+.risk-high .risk-label { color: #E05B3A; }
+.risk-note { font-size: 20px; font-family: var(--serif); font-weight: 400; color: var(--gray-900); margin-bottom: 8px; }
+.risk-desc { font-size: 13px; color: var(--gray-700); line-height: 1.55; }
+
+/* DISCLAIMER */
+.disclaimer {
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  border-radius: var(--radius); padding: 20px 24px;
+  margin-top: 32px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.disclaimer-icon { color: var(--gray-400); flex-shrink: 0; margin-top: 1px; }
+.disclaimer-text { font-size: 13px; color: var(--gray-400); line-height: 1.6; }
+
+/* CTA */
+.cta-section-sec { padding: 80px 0; background: var(--gray-50); text-align: center; border-top: 1px solid var(--gray-100); }
+.cta-section-sec h2 {
+  font-family: var(--serif); font-size: 38px; font-weight: 400;
+  color: var(--gray-900); letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 14px;
+}
+.cta-section-sec p { font-size: 16px; color: var(--gray-700); margin-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">KPIT<span>A</span>L</a>
+    <ul class="nav-links">
+      <li><a href="projets.html">Projets</a></li>
+      <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+      <li><a href="securite.html" class="active">Sécurité</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <button class="btn-login">Connexion</button>
+      <button class="btn-cta">Investir</button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <p class="section-eyebrow">Protection de votre capital</p>
+    <h1>3 couches de protection,<br>indépendantes de KPITAL</h1>
+    <p>Votre argent n'est jamais entre les mains de KPITAL seul. Chaque mécanisme est géré par un tiers et audité de façon indépendante.</p>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="container trust-inner">
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      Séquestre SEMOA
+    </div>
+    <div style="width:1px;height:16px;background:var(--green-100);"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Fonds de réserve 5%
+    </div>
+    <div style="width:1px;height:16px;background:var(--green-100);"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Caution porteur légale
+    </div>
+    <div style="width:1px;height:16px;background:var(--green-100);"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Audit trimestriel
+    </div>
+  </div>
+</div>
+
+<!-- LAYER 1: SEQUESTRE -->
+<section class="layer-section">
+  <div class="container layer-grid">
+    <div>
+      <div class="layer-num">01</div>
+      <div class="layer-icon-large">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="layer-title">Séquestre SEMOA — un compte par projet</div>
+      <p class="layer-desc">Dès que vous investissez, votre argent quitte immédiatement votre Mobile Money pour un compte séquestre SEMOA dédié au projet. Pas un compte KPITAL — un compte projet, isolé, inaccessible sans accord tripartite.</p>
+      <div class="layer-details">
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Un compte unique par projet.</strong> Les fonds ne se mélangent jamais entre projets.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Double signature requise.</strong> Ni KPITAL ni le porteur seul ne peuvent débloquer les fonds.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Décaissements par jalons.</strong> Le porteur accède aux fonds par tranches liées à des livrables vérifiés.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Remboursement direct.</strong> À échéance, SEMOA reverse capital + ROI sur votre Mobile Money sans passer par KPITAL.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="visual-panel">
+        <div class="vp-label">Flux des fonds — Projet type</div>
+        <div class="flow-step">
+          <div class="flow-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5>Mobile Money investisseur</h5>
+            <p>T-Money ou Flooz · Paiement unique</p>
+          </div>
+        </div>
+        <div style="padding-left:10px;margin:4px 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-100)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </div>
+        <div class="flow-step" style="background:var(--green-50);border-radius:var(--radius);padding:14px;margin-bottom:4px;border-bottom:none;">
+          <div class="flow-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5 style="color:var(--green-700);">Séquestre SEMOA · Compte projet</h5>
+            <p>Isolé · Double signature · Inaccessible seul</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;padding-left:10px;margin:4px 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-100)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          <span style="font-size:11px;color:var(--gray-400);">Jalon validé + rapport soumis</span>
+        </div>
+        <div class="flow-step" style="border-bottom:none;">
+          <div class="flow-icon gold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5>Porteur du projet (tranches)</h5>
+            <p>Décaissements progressifs liés aux jalons</p>
+          </div>
+        </div>
+        <div style="padding-top:16px;margin-top:8px;border-top:1px solid var(--gray-50);">
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">À échéance :</div>
+          <div class="flow-step" style="border-bottom:none;padding:0;">
+            <div class="flow-icon green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="flow-body">
+              <h5>Capital + ROI → Mobile Money investisseur</h5>
+              <p>SEMOA libère directement. Aucun intermédiaire.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEMOA partner box -->
+      <div class="semoa-box" style="margin-top:16px;">
+        <div class="semoa-header">
+          <div class="semoa-logo-placeholder">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <h4>SEMOA · CashPay</h4>
+            <p>Partenaire de séquestre et d'agrégation Mobile Money</p>
+          </div>
+        </div>
+        <div class="semoa-body">
+          <div class="semoa-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Agréé par les autorités monétaires UEMOA
+          </div>
+          <div class="semoa-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Agrégation T-Money (Togocel) + Flooz (Moov Africa)
+          </div>
+          <div class="semoa-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            KYC investisseurs · Comptes séquestre dédiés
+          </div>
+          <div class="semoa-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Opérationnel au Togo et dans la zone UEMOA
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LAYER 2: FONDS DE RESERVE -->
+<section class="layer-section">
+  <div class="container layer-grid reverse">
+    <div>
+      <div class="layer-num">02</div>
+      <div class="layer-icon-large gold">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <div class="layer-title">Fonds de réserve — 5% de chaque collecte</div>
+      <p class="layer-desc">Pour chaque euro levé sur la plateforme, 5% alimentent automatiquement un fonds commun de réserve géré par SEMOA. Ce fonds n'appartient pas à KPITAL — il est là pour vous.</p>
+      <div class="layer-details">
+        <div class="layer-detail-row">
+          <div class="detail-check gold"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>5% prélevés automatiquement</strong> sur chaque collecte réussie, avant décaissement au porteur.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check gold"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Couverture jusqu'à 50% de la perte</strong> en cas d'échec partiel ou de défaut du porteur.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check gold"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Géré par SEMOA, pas par KPITAL.</strong> KPITAL n'a pas accès à ce fonds de façon unilatérale.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check gold"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Audité tous les trimestres.</strong> Le rapport d'audit est publié sur la plateforme. Transparence totale.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="visual-panel" style="background:var(--gold-50);border-color:#F0D08A;">
+        <div class="vp-label" style="color:var(--gold-700);">Calcul du fonds de réserve</div>
+        <div style="margin-bottom:24px;">
+          <div style="font-size:13px;color:var(--gray-700);margin-bottom:12px;">Exemple — collecte de 1 200 000 FCFA :</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--white);border-radius:8px;border:1px solid #F0D08A;">
+              <span style="font-size:13px;color:var(--gray-700);">Collecte totale</span>
+              <span style="font-size:13px;font-weight:500;">1 200 000 FCFA</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--gold-50);border-radius:8px;border:1px solid #F0D08A;">
+              <span style="font-size:13px;color:var(--gold-700);">→ Fonds de réserve (5%)</span>
+              <span style="font-size:13px;font-weight:500;color:var(--gold-700);">60 000 FCFA</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--white);border-radius:8px;border:1px solid #F0D08A;">
+              <span style="font-size:13px;color:var(--gray-700);">Versé au porteur</span>
+              <span style="font-size:13px;font-weight:500;">1 092 000 FCFA</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--white);border-radius:8px;border:1px solid #F0D08A;">
+              <span style="font-size:13px;color:var(--gray-700);">Commission KPITAL (4%)</span>
+              <span style="font-size:13px;font-weight:500;">48 000 FCFA</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px;background:var(--white);border-radius:var(--radius);border:1px solid #F0D08A;">
+          <div style="font-size:12px;font-weight:500;color:var(--gold-700);margin-bottom:4px;">En cas de défaut partiel du porteur</div>
+          <div style="font-size:13px;color:var(--gray-700);line-height:1.55;">Le fonds de réserve couvre jusqu'à <strong>50% de votre perte.</strong> Activation automatique sur décision SEMOA. Notification immédiate.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LAYER 3: CAUTION PORTEUR -->
+<section class="layer-section">
+  <div class="container layer-grid">
+    <div>
+      <div class="layer-num">03</div>
+      <div class="layer-icon-large dark">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div class="layer-title">Caution porteur — une garantie légale avant tout accès</div>
+      <p class="layer-desc">Avant qu'un seul franc soit décaissé, le porteur de projet dépose une garantie formelle auprès de SEMOA. Cette caution est légalement tracée — le porteur ne peut pas disparaître sans conséquence juridique.</p>
+      <div class="layer-details">
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Trois formes acceptées :</strong> bien immobilier mis en hypothèque, aval d'un tiers solvable, ou co-signature d'une institution.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Acte notarié via SEMOA.</strong> La caution est enregistrée légalement — pas un simple engagement verbal.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Activation en cas de défaut.</strong> Si le porteur ne rembourse pas, la caution est exécutée pour rembourser les investisseurs.</p>
+        </div>
+        <div class="layer-detail-row">
+          <div class="detail-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="detail-text"><strong>Information visible sur chaque fiche projet.</strong> Le type de caution (pas sa valeur exacte) est affiché publiquement.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="visual-panel">
+        <div class="vp-label">Types de cautions acceptées</div>
+        <div class="flow-step">
+          <div class="flow-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5>Bien immobilier</h5>
+            <p>Mise en hypothèque via acte notarié SEMOA. Option la plus courante.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon gold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5>Aval d'un tiers solvable</h5>
+            <p>Un garant personnel ou institutionnel co-signe la dette. Vérifié par SEMOA.</p>
+          </div>
+        </div>
+        <div class="flow-step" style="border-bottom:none;">
+          <div class="flow-icon" style="background:#E6F1FB;color:#2563EB;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </div>
+          <div class="flow-body">
+            <h5>Co-signature institutionnelle</h5>
+            <p>Une banque ou IMF co-signe l'engagement. Requise pour les projets Tier 4+.</p>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:16px 20px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100);display:flex;gap:10px;align-items:flex-start;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style="font-size:13px;color:var(--gray-500);line-height:1.55;">Le type de caution est mentionné sur chaque fiche projet. La valeur précise n'est pas divulguée publiquement pour des raisons de confidentialité légale.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIT & TRANSPARENCE -->
+<section class="audit-section">
+  <div class="container">
+    <p class="section-eyebrow">Transparence</p>
+    <h2 class="section-title">Audits & rapports</h2>
+    <p class="section-sub">KPITAL publie les résultats de chaque audit et rapport terrain. Si quelque chose ne va pas, vous le savez avant nous.</p>
+    <div class="audit-grid">
+      <div class="audit-card">
+        <div class="audit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="audit-title">Rapport de visite terrain</div>
+        <div class="audit-text">Chaque projet publié est accompagné du rapport complet de l'agent terrain — photos géolocalisées, liste des documents vérifiés, commentaires. Accessible à tous les investisseurs.</div>
+        <div class="audit-freq">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Avant chaque publication
+        </div>
+      </div>
+      <div class="audit-card">
+        <div class="audit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="audit-title">Audit du fonds de réserve</div>
+        <div class="audit-text">Le solde et les mouvements du fonds de réserve SEMOA sont audités par un cabinet indépendant chaque trimestre. Le rapport est publié sur la plateforme dans les 15 jours suivant la clôture.</div>
+        <div class="audit-freq">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Tous les 3 mois
+        </div>
+      </div>
+      <div class="audit-card">
+        <div class="audit-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="audit-title">Rapport d'avancement projets</div>
+        <div class="audit-text">Chaque porteur soumet un rapport mensuel accompagné de photos terrain. Ce rapport est rendu visible aux investisseurs du projet dans les 48h. Les jalons de décaissement y sont liés.</div>
+        <div class="audit-freq">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Mensuel par projet
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RISK SECTION -->
+<section class="risk-section">
+  <div class="container">
+    <p class="section-eyebrow">Gestion du risque</p>
+    <h2 class="section-title">Comprendre les niveaux<br>de risque</h2>
+    <p class="risk-intro">Tout investissement comporte un risque. KPITAL ne promet pas de rendement garanti — nous vous donnons les outils pour évaluer le risque et vous protégeons en cas de défaillance. Chaque projet est noté de A à D selon son profil.</p>
+    <div class="risk-grid">
+      <div class="risk-card risk-low">
+        <div class="risk-bar"></div>
+        <div class="risk-label">Note A — Faible risque</div>
+        <div class="risk-note">Immobilier locatif Tier 1</div>
+        <div class="risk-desc">Bien tangible et vérifiable. Revenu locatif stable. Caution immobilière. Score d'évaluation > 80/100. ROI 8–14%/an.</div>
+      </div>
+      <div class="risk-card risk-med" style="--bar-color:var(--gold-400);">
+        <div class="risk-bar" style="background:var(--gold-400);"></div>
+        <div class="risk-label">Note B — Risque modéré</div>
+        <div class="risk-note">Commerce & agriculture</div>
+        <div class="risk-desc">Dépend des cycles de marché et de la saison. Caution personnelle ou tiers. Score 65–80/100. ROI 15–24%/an.</div>
+      </div>
+      <div class="risk-card risk-med">
+        <div class="risk-bar" style="background:#F5863A;"></div>
+        <div class="risk-label">Note C — Risque élevé</div>
+        <div class="risk-note">PME en expansion Tier 4</div>
+        <div class="risk-desc">Croissance potentielle forte mais incertitudes opérationnelles. Suivi renforcé requis. Score 60–65/100. ROI 18–25%/an.</div>
+      </div>
+      <div class="risk-card risk-high">
+        <div class="risk-bar" style="background:#E05B3A;"></div>
+        <div class="risk-label">Note D — Risque très élevé</div>
+        <div class="risk-note">Projets spéculatifs ou émergents</div>
+        <div class="risk-desc">Réservé aux investisseurs avertis. ROI élevé mais capital non garanti même avec les mécanismes de protection. Ticket minimum majoré.</div>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <div class="disclaimer-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p class="disclaimer-text">Investir comporte des risques, y compris la perte partielle ou totale du capital investi. Les performances passées ne préjugent pas des performances futures. KPITAL met en place des mécanismes de protection mais ne garantit pas le remboursement intégral en cas de défaut majeur du porteur. Investissez uniquement des sommes que vous pouvez immobiliser sur la durée du projet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section-sec">
+  <div class="container">
+    <h2>Des questions sur la sécurité ?</h2>
+    <p>Consultez notre FAQ ou contactez-nous directement. Nous répondons dans les 24h.</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <a href="faq.html" class="btn-primary-lg">Voir la FAQ</a>
+      <a href="mailto:contact@kpital.app" class="btn-ghost-lg">Contacter l'équipe</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo">KPIT<span>A</span>L</span>
+        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <div class="footer-semoa">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--green-600);flex-shrink:0;"></div>
+          Fonds sécurisés via SEMOA · CashPay
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Plateforme</h4>
+        <ul>
+          <li><a href="projets.html">Projets</a></li>
+          <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+          <li><a href="securite.html">Sécurité</a></li>
+          <li><a href="soumettre.html">Soumettre un projet</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Investisseurs</h4>
+        <ul>
+          <li><a href="#">Inscription</a></li>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="index.html#diaspora">Diaspora</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Société</h4>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Conditions</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <div class="footer-legal">
+        <a href="#">Conditions générales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">Mentions légales</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
