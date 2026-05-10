@@ -90,6 +90,7 @@ nav {
   padding: 8px 16px; border-radius: var(--radius);
   cursor: pointer; font-family: var(--sans);
   transition: border-color 0.2s;
+  text-decoration: none;
 }
 .btn-login:hover { border-color: var(--gray-400); }
 .btn-cta {
@@ -98,6 +99,7 @@ nav {
   border: none; padding: 10px 20px; border-radius: var(--radius);
   cursor: pointer; font-family: var(--sans);
   transition: background 0.2s, transform 0.15s;
+  text-decoration: none;
 }
 .btn-cta:hover { background: var(--green-800); transform: translateY(-1px); }
 .btn-cta:active { transform: translateY(0); }
