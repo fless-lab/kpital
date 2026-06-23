@@ -1,0 +1,79 @@
+{%- set metaTitle = title or site.name -%}
+{%- set metaDesc = description or site.description -%}
+{%- set canonical = site.url + page.url -%}
+{%- set ogImg = site.url + (ogImage or site.ogImage) -%}
+<meta name="description" content="{{ metaDesc }}">
+<meta name="robots" content="{% if noindex %}noindex, nofollow{% else %}index, follow, max-image-preview:large, max-snippet:-1{% endif %}">
+<link rel="canonical" href="{{ canonical }}">
+<link rel="alternate" hreflang="fr" href="{{ canonical }}">
+<link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+<meta name="author" content="{{ site.legalName }}">
+<meta name="theme-color" content="{{ site.themeColor }}">
+
+<!-- Geo (Togo / Lomé) -->
+<meta name="geo.region" content="{{ site.geo.region }}">
+<meta name="geo.placename" content="{{ site.geo.placename }}">
+<meta name="geo.position" content="{{ site.geo.position }}">
+<meta name="ICBM" content="{{ site.geo.icbm }}">
+
+<!-- Open Graph -->
+<meta property="og:type" content="{{ ogType or 'website' }}">
+<meta property="og:site_name" content="{{ site.name }}">
+<meta property="og:locale" content="{{ site.locale }}">
+<meta property="og:title" content="{{ metaTitle }}">
+<meta property="og:description" content="{{ metaDesc }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:image" content="{{ ogImg }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KPITAL · investir dans l'économie réelle togolaise">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="{{ site.twitter }}">
+<meta name="twitter:title" content="{{ metaTitle }}">
+<meta name="twitter:description" content="{{ metaDesc }}">
+<meta name="twitter:image" content="{{ ogImg }}">
+<meta name="twitter:image:alt" content="KPITAL · investir dans l'économie réelle togolaise">
+
+<!-- Icons & manifest -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site.webmanifest">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["Organization", "FinancialService"],
+      "@id": "{{ site.url }}/#organization",
+      "name": "KPITAL",
+      "legalName": "{{ site.legalName }}",
+      "url": "{{ site.url }}/",
+      "logo": "{{ site.url }}/assets/icon-512.png",
+      "image": "{{ site.url }}{{ site.ogImage }}",
+      "description": "{{ site.description }}",
+      "email": "contact@kpital.finance",
+      "areaServed": { "@type": "Country", "name": "Togo" },
+      "address": { "@type": "PostalAddress", "addressLocality": "Lomé", "addressCountry": "TG" },
+      "sameAs": [{% for s in site.sameAs %}"{{ s }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ site.url }}/#website",
+      "url": "{{ site.url }}/",
+      "name": "KPITAL",
+      "description": "{{ site.description }}",
+      "inLanguage": "fr",
+      "publisher": { "@id": "{{ site.url }}/#organization" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": { "@type": "EntryPoint", "urlTemplate": "{{ site.url }}/projets?secteur={search_term_string}" },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>

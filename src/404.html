@@ -1,0 +1,25 @@
+---
+layout: base.njk
+title: "Page introuvable | KPITAL"
+description: "La page que vous cherchez n'existe pas ou a été déplacée."
+permalink: /404.html
+noindex: true
+eleventyExcludeFromCollections: true
+---
+<section class="section nf">
+  <div class="container nf-inner">
+    <p class="eyebrow">Erreur 404</p>
+    <h1 class="title">Cette page n'existe pas</h1>
+    <p class="sub">La page que vous cherchez a été déplacée, ou n'a jamais existé. Revenez à l'accueil ou explorez les projets ouverts à l'investissement.</p>
+    <div class="nf-actions">
+      <a class="btn btn-primary" href="/">Retour à l'accueil</a>
+      <a class="btn btn-ghost" href="/projets">Voir les projets</a>
+    </div>
+  </div>
+</section>
+<style>
+  .nf{min-height:58vh;display:flex;align-items:center}
+  .nf-inner{max-width:560px}
+  .nf .eyebrow::before{background:var(--gold)}
+  .nf-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+</style>

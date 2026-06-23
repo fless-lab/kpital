@@ -1,0 +1,23 @@
+{
+  "name": "KPITAL",
+  "legalName": "KPITAL Finance SARL",
+  "url": "https://kpital.finance",
+  "description": "Investissez dès 10 000 FCFA dans l'économie réelle togolaise : immobilier, commerce, agriculture. Projets vérifiés sur le terrain, fonds sécurisés par séquestre SEMOA. Accessible depuis le Togo et la diaspora.",
+  "lang": "fr",
+  "locale": "fr_TG",
+  "themeColor": "#0C5C45",
+  "twitter": "@kpital_finance",
+  "ogImage": "/assets/og.png",
+  "geo": {
+    "region": "TG-M",
+    "placename": "Lomé",
+    "position": "6.1319;1.2228",
+    "icbm": "6.1319, 1.2228"
+  },
+  "sameAs": [
+    "https://twitter.com/kpital_finance",
+    "https://www.linkedin.com/company/kpital-finance",
+    "https://www.facebook.com/kpital.finance",
+    "https://www.instagram.com/kpital.finance"
+  ]
+}
