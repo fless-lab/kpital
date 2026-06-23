@@ -151,6 +151,37 @@
   transition: border-color 0.2s; text-decoration: none; display: inline-block;
 }
 .btn-white-outline:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .journey-cols { gap: 48px; }
+  .compare-cell { padding: 14px 16px; }
+}
+
+@media (max-width: 768px) {
+  .journey-cols { grid-template-columns: 1fr; gap: 32px; }
+  .info-panel { position: static; top: auto; padding: 28px; }
+  .cta-section h2 { font-size: 30px; }
+  .compare-cell { padding: 12px 14px; font-size: 13px; }
+  .compare-row.header .compare-cell { font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .tabs-nav { width: 100%; }
+  .tab-btn { flex: 1; font-size: 13px; padding: 9px 12px; }
+  .journey-full,
+  .timeline-section,
+  .compare-section,
+  .cta-section { padding: 56px 0; }
+  .info-panel { padding: 22px; }
+  .timeline { padding-left: 24px; }
+  .tl-item { padding-left: 32px; }
+  .cta-section h2 { font-size: 26px; }
+  .cta-btns { flex-direction: column; }
+  .cta-btns .btn-white-solid,
+  .cta-btns .btn-white-outline { width: 100%; text-align: center; }
+  .compare-cell { padding: 10px 12px; font-size: 12px; }
+}
 </style>
 </head>
 <body>
@@ -404,7 +435,7 @@
   <div class="container">
     <p class="section-eyebrow">Exemple concret</p>
     <h2 class="section-title">Cycle de vie d'un projet<br>commerce · 4 mois</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
+    <div class="journey-cols">
       <div class="timeline">
         <div class="tl-item">
           <div class="tl-dot active"></div>
@@ -609,5 +640,6 @@ function showTab(tab, btn) {
 }
 </script>
 
+  <script src="kpital.js" defer></script>
 </body>
 </html>

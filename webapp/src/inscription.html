@@ -1,0 +1,331 @@
+---
+layout: base.njk
+title: "Inscription | KPITAL"
+description: "Créez votre compte KPITAL : profil, vérification d'identité KYC par SEMOA et numéro Mobile Money. Inscription gratuite, fonds sécurisés en séquestre."
+pageCss: inscription
+---
+
+<!-- AUTH / ONBOARDING -->
+<section class="auth">
+  <div class="container auth-inner">
+
+    <div class="auth-head">
+      <p class="eyebrow">Créer un compte</p>
+      <h1 class="auth-title">Rejoindre KPITAL</h1>
+      <p class="auth-sub">Quatre étapes, environ trois minutes. Inscription 100% gratuite.</p>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <ol class="steps" id="steps" aria-label="Progression de l'inscription">
+      <li class="step active" data-step="1"><span class="step-no">01</span><span class="step-lbl">Profil</span></li>
+      <li class="step" data-step="2"><span class="step-no">02</span><span class="step-lbl">Identité</span></li>
+      <li class="step" data-step="3"><span class="step-no">03</span><span class="step-lbl">Mobile Money</span></li>
+      <li class="step" data-step="4"><span class="step-no">04</span><span class="step-lbl">Confirmation</span></li>
+    </ol>
+
+    <div class="auth-card form-card">
+
+      <!-- STEP 1 · PROFIL -->
+      <div class="pane" id="pane1">
+        <div class="pane-head">
+          <p class="pane-kicker">Étape <span class="num">01</span> / <span class="num">04</span></p>
+          <h2 class="pane-title">Quel est votre profil ?</h2>
+          <p class="pane-sub">Choisissez comment vous souhaitez utiliser KPITAL.</p>
+        </div>
+
+        <div class="profiles" role="radiogroup" aria-label="Type de profil">
+          <button type="button" class="profile selected" id="prof-invest" role="radio" aria-checked="true" onclick="selectProfile('invest')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+            <span class="profile-name">Investisseur</span>
+            <span class="profile-desc">Placer mon argent dans des projets vérifiés</span>
+          </button>
+          <button type="button" class="profile" id="prof-porteur" role="radio" aria-checked="false" onclick="selectProfile('porteur')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="profile-name">Porteur de projet</span>
+            <span class="profile-desc">Faire financer mon projet par la communauté</span>
+          </button>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="prenom">Prénom <span class="req">*</span></label>
+            <input class="input" id="prenom" type="text" placeholder="Kofi">
+          </div>
+          <div class="field">
+            <label for="nom">Nom <span class="req">*</span></label>
+            <input class="input" id="nom" type="text" placeholder="Amevor">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email <span class="req">*</span></label>
+          <input class="input" id="email" type="email" placeholder="kofi@email.com">
+        </div>
+
+        <div class="field">
+          <label for="password">Mot de passe <span class="req">*</span></label>
+          <input class="input" id="password" type="password" placeholder="Minimum 8 caractères">
+          <p class="hint">Au moins 8 caractères, une majuscule et un chiffre.</p>
+        </div>
+
+        <div class="field" style="margin-bottom:0">
+          <label for="pays">Pays de résidence <span class="req">*</span></label>
+          <select class="select" id="pays">
+            <option>Togo</option>
+            <option>France</option>
+            <option>Allemagne</option>
+            <option>Belgique</option>
+            <option>Canada</option>
+            <option>États-Unis</option>
+            <option>Autre</option>
+          </select>
+        </div>
+
+        <div class="pane-foot">
+          <span class="pane-note">Inscription gratuite</span>
+          <button type="button" class="btn btn-primary" onclick="goStep(2)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 · IDENTITÉ / KYC -->
+      <div class="pane" id="pane2" hidden>
+        <div class="pane-head">
+          <p class="pane-kicker">Étape <span class="num">02</span> / <span class="num">04</span> · Vérification KYC</p>
+          <h2 class="pane-title">Vérifiez votre identité</h2>
+          <p class="pane-sub">Requis par SEMOA pour sécuriser votre compte et vos fonds.</p>
+        </div>
+
+        <div class="field">
+          <label for="doc-type">Type de document <span class="req">*</span></label>
+          <select class="select" id="doc-type">
+            <option>Carte Nationale d'Identité (CNI)</option>
+            <option>Passeport</option>
+            <option>Titre de séjour</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="doc-num">Numéro du document <span class="req">*</span></label>
+          <input class="input" id="doc-num" type="text" placeholder="Ex : TG-2024-XXXXXXX">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="dob">Date de naissance <span class="req">*</span></label>
+            <input class="input" id="dob" type="date">
+          </div>
+          <div class="field">
+            <label for="nat">Nationalité <span class="req">*</span></label>
+            <select class="select" id="nat">
+              <option>Togolaise</option>
+              <option>Française</option>
+              <option>Béninoise</option>
+              <option>Ghanéenne</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-cap">Photo du document (recto) <span class="req">*</span></span>
+          <label class="upload">
+            <input type="file" accept=".jpg,.png,.pdf">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="upload-t"><strong>Recto du document</strong></span>
+            <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
+          </label>
+        </div>
+
+        <div class="field" style="margin-bottom:0">
+          <span class="field-cap">Photo du document (verso) <span class="req">*</span></span>
+          <label class="upload">
+            <input type="file" accept=".jpg,.png,.pdf">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="upload-t"><strong>Verso du document</strong></span>
+            <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
+          </label>
+        </div>
+
+        <div class="notice">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Vos documents sont transmis à <strong>SEMOA</strong> uniquement pour le KYC. Ils ne sont pas stockés par KPITAL.</p>
+        </div>
+
+        <div class="pane-foot">
+          <button type="button" class="btn btn-ghost" onclick="goStep(1)">← Retour</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 · MOBILE MONEY -->
+      <div class="pane" id="pane3" hidden>
+        <div class="pane-head">
+          <p class="pane-kicker">Étape <span class="num">03</span> / <span class="num">04</span></p>
+          <h2 class="pane-title">Votre Mobile Money</h2>
+          <p class="pane-sub">Ce numéro recevra vos remboursements et votre ROI à échéance.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-cap">Opérateur <span class="req">*</span></span>
+          <div class="momo" role="radiogroup" aria-label="Opérateur Mobile Money">
+            <button type="button" class="momo-opt selected" id="momo-tmoney" role="radio" aria-checked="true" onclick="selectMomo('tmoney')">
+              <span class="momo-badge">T</span>
+              <span class="momo-text"><span class="momo-name">T-Money</span><span class="momo-net">Togocel</span></span>
+            </button>
+            <button type="button" class="momo-opt" id="momo-flooz" role="radio" aria-checked="false" onclick="selectMomo('flooz')">
+              <span class="momo-badge">F</span>
+              <span class="momo-text"><span class="momo-name">Flooz</span><span class="momo-net">Moov Africa</span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="momo-num">Numéro Mobile Money <span class="req">*</span></label>
+          <input class="input" id="momo-num" type="tel" placeholder="+228 9X XX XX XX">
+          <p class="hint">Le numéro associé à votre compte Mobile Money.</p>
+        </div>
+
+        <div class="field" style="margin-bottom:0">
+          <label for="otp">Code de confirmation SMS <span class="req">*</span></label>
+          <div class="otp-row">
+            <input class="input otp-input" id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="XXXXXX">
+            <button type="button" class="btn btn-ghost otp-send">Envoyer le code</button>
+          </div>
+          <p class="hint">Un code à <span class="num">6</span> chiffres sera envoyé sur votre numéro.</p>
+        </div>
+
+        <div class="wallet">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+          <div>
+            <p class="wallet-t">KPITAL Wallet · bientôt disponible</p>
+            <p class="wallet-s">Votre solde affichera capital + ROI une fois les projets remboursés. L'argent reste géré par SEMOA ; KPITAL affiche le solde disponible que vous pouvez réinvestir ou retirer.</p>
+          </div>
+        </div>
+
+        <div class="pane-foot">
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Retour</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(4)">Finaliser →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 · CONFIRMATION -->
+      <div class="pane" id="pane4" hidden>
+        <div class="pane-head">
+          <p class="pane-kicker">Étape <span class="num">04</span> / <span class="num">04</span> · Finalisation</p>
+          <h2 class="pane-title">Presque terminé</h2>
+          <p class="pane-sub">Lisez et acceptez les conditions avant de créer votre compte.</p>
+        </div>
+
+        <ul class="consents">
+          <li class="consent">
+            <input type="checkbox" id="c1">
+            <label for="c1">J'accepte les <a href="/conditions">Conditions générales d'utilisation</a> de KPITAL.</label>
+          </li>
+          <li class="consent">
+            <input type="checkbox" id="c2">
+            <label for="c2">J'accepte la <a href="/confidentialite">Politique de confidentialité</a> et le traitement de mes données par SEMOA pour le KYC.</label>
+          </li>
+          <li class="consent">
+            <input type="checkbox" id="c3">
+            <label for="c3">Je comprends que tout investissement comporte des risques, y compris la perte partielle ou totale du capital, et que les rendements passés ne garantissent pas les rendements futurs.</label>
+          </li>
+          <li class="consent">
+            <input type="checkbox" id="c4">
+            <label for="c4">J'accepte de recevoir les notifications de compte par SMS et email (rapports, jalons, remboursements). Désactivable à tout moment.</label>
+          </li>
+        </ul>
+
+        <div class="recap">
+          <p class="recap-head">Récapitulatif</p>
+          <div class="recap-row"><span>Profil</span><span class="recap-v" id="recap-profil">Investisseur</span></div>
+          <div class="recap-row"><span>Frais d'inscription</span><span class="recap-v recap-free">Gratuit</span></div>
+          <div class="recap-row"><span>KYC SEMOA</span><span class="recap-v recap-pending">En attente de validation</span></div>
+        </div>
+
+        <div class="pane-foot">
+          <button type="button" class="btn btn-ghost" onclick="goStep(3)">← Retour</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(5)">✓ Créer mon compte</button>
+        </div>
+      </div>
+
+      <!-- STEP 5 · SUCCÈS -->
+      <div class="pane" id="pane5" hidden>
+        <div class="done">
+          <div class="done-mark">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2 class="pane-title">Compte créé</h2>
+          <p class="pane-sub">Bienvenue sur KPITAL. Votre KYC est en cours de vérification par SEMOA, généralement moins de <span class="num">24</span> heures.</p>
+
+          <ol class="done-steps">
+            <li class="done-step is-done">
+              <span class="done-no"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <p>Compte créé · email de confirmation envoyé</p>
+            </li>
+            <li class="done-step is-pending">
+              <span class="done-no num">2</span>
+              <p>KYC SEMOA en cours · résultat sous <span class="num">24</span>h</p>
+            </li>
+            <li class="done-step">
+              <span class="done-no num">3</span>
+              <p>Accès complet au tableau de bord et aux projets</p>
+            </li>
+          </ol>
+
+          <a href="/projets" class="btn btn-primary done-cta">Explorer les projets →</a>
+          <a href="/dashboard" class="done-alt">Accéder à mon tableau de bord →</a>
+        </div>
+      </div>
+
+    </div><!-- /auth-card -->
+
+    <p class="auth-switch">
+      Déjà un compte ? <a href="/connexion">Se connecter →</a>
+    </p>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var profile = "invest";
+  var momo = "tmoney";
+
+  window.selectProfile = function (p) {
+    profile = p;
+    var inv = document.getElementById("prof-invest");
+    var por = document.getElementById("prof-porteur");
+    inv.classList.toggle("selected", p === "invest");
+    inv.setAttribute("aria-checked", p === "invest");
+    por.classList.toggle("selected", p === "porteur");
+    por.setAttribute("aria-checked", p === "porteur");
+    var recap = document.getElementById("recap-profil");
+    if (recap) recap.textContent = p === "invest" ? "Investisseur" : "Porteur de projet";
+  };
+
+  window.selectMomo = function (m) {
+    momo = m;
+    var t = document.getElementById("momo-tmoney");
+    var f = document.getElementById("momo-flooz");
+    t.classList.toggle("selected", m === "tmoney");
+    t.setAttribute("aria-checked", m === "tmoney");
+    f.classList.toggle("selected", m === "flooz");
+    f.setAttribute("aria-checked", m === "flooz");
+  };
+
+  window.goStep = function (n) {
+    for (var i = 1; i <= 5; i++) {
+      var pane = document.getElementById("pane" + i);
+      if (pane) pane.hidden = i !== n;
+    }
+    var steps = document.querySelectorAll(".step");
+    Array.prototype.forEach.call(steps, function (el) {
+      var s = parseInt(el.dataset.step, 10);
+      el.classList.remove("active", "done");
+      if (s < n) el.classList.add("done");
+      else if (s === n) el.classList.add("active");
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+})();
+</script>

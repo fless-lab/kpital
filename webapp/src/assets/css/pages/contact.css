@@ -1,0 +1,63 @@
+/* Contact — KPITAL "Le Registre" */
+
+.ctc{padding-top:64px;padding-bottom:96px;border-top:none}
+.ctc-grid{display:grid;grid-template-columns:1fr .82fr;gap:64px;align-items:start}
+
+/* ── FORM COLUMN ── */
+.ctc-form-head{margin-bottom:26px;padding-bottom:22px;border-bottom:1px solid var(--hairline)}
+.ctc-form-head h2{font-family:var(--display);font-weight:700;font-size:clamp(20px,2.4vw,24px);letter-spacing:-0.02em;color:var(--ink)}
+.ctc-form-head p{font-size:14px;color:var(--muted);line-height:1.6;margin-top:8px;max-width:44ch}
+
+.ctc-form .field:last-of-type{margin-bottom:24px}
+
+/* select caret (shared .select has no native arrow) */
+.select-wrap{position:relative}
+.select-wrap .select{appearance:none;-webkit-appearance:none;padding-right:38px}
+.select-caret{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+
+.ctc-submit{width:100%;justify-content:center}
+.ctc-disclaimer{font-size:12px;color:var(--muted);line-height:1.55;margin-top:14px;text-align:center}
+
+/* ── INFO COLUMN ── */
+.ctc-info{display:flex;flex-direction:column;gap:34px}
+.ctc-block-head{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+.ctc-rows{border-top:1px solid var(--hairline)}
+.ctc-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:16px 2px;border-bottom:1px solid var(--hairline);transition:padding-left .16s,background .16s}
+.ctc-row:not(.ctc-row-static):hover{background:var(--green-soft);padding-left:12px;border-radius:2px}
+.ctc-row-ico{width:34px;height:34px;border:1px solid var(--hairline);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;background:#fff}
+.ctc-row:not(.ctc-row-static):hover .ctc-row-ico{border-color:var(--green)}
+.ctc-row-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ctc-row-k{font-size:14px;font-weight:500;color:var(--ink)}
+.ctc-row-v{font-size:13px;color:var(--green)}
+.ctc-row-v-mut{color:var(--muted)}
+.ctc-row .num{font-variant-numeric:tabular-nums}
+.ctc-row-go{color:var(--muted);flex-shrink:0;opacity:0;transform:translateX(-4px);transition:opacity .16s,transform .16s}
+.ctc-row:hover .ctc-row-go{opacity:1;transform:translateX(0);color:var(--green)}
+
+/* ── FAQ CALLOUT ── */
+.ctc-faq{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:18px 20px;border:1px solid var(--hairline);border-radius:4px;background:#fff;transition:border-color .16s}
+.ctc-faq:hover{border-color:var(--green)}
+.ctc-faq-ico{width:34px;height:34px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:var(--green-soft);color:var(--green);flex-shrink:0}
+.ctc-faq-k{display:block;font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.ctc-faq-v{display:block;font-size:13px;color:var(--muted);line-height:1.55}
+
+/* ── SEMOA MENTION ── */
+.ctc-semoa{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);padding-top:4px}
+.ctc-semoa .d{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  .ctc-grid{grid-template-columns:1fr .9fr;gap:44px}
+}
+@media (max-width:768px){
+  .ctc{padding-top:48px;padding-bottom:64px}
+  .ctc-grid{grid-template-columns:1fr;gap:48px}
+  .ctc-info{gap:30px}
+}
+@media (max-width:480px){
+  .ctc{padding-bottom:52px}
+  .ctc-grid{gap:38px}
+  .ctc-row-go{display:none}
+  .ctc-row{gap:13px}
+}

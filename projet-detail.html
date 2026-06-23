@@ -306,6 +306,62 @@
 }
 .countdown-val { font-size: 16px; font-weight: 500; color: var(--gray-900); font-family: var(--serif); }
 .countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-600); animation: pulse 2s infinite; flex-shrink: 0; }
+
+/* ── RESPONSIVE (page-specific layouts) ── */
+@media (max-width: 1024px) {
+  .detail-grid { grid-template-columns: 1fr 300px; gap: 32px; }
+  .detail-section { padding: 40px 0 72px; }
+  .project-title { font-size: 32px; }
+  .metric-cell { padding: 14px 16px; }
+  .metric-cell-val { font-size: 20px; }
+}
+
+@media (max-width: 768px) {
+  /* content + sidebar → single column, sidebar drops below & loses sticky */
+  .detail-grid { grid-template-columns: 1fr; gap: 32px; }
+  .invest-panel { position: static; top: auto; }
+  .detail-section { padding: 32px 0 56px; }
+
+  /* project header stacks, actions wrap */
+  .project-header { padding: 28px 0 0; }
+  .project-header-top { flex-direction: column; gap: 16px; }
+  .project-header-actions { padding-top: 0; }
+  .project-title { font-size: 28px; }
+  .project-title br { display: none; }
+
+  /* metrics bar: 5 cols → wrapping grid of 2 */
+  .metrics-bar { grid-template-columns: repeat(2, 1fr); }
+  .metric-cell { border-right: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100); }
+  .metric-cell:nth-child(2n) { border-right: none; }
+  .metric-cell:last-child { border-bottom: none; }
+
+  /* validation cards → single column */
+  .validation-grid { grid-template-columns: 1fr; }
+
+  /* gallery shrinks */
+  .gallery-main { height: 260px; }
+}
+
+@media (max-width: 480px) {
+  .detail-section { padding: 28px 0 48px; }
+  .detail-block { margin-bottom: 32px; padding-bottom: 32px; }
+  .project-title { font-size: 24px; }
+
+  /* metrics bar → single column */
+  .metrics-bar { grid-template-columns: 1fr; }
+  .metric-cell { border-right: none; }
+
+  /* full-width header actions */
+  .project-header-actions { width: 100%; }
+  .btn-save, .btn-share { flex: 1; justify-content: center; }
+
+  .gallery-main { height: 200px; }
+  .gallery-thumbs { flex-wrap: wrap; }
+  .invest-card-header, .invest-card-body { padding: 16px 18px; }
+  .owner-card { flex-direction: column; gap: 12px; }
+  .owner-stats { gap: 12px; flex-wrap: wrap; }
+  .expert-header { flex-direction: column; gap: 8px; }
+}
 </style>
 </head>
 <body>
@@ -786,5 +842,6 @@ function selectMomo(el) {
   el.classList.add('selected');
 }
 </script>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

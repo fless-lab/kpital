@@ -1,0 +1,269 @@
+---
+layout: base.njk
+title: "Tableau de bord | KPITAL"
+description: "Votre tableau de bord investisseur KPITAL."
+pageCss: dashboard
+hideFooter: true
+---
+
+<!-- DASHBOARD HEADER -->
+<section class="dash-head">
+  <div class="container dash-head-inner">
+    <div class="dash-greet">
+      <p class="eyebrow">Espace investisseur</p>
+      <h1>Bonjour, Kofi A.</h1>
+      <p class="dash-greet-sub">Lundi 22 juin 2026 · Lomé, Togo</p>
+    </div>
+    <div class="dash-acct">
+      <div class="dash-acct-row">
+        <span class="k">Compte</span>
+        <span class="v num">KPT&#8202;·&#8202;0042&#8202;187</span>
+      </div>
+      <div class="dash-acct-row">
+        <span class="k">Séquestre</span>
+        <span class="v">SEMOA · CashPay</span>
+      </div>
+      <div class="dash-acct-row">
+        <span class="k">Statut KYC</span>
+        <span class="v dash-kyc-flag"><i></i>En vérification</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO SUMMARY -->
+<section class="dash-summary-band">
+  <div class="container">
+    <div class="dash-summary">
+      <div class="dsm">
+        <div class="dsm-k">Valeur du portefeuille</div>
+        <div class="dsm-v num">1&#8239;198&#8239;200<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s">Capital investi + ROI attendu</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Capital investi</div>
+        <div class="dsm-v num">820&#8239;000<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s"><span class="num">230&#8239;000</span> FCFA déjà remboursés</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">ROI cumulé attendu</div>
+        <div class="dsm-v num dsm-pos">+148&#8239;200<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s"><span class="num">+18,07%</span> annualisé · durée restante</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Projets actifs</div>
+        <div class="dsm-v num">3</div>
+        <div class="dsm-s"><span class="num">1</span> projet déjà remboursé</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KYC / STATUS BANNER -->
+<section class="dash-section dash-section--tight">
+  <div class="container">
+    <div class="kyc-note">
+      <span class="kyc-note-ico">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </span>
+      <div class="kyc-note-body">
+        <h4>Vérification KYC en cours · SEMOA</h4>
+        <p>Votre dossier est en cours de vérification, généralement résolu sous 24h. Vous pouvez explorer les projets, mais pas encore confirmer de nouvel investissement.</p>
+      </div>
+      <a href="/securite" class="btn btn-ghost kyc-note-cta">Voir le statut</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOLDINGS LIST -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-sec-head">
+      <div>
+        <p class="eyebrow">Portefeuille</p>
+        <h2 class="dash-h2">Mes investissements</h2>
+      </div>
+      <a href="/projets" class="dash-sec-link">Explorer les projets →</a>
+    </div>
+
+    <div class="ledger" role="table" aria-label="Mes investissements actifs">
+      <div class="ledger-scroll">
+        <div class="ledger-head" role="row">
+          <span class="lc lc-name" role="columnheader">Projet</span>
+          <span class="lc lc-sector" role="columnheader">Secteur</span>
+          <span class="lc lc-amt" role="columnheader">Montant</span>
+          <span class="lc lc-roi" role="columnheader">ROI attendu</span>
+          <span class="lc lc-prog" role="columnheader">Avancement</span>
+          <span class="lc lc-due" role="columnheader">Échéance</span>
+          <span class="lc lc-status" role="columnheader">Statut</span>
+        </div>
+
+        <!-- Villa Tokoin -->
+        <a class="ledger-row" href="/projet" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Villa Tokoin : location longue durée</span>
+            <span class="lr-place">Tokoin, Lomé · <span class="num">24</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag tag-green">Immobilier · A</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">300&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+66&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:73%"></i></span>
+            <span class="lr-bar-l"><span class="num">73%</span> collecté</span>
+          </span>
+          <span class="lc lc-due num" role="cell">juil. 2028</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">En cours</span></span>
+        </a>
+
+        <!-- Stock tissu wax -->
+        <a class="ledger-row" href="/projet" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Stock tissu wax : Grand Marché</span>
+            <span class="lr-place">Grand Marché, Lomé · <span class="num">4</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Commerce · B</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">200&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+30&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:40%"></i></span>
+            <span class="lr-bar-l"><span class="num">40%</span> durée écoulée</span>
+          </span>
+          <span class="lc lc-due num" role="cell">oct. 2026</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">En cours</span></span>
+        </a>
+
+        <!-- Campagne maïs -->
+        <a class="ledger-row" href="/projet" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Campagne maïs : Région des Plateaux</span>
+            <span class="lr-place">Kpalimé, Plateaux · <span class="num">6</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Agriculture · B+</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">320&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+52&#8239;200</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:88%"></i></span>
+            <span class="lr-bar-l"><span class="num">88%</span> collecté</span>
+          </span>
+          <span class="lc lc-due num" role="cell">jan. 2027</span>
+          <span class="lc lc-status" role="cell"><span class="st st-open">Collecte</span></span>
+        </a>
+
+        <!-- TOTALS -->
+        <div class="ledger-total" role="row">
+          <span class="lc lc-name" role="cell">Total · <span class="num">3</span> investissements actifs</span>
+          <span class="lc lc-sector" role="cell"></span>
+          <span class="lc lc-amt num" role="cell">820&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+148&#8239;200</span>
+          <span class="lc lc-prog" role="cell"></span>
+          <span class="lc lc-due" role="cell"></span>
+          <span class="lc lc-status" role="cell"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WALLET (dark panel) -->
+<section class="dash-section">
+  <div class="container">
+    <div class="wallet">
+      <div class="wallet-main">
+        <p class="wallet-kicker">Solde retirable · Wallet SEMOA</p>
+        <div class="wallet-amt num">230&#8239;000<span class="wallet-cur">FCFA</span></div>
+        <p class="wallet-note">Issu de remboursements de projets terminés. Ce wallet ne peut pas être rechargé directement : il s'alimente uniquement par les remboursements SEMOA.</p>
+        <div class="wallet-actions">
+          <a href="#retrait" class="btn btn-white">Retirer par Mobile Money →</a>
+          <a href="/projets" class="btn btn-line">Réinvestir le solde</a>
+        </div>
+      </div>
+      <div class="wallet-side" id="retrait">
+        <div class="wallet-side-head">Retrait Mobile Money</div>
+        <div class="wallet-chan">
+          <div class="wchan">
+            <span class="wchan-t">T-Money · Togocel</span>
+            <span class="wchan-s">Crédit immédiat · frais opérateur standard</span>
+          </div>
+          <div class="wchan">
+            <span class="wchan-t">Flooz · Moov Africa</span>
+            <span class="wchan-s">Crédit immédiat · frais opérateur standard</span>
+          </div>
+          <div class="wchan">
+            <span class="wchan-t">Compte bancaire · Togo</span>
+            <span class="wchan-s">1–2 jours ouvrés · sans frais</span>
+          </div>
+        </div>
+        <div class="wallet-side-foot">
+          <span class="k">Disponible</span>
+          <span class="v num">230&#8239;000 FCFA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REINVEST SUGGESTIONS -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-sec-head">
+      <div>
+        <p class="eyebrow">Réinvestir votre solde</p>
+        <h2 class="dash-h2">Suggestions à partir de <span class="num">230&#8239;000</span> FCFA</h2>
+      </div>
+      <a href="/projets" class="dash-sec-link">Voir tous les projets →</a>
+    </div>
+
+    <div class="reinvest">
+      <a class="rcard" href="/projet">
+        <div class="rcard-head">
+          <span class="rcard-sector">Commerce</span>
+          <span class="tag tag-green">Note A−</span>
+        </div>
+        <h3 class="rcard-name">Épicerie moderne Adéwi</h3>
+        <p class="rcard-meta">Hédzranawoé, Lomé · <span class="num">6</span> mois</p>
+        <div class="rcard-stats">
+          <div class="rst"><span class="rst-v num">16%</span><span class="rst-l">ROI / an</span></div>
+          <div class="rst"><span class="rst-v num">22%</span><span class="rst-l">Collecté</span></div>
+          <div class="rst"><span class="rst-v num">10K</span><span class="rst-l">Ticket min</span></div>
+        </div>
+        <span class="rcard-go">Réinvestir ici →</span>
+      </a>
+
+      <a class="rcard" href="/projet">
+        <div class="rcard-head">
+          <span class="rcard-sector">Immobilier</span>
+          <span class="tag tag-green">Note A</span>
+        </div>
+        <h3 class="rcard-name">Villa Bè : location meublée</h3>
+        <p class="rcard-meta">Bè-Kpota, Lomé · <span class="num">18</span> mois</p>
+        <div class="rcard-stats">
+          <div class="rst"><span class="rst-v num">12%</span><span class="rst-l">ROI / an</span></div>
+          <div class="rst"><span class="rst-v num">55%</span><span class="rst-l">Collecté</span></div>
+          <div class="rst"><span class="rst-v num">10K</span><span class="rst-l">Ticket min</span></div>
+        </div>
+        <span class="rcard-go">Réinvestir ici →</span>
+      </a>
+
+      <a class="rcard" href="/projet">
+        <div class="rcard-head">
+          <span class="rcard-sector">Agriculture</span>
+          <span class="tag">Note B+</span>
+        </div>
+        <h3 class="rcard-name">Campagne maïs : Plateaux</h3>
+        <p class="rcard-meta">Kpalimé, Plateaux · <span class="num">6</span> mois</p>
+        <div class="rcard-stats">
+          <div class="rst"><span class="rst-v num">24%</span><span class="rst-l">ROI / an</span></div>
+          <div class="rst"><span class="rst-v num">88%</span><span class="rst-l">Collecté</span></div>
+          <div class="rst"><span class="rst-v num">10K</span><span class="rst-l">Ticket min</span></div>
+        </div>
+        <span class="rcard-go">Réinvestir ici →</span>
+      </a>
+    </div>
+  </div>
+</section>

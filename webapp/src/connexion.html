@@ -1,0 +1,59 @@
+---
+layout: base.njk
+title: "Connexion | KPITAL"
+description: "Connectez-vous à votre espace KPITAL pour suivre votre portefeuille, vos projets en cours et découvrir de nouvelles opportunités vérifiées."
+pageCss: connexion
+---
+
+<!-- AUTH -->
+<section class="auth">
+  <div class="container auth-inner">
+
+    <div class="auth-card form-card">
+      <p class="eyebrow">Espace investisseur</p>
+      <h1 class="auth-title">Connexion</h1>
+      <p class="auth-sub">Accédez à votre portefeuille, suivez vos projets et vos remboursements.</p>
+
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="field">
+          <label for="login-id">Email ou numéro Mobile Money</label>
+          <input class="input" id="login-id" name="login-id" type="text" autocomplete="username"
+                 placeholder="votre@email.com ou +228 9X XX XX XX" autofocus>
+        </div>
+
+        <div class="field auth-pw-field">
+          <div class="auth-label-row">
+            <label for="login-pw">Mot de passe</label>
+            <a class="auth-forgot" href="#">Oublié ?</a>
+          </div>
+          <input class="input" id="login-pw" name="login-pw" type="password" autocomplete="current-password"
+                 placeholder="••••••••">
+        </div>
+
+        <label class="auth-remember">
+          <input type="checkbox" name="remember">
+          <span>Se souvenir de moi sur cet appareil</span>
+        </label>
+
+        <button class="btn btn-primary auth-submit" type="submit">Se connecter →</button>
+
+        <div class="auth-divider"><span>ou</span></div>
+
+        <a class="btn btn-ghost auth-otp" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+          Recevoir un code unique par SMS ou email
+        </a>
+      </form>
+
+      <p class="auth-switch">
+        Pas encore de compte ? <a href="/inscription">Créer un compte gratuit →</a>
+      </p>
+    </div>
+
+    <p class="auth-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Connexion chiffrée · KYC opéré par SEMOA · Fonds en séquestre
+    </p>
+
+  </div>
+</section>

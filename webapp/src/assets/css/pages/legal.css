@@ -1,0 +1,96 @@
+/* Legal pages (Conditions · Confidentialité · Mentions légales) — KPITAL "Le Registre" */
+
+/* ── HERO META ── */
+.legal-hero-meta{
+  display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px;
+}
+.legal-hero-meta span{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--muted);
+}
+.legal-hero-meta svg{color:var(--gold);flex-shrink:0}
+.legal-hero-meta .num{color:var(--ink);font-weight:500}
+
+/* ── LAYOUT: sticky TOC + long-form content ── */
+.legal-layout{
+  display:grid;grid-template-columns:240px 1fr;gap:72px;align-items:start;
+}
+
+/* ── SIDEBAR (doc switcher + TOC) ── */
+.legal-aside{position:sticky;top:88px}
+.legal-aside-title{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:14px;
+}
+.legal-aside-title + .legal-aside-title{margin-top:34px}
+
+.legal-docnav{display:flex;flex-direction:column;border-top:1px solid var(--hairline)}
+.legal-docnav a{
+  font-size:13.5px;color:var(--muted);
+  padding:11px 0;border-bottom:1px solid var(--hairline);
+  transition:color .16s,padding-left .16s;
+}
+.legal-docnav a:hover{color:var(--ink);padding-left:6px}
+.legal-docnav a.current{color:var(--green);font-weight:500}
+
+.legal-toc{display:flex;flex-direction:column}
+.legal-toc a{
+  display:flex;gap:10px;
+  font-size:13px;color:var(--muted);line-height:1.4;
+  padding:8px 0;border-bottom:1px solid var(--hairline);
+  transition:color .16s,padding-left .16s;
+}
+.legal-toc a:first-child{border-top:1px solid var(--hairline)}
+.legal-toc a:hover{color:var(--ink);padding-left:6px}
+.legal-toc a .num{color:var(--green);flex-shrink:0;font-size:12px}
+
+/* ── CONTENT (reading measure ~70ch) ── */
+.legal-content{max-width:70ch}
+.legal-content :where(p,ul,li,a){overflow-wrap:break-word}
+
+.legal-article{
+  padding:0 0 44px;margin-bottom:44px;
+  border-bottom:1px solid var(--hairline);
+}
+.legal-article:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.legal-article .eyebrow{margin-bottom:14px}
+.legal-article h2{
+  font-family:var(--display);font-weight:700;letter-spacing:-0.02em;
+  font-size:clamp(21px,2.6vw,27px);line-height:1.18;color:var(--ink);
+  margin-bottom:18px;
+}
+.legal-article h3{
+  font-family:var(--display);font-weight:600;letter-spacing:-0.01em;
+  font-size:15px;color:var(--ink);margin:24px 0 8px;
+}
+.legal-article p{
+  font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:13px;
+}
+.legal-article p:last-child{margin-bottom:0}
+.legal-article ul{list-style:none;margin:14px 0 16px}
+.legal-article li{
+  position:relative;padding-left:20px;
+  font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:9px;
+}
+.legal-article li::before{
+  content:"";position:absolute;left:0;top:11px;
+  width:6px;height:1px;background:var(--gold);
+}
+.legal-article strong{color:var(--ink);font-weight:600}
+.legal-article a{color:var(--green);text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--hairline)}
+.legal-article a:hover{text-decoration-color:var(--green)}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  .legal-layout{grid-template-columns:200px 1fr;gap:48px}
+}
+@media (max-width:768px){
+  .legal-layout{grid-template-columns:1fr;gap:40px}
+  .legal-aside{position:static;top:auto}
+  .legal-content{max-width:100%}
+}
+@media (max-width:480px){
+  .legal-article{padding-bottom:32px;margin-bottom:32px}
+  .legal-hero-meta{gap:8px 0;flex-direction:column}
+}

@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPITAL | Investissez dans l'économie réelle togolaise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --paper:#F6F4EE;
+  --ink:#1C1A17;
+  --muted:#6B655B;
+  --green:#0E5C41;
+  --green-deep:#08382A;
+  --green-soft:#E7F0EA;
+  --amber:#C2861C;
+  --hairline:#E2DDD2;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"DM Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --maxw:1200px;
+  --gutter:40px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+
+body{
+  font-family:var(--body);
+  background:var(--paper);
+  color:var(--ink);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+.container{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter);}
+
+a{color:inherit;text-decoration:none;}
+
+:focus-visible{
+  outline:2px solid var(--amber);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+/* shared editorial primitives */
+.eyebrow{
+  font-family:var(--body);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--amber);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.eyebrow::before{
+  content:"";
+  width:24px;height:1px;
+  background:var(--amber);
+  display:inline-block;
+}
+.kicker{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+h2.heading{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(30px,4.6vw,52px);
+  line-height:1.02;
+  letter-spacing:-0.02em;
+  color:var(--ink);
+}
+.lead{
+  font-size:clamp(16px,1.4vw,18px);
+  color:var(--muted);
+  line-height:1.65;
+  max-width:48ch;
+}
+
+section{padding:96px 0;}
+
+/* ============ NAV ============ */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(246,244,238,0.86);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hairline);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:70px;
+}
+.logo{
+  font-family:var(--display);
+  font-weight:700;font-size:22px;
+  letter-spacing:-0.02em;color:var(--ink);
+}
+.logo span{color:var(--amber);}
+.nav-links{display:flex;gap:30px;list-style:none;}
+.nav-links a{
+  font-size:14px;color:var(--ink);position:relative;padding:4px 0;
+  transition:color .2s;
+}
+.nav-links a::after{
+  content:"";position:absolute;left:0;bottom:-2px;width:0;height:1.5px;
+  background:var(--amber);transition:width .25s ease;
+}
+.nav-links a:hover{color:var(--green);}
+.nav-links a:hover::after{width:100%;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.btn-lang{
+  background:none;border:none;font-family:var(--mono);
+  font-size:12px;letter-spacing:0.04em;color:var(--muted);cursor:pointer;
+  padding:6px 4px;
+}
+.btn-lang:hover{color:var(--ink);}
+.btn-login{font-size:14px;color:var(--ink);}
+.btn-login:hover{color:var(--green);}
+.btn-cta{
+  font-size:14px;font-weight:500;
+  background:var(--green);color:#fff;
+  padding:9px 20px;border-radius:2px;
+  transition:background .2s,transform .15s;
+}
+.btn-cta:hover{background:var(--green-deep);transform:translateY(-1px);}
+
+/* buttons */
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:500;font-family:var(--body);
+  background:var(--ink);color:var(--paper);
+  padding:14px 26px;border-radius:2px;border:none;cursor:pointer;
+  transition:background .2s,transform .15s;
+}
+.btn-primary:hover{background:var(--green);transform:translateY(-1px);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:500;font-family:var(--body);
+  background:none;border:1px solid var(--ink);color:var(--ink);
+  padding:14px 24px;border-radius:2px;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+.btn-ghost:hover{background:var(--ink);color:var(--paper);}
+
+/* ============ DUOTONE FRAMES ============ */
+.frame{
+  position:relative;
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid var(--hairline);
+  background:linear-gradient(150deg,var(--green) 0%,var(--green-deep) 70%,#031f17 100%);
+  isolation:isolate;
+}
+.frame::before{
+  /* texture: faint diagonal grain + light field */
+  content:"";position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(120% 80% at 25% 15%, rgba(231,240,234,0.22) 0%, transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 7px);
+  mix-blend-mode:screen;
+}
+.frame::after{
+  /* amber editorial corner tick */
+  content:"";position:absolute;top:14px;right:14px;z-index:2;
+  width:26px;height:26px;
+  border-top:2px solid var(--amber);
+  border-right:2px solid var(--amber);
+}
+.frame-glyph{
+  position:absolute;inset:0;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(231,240,234,0.16);
+}
+.frame-cap{
+  position:absolute;left:0;bottom:0;z-index:3;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;width:100%;
+  background:linear-gradient(0deg, rgba(3,20,15,0.78) 0%, transparent 100%);
+}
+.frame-cap .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+.frame-cap .t{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;color:#fff;text-transform:uppercase;}
+.frame-cap .s{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.6);margin-left:auto;}
+
+/* ============ HERO ============ */
+.hero{padding:74px 0 72px;position:relative;}
+.hero-rule{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--hairline);
+  padding:10px 0;margin-bottom:54px;
+  font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
+  text-transform:uppercase;color:var(--muted);
+}
+.hero-rule .badge{display:inline-flex;align-items:center;gap:8px;color:var(--green);}
+.hero-rule .badge .pulse{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:pulse 2.4s infinite;
+}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(14,92,65,0.45);}70%{box-shadow:0 0 0 8px rgba(14,92,65,0);}100%{box-shadow:0 0 0 0 rgba(14,92,65,0);}}
+.hero-edition{display:none;}
+@media(min-width:768px){.hero-edition{display:inline;}}
+
+.hero-inner{
+  display:grid;
+  grid-template-columns:1.15fr 0.85fr;
+  gap:56px;align-items:end;
+}
+.hero h1{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(46px,8.2vw,104px);
+  line-height:0.94;letter-spacing:-0.035em;
+  color:var(--ink);
+}
+.hero h1 .em{color:var(--green);position:relative;}
+.hero h1 .em::after{
+  content:"";position:absolute;left:0;right:0;bottom:0.07em;height:4px;
+  background:var(--amber);opacity:0.9;
+}
+.hero-sub{margin-top:30px;display:flex;gap:28px;align-items:flex-start;}
+.hero-sub .dropcap{
+  font-family:var(--display);font-weight:700;font-size:74px;line-height:0.7;
+  color:var(--amber);flex-shrink:0;
+}
+.hero-sub p{font-size:17px;color:var(--muted);line-height:1.65;max-width:42ch;}
+.hero-ctas{display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap;}
+
+/* hero collection card (Projets en collecte) */
+.collect{
+  border:1px solid var(--hairline);
+  background:#fff;
+  border-radius:3px;
+}
+.collect-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:18px 22px;border-bottom:1px solid var(--hairline);
+}
+.collect-head .title{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-0.01em;}
+.collect-head .count{font-family:var(--mono);font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:0.05em;}
+.proj{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:16px 22px;border-bottom:1px solid var(--hairline);
+}
+.proj-no{font-family:var(--mono);font-size:12px;color:var(--muted);align-self:flex-start;padding-top:2px;}
+.proj-name{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-0.01em;}
+.proj-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.02em;}
+.proj-roi{font-family:var(--display);font-weight:700;font-size:22px;color:var(--green);text-align:right;line-height:1;}
+.proj-roi span{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:0.04em;}
+.collect-foot{padding:16px 22px;}
+.collect-foot .semoa{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px;}
+.collect-foot .semoa .d{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.collect-foot .progress-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.03em;}
+.bar{height:4px;background:var(--green-soft);border-radius:99px;overflow:hidden;}
+.bar > i{display:block;height:100%;width:73%;background:var(--green);border-radius:99px;}
+
+/* ============ STATS ============ */
+.stats{
+  background:var(--green-deep);color:var(--paper);
+  padding:0;border-top:1px solid var(--green-deep);
+}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+}
+.stat{
+  padding:40px var(--gutter);
+  border-right:1px solid rgba(255,255,255,0.1);
+}
+.stat:last-child{border-right:none;}
+.stat .num{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(20px,2.2vw,30px);
+  line-height:1.05;letter-spacing:-0.02em;color:#fff;
+}
+.stat .num.small{font-size:clamp(15px,1.5vw,18px);}
+.stat .lbl{
+  font-family:var(--mono);font-size:11px;text-transform:uppercase;
+  letter-spacing:0.08em;color:rgba(231,240,234,0.6);margin-top:10px;
+}
+/* full-bleed stats (no container) */
+.stats > .stats-grid{max-width:none;}
+
+/* ============ SECTION HEAD ============ */
+.sec-head{
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;
+  align-items:end;margin-bottom:56px;
+}
+.sec-head .t-left{}
+.sec-head h2.heading{margin-top:18px;}
+.sec-head .lead{align-self:end;}
+
+/* ============ TIERS (editorial index) ============ */
+.tiers{background:var(--paper);}
+.index{
+  border-top:2px solid var(--ink);
+}
+.idx-row{
+  display:grid;
+  grid-template-columns:64px 1.1fr 0.6fr auto;
+  gap:28px;align-items:center;
+  padding:30px 6px;
+  border-bottom:1px solid var(--hairline);
+  transition:background .25s,padding-left .25s;
+  position:relative;
+}
+.idx-row:hover{background:#fff;padding-left:18px;}
+.idx-no{font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:0.05em;align-self:flex-start;padding-top:6px;}
+.idx-main .cat{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px;}
+.idx-main .name{font-family:var(--display);font-weight:700;font-size:clamp(22px,2.6vw,30px);letter-spacing:-0.02em;line-height:1.05;}
+.idx-detail{font-size:14px;color:var(--muted);line-height:1.6;}
+.idx-roi{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(30px,3.4vw,46px);color:var(--green);
+  letter-spacing:-0.02em;line-height:1;text-align:right;white-space:nowrap;
+}
+.idx-roi.impact{color:var(--amber);font-size:clamp(22px,2.4vw,30px);}
+.idx-roi small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:8px;text-align:right;}
+
+/* ============ HOW (validation steps) ============ */
+.how{background:#fff;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+.how-inner{display:grid;grid-template-columns:1.05fr 0.95fr;gap:64px;align-items:start;}
+.steps{margin-top:40px;border-top:2px solid var(--ink);}
+.step{
+  display:grid;grid-template-columns:auto 1fr;gap:26px;
+  padding:28px 0;border-bottom:1px solid var(--hairline);
+  align-items:start;
+}
+.step .n{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(40px,5vw,64px);line-height:0.8;
+  color:var(--ink);letter-spacing:-0.04em;
+  width:1.6em;
+}
+.step .n .acc{color:var(--amber);}
+.step h4{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;margin-bottom:8px;}
+.step p{font-size:14.5px;color:var(--muted);line-height:1.65;}
+
+/* verification panel */
+.verif{
+  position:sticky;top:94px;
+  background:var(--green-deep);color:var(--paper);
+  border-radius:3px;padding:30px;
+}
+.verif .vt{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber);margin-bottom:22px;display:flex;align-items:center;gap:10px;}
+.verif .vt::after{content:"";flex:1;height:1px;background:rgba(255,255,255,0.14);}
+.vitem{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.1);align-items:start;}
+.vcheck{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vcheck.done{background:rgba(231,240,234,0.16);color:#fff;}
+.vcheck.pending{background:rgba(194,134,28,0.22);color:var(--amber);}
+.vtext{font-size:14px;color:#fff;font-weight:500;}
+.vsub{font-family:var(--mono);font-size:11px;color:rgba(231,240,234,0.6);margin-top:4px;letter-spacing:0.02em;}
+.vbox{margin-top:22px;padding:16px;border:1px solid rgba(255,255,255,0.14);border-radius:3px;}
+.vbox .h{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(231,240,234,0.6);margin-bottom:8px;}
+.vbox .m{font-size:13.5px;color:#fff;}
+.vbox .a{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--amber);}
+.vbox .a .d{width:8px;height:8px;border-radius:50%;background:var(--amber);}
+
+/* ============ PROTECTION (pull-quote spread) ============ */
+.protect{background:var(--green-deep);color:var(--paper);}
+.protect .eyebrow{color:var(--amber);}
+.protect h2.heading{color:#fff;}
+.pullquote{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(24px,3.2vw,40px);
+  line-height:1.18;letter-spacing:-0.02em;
+  color:#fff;max-width:22ch;margin:24px 0 8px;
+}
+.pullquote b{color:var(--amber);font-weight:600;}
+.prot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px;border-top:1px solid rgba(255,255,255,0.16);}
+.prot{
+  padding:34px 30px 30px 0;
+  border-right:1px solid rgba(255,255,255,0.16);
+}
+.prot:last-child{border-right:none;padding-right:0;}
+.prot:first-child{padding-left:0;}
+.prot .pn{
+  font-family:var(--display);font-weight:700;font-size:52px;line-height:1;
+  color:var(--amber);letter-spacing:-0.03em;margin-bottom:18px;
+}
+.prot .picon{color:var(--green-soft);margin-bottom:16px;display:block;}
+.prot h3{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-0.01em;color:#fff;margin-bottom:12px;}
+.prot p{font-size:14px;color:rgba(231,240,234,0.72);line-height:1.65;}
+.prot .tag{
+  margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.14);
+  font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--green-soft);display:flex;align-items:center;gap:8px;
+}
+
+/* ============ JOURNEY ============ */
+.journey{background:var(--paper);}
+.j-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+  margin-top:48px;border-top:2px solid var(--ink);
+}
+.j-step{
+  padding:30px 22px 30px 0;
+  border-right:1px solid var(--hairline);
+}
+.j-step:last-child{border-right:none;}
+.j-no{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:0.08em;}
+.j-icon{color:var(--green);margin:18px 0 16px;display:block;}
+.j-step h4{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;margin-bottom:8px;}
+.j-step p{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* ============ DIASPORA (magazine spread) ============ */
+.diaspora{background:#fff;border-top:1px solid var(--hairline);}
+.dia-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.dia-quote{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(22px,2.6vw,30px);line-height:1.22;letter-spacing:-0.02em;
+  margin:22px 0 18px;color:var(--ink);max-width:22ch;
+}
+.dia-frame{margin-bottom:30px;}
+.dia-feats{border-top:1px solid var(--hairline);}
+.dia-feat{
+  display:grid;grid-template-columns:auto 1fr;gap:18px;
+  padding:22px 0;border-bottom:1px solid var(--hairline);align-items:start;
+}
+.dia-feat .fi{color:var(--green);flex-shrink:0;}
+.dia-feat h4{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:-0.01em;margin-bottom:5px;}
+.dia-feat p{font-size:13.5px;color:var(--muted);line-height:1.6;}
+
+/* waitlist sidebar */
+.waitlist{
+  position:sticky;top:94px;
+  border:1px solid var(--hairline);
+  border-top:3px solid var(--amber);
+  background:var(--paper);
+  padding:34px;border-radius:0 0 3px 3px;
+}
+.waitlist .wk{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber);margin-bottom:14px;}
+.waitlist h3{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-0.02em;line-height:1.05;margin-bottom:12px;}
+.waitlist > p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:22px;}
+.countries{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+.country{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.03em;
+  padding:5px 12px;border-radius:99px;
+  background:#fff;color:var(--green);border:1px solid var(--hairline);
+}
+.waitlist input{
+  width:100%;padding:13px 14px;
+  border:1px solid var(--hairline);border-radius:2px;
+  font-size:14px;font-family:var(--body);background:#fff;color:var(--ink);
+  margin-bottom:10px;
+}
+.waitlist input::placeholder{color:#a8a293;}
+.btn-amber{
+  width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-size:14px;font-weight:500;font-family:var(--body);
+  background:var(--amber);color:#fff;border:none;cursor:pointer;
+  padding:13px 18px;border-radius:2px;transition:background .2s,transform .15s;
+}
+.btn-amber:hover{background:#a86f12;transform:translateY(-1px);}
+.waitlist .fine{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
+
+/* ============ FAQ ============ */
+.faq{background:var(--paper);}
+.faq-list{margin-top:48px;border-top:2px solid var(--ink);}
+.faq-item{
+  display:grid;grid-template-columns:48px 1fr;gap:26px;
+  padding:30px 6px;border-bottom:1px solid var(--hairline);
+  align-items:start;transition:padding-left .25s;
+}
+.faq-item:hover{padding-left:16px;}
+.faq-no{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:0.05em;padding-top:4px;}
+.faq-q{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;line-height:1.3;margin-bottom:10px;color:var(--ink);}
+.faq-a{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:64ch;}
+.faq-more{text-align:center;margin-top:34px;}
+.faq-more a{font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:0.03em;border-bottom:1px solid var(--green);padding-bottom:2px;}
+.faq-more a:hover{color:var(--amber);border-color:var(--amber);}
+
+/* ============ FINAL CTA ============ */
+.final{
+  background:var(--green-deep);color:var(--paper);text-align:center;
+  padding:110px 0;
+}
+.final h2{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(34px,5.4vw,66px);line-height:0.98;letter-spacing:-0.03em;color:#fff;
+  max-width:16ch;margin:0 auto;
+}
+.final h2 .em{color:var(--amber);}
+.final p{font-size:17px;color:rgba(231,240,234,0.7);margin:24px auto 38px;max-width:46ch;}
+.final-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-paper{
+  font-size:15px;font-weight:500;font-family:var(--body);
+  background:var(--paper);color:var(--green-deep);
+  border:none;padding:15px 30px;border-radius:2px;cursor:pointer;
+  transition:transform .15s,background .2s;
+}
+.btn-paper:hover{background:#fff;transform:translateY(-1px);}
+.btn-outline{
+  font-size:15px;font-weight:500;font-family:var(--body);
+  background:none;color:rgba(255,255,255,0.85);
+  border:1px solid rgba(255,255,255,0.3);
+  padding:15px 30px;border-radius:2px;cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+.btn-outline:hover{border-color:#fff;color:#fff;}
+
+/* ============ FOOTER ============ */
+footer{background:var(--paper);border-top:1px solid var(--hairline);padding:64px 0 40px;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;}
+.footer-logo{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-0.02em;}
+.footer-logo span{color:var(--amber);}
+.footer-tagline{font-size:13.5px;color:var(--muted);line-height:1.6;margin:14px 0 16px;max-width:34ch;}
+.footer-semoa{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.footer-col h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink);margin-bottom:16px;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:11px;}
+.footer-col a{font-size:14px;color:var(--muted);transition:color .2s;}
+.footer-col a:hover{color:var(--green);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  margin-top:48px;padding-top:24px;border-top:1px solid var(--hairline);
+}
+.footer-copy{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.03em;}
+.footer-legal{display:flex;gap:22px;flex-wrap:wrap;}
+.footer-legal a{font-size:12.5px;color:var(--muted);}
+.footer-legal a:hover{color:var(--green);}
+
+/* ============ SCROLL REVEAL ============ */
+.reveal{opacity:1;}
+.js-on .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;}
+.js-on .reveal.in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){
+  .js-on .reveal{opacity:1!important;transform:none!important;transition:none!important;}
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1024px){
+  :root{--gutter:32px;}
+  .hero-inner{grid-template-columns:1fr;gap:48px;align-items:start;}
+  .how-inner{grid-template-columns:1fr;gap:44px;}
+  .verif{position:static;}
+  .dia-inner{grid-template-columns:1fr;gap:44px;}
+  .waitlist{position:static;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat:nth-child(2){border-right:none;}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid rgba(255,255,255,0.1);}
+}
+@media (max-width:768px){
+  section{padding:72px 0;}
+  .sec-head{grid-template-columns:1fr;gap:20px;}
+  .idx-row{grid-template-columns:40px 1fr auto;gap:18px;}
+  .idx-detail{grid-column:2 / -1;}
+  .prot-grid{grid-template-columns:1fr;}
+  .prot{border-right:none;border-bottom:1px solid rgba(255,255,255,0.16);padding:28px 0;}
+  .prot:last-child{border-bottom:none;}
+  .j-grid{grid-template-columns:1fr 1fr;}
+  .j-step{border-right:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:26px 18px 26px 0;}
+  .j-step:nth-child(2n){border-right:none;}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:32px;}
+}
+@media (max-width:480px){
+  :root{--gutter:20px;}
+  section{padding:56px 0;}
+  .hero{padding:48px 0 56px;}
+  .hero-rule{flex-wrap:wrap;gap:8px;margin-bottom:36px;}
+  .hero-sub{gap:18px;}
+  .hero-sub .dropcap{font-size:56px;}
+  .hero-ctas .btn-primary,.hero-ctas .btn-ghost{width:100%;justify-content:center;}
+  .stats-grid{grid-template-columns:1fr;}
+  .stat{border-right:none!important;border-bottom:1px solid rgba(255,255,255,0.1);}
+  .stat:last-child{border-bottom:none;}
+  .idx-row{grid-template-columns:34px 1fr;gap:14px;padding:24px 4px;}
+  .idx-roi{grid-column:2 / -1;text-align:left;margin-top:6px;}
+  .idx-roi small,.idx-roi.impact{text-align:left;}
+  .idx-detail{grid-column:1 / -1;}
+  .step{grid-template-columns:1fr;gap:10px;}
+  .step .n{width:auto;}
+  .j-grid{grid-template-columns:1fr;}
+  .j-step{border-right:none;padding:24px 0;}
+  .faq-item{grid-template-columns:1fr;gap:10px;}
+  .footer-grid{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;align-items:flex-start;}
+  .final{padding:72px 0;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="logo">KPIT<span>A</span>L</a>
+    <ul class="nav-links">
+      <li><a href="projets.html">Projets</a></li>
+      <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+      <li><a href="securite.html">Sécurité</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <a href="connexion.html" class="btn-login">Connexion</a>
+      <a href="inscription.html" class="btn-cta">Investir</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-rule">
+      <span class="badge"><span class="pulse"></span>Ouverture · Juillet 2026 · Lomé, Togo</span>
+      <span class="hero-edition">Économie réelle togolaise — Édition Nº01</span>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <h1>Investissez dans<br>l'économie réelle<br><span class="em">togolaise</span></h1>
+        <div class="hero-sub">
+          <span class="dropcap">«</span>
+          <p>Immobilier, commerce, agriculture. Dès 10 000 FCFA. Sécurisé par séquestre SEMOA. Accessible depuis Lomé ou n'importe où dans la diaspora.</p>
+        </div>
+        <div class="hero-ctas">
+          <a href="projets.html" class="btn-primary">Voir les projets
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="comment-ca-marche.html" class="btn-ghost">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Comment ça marche
+          </a>
+        </div>
+      </div>
+      <div class="collect">
+        <div class="collect-head">
+          <span class="title">Projets en collecte</span>
+          <span class="count">3 disponibles</span>
+        </div>
+        <div class="proj">
+          <span class="proj-no">01</span>
+          <div>
+            <div class="proj-name">Villa Tokoin : Location</div>
+            <div class="proj-meta">Immobilier · 24 mois · Note A</div>
+          </div>
+          <div class="proj-roi">11%<span>/an</span></div>
+        </div>
+        <div class="proj">
+          <span class="proj-no">02</span>
+          <div>
+            <div class="proj-name">Stock tissu wax : Lomé</div>
+            <div class="proj-meta">Commerce · 4 mois · Note B</div>
+          </div>
+          <div class="proj-roi">18%<span>/an</span></div>
+        </div>
+        <div class="proj">
+          <span class="proj-no">03</span>
+          <div>
+            <div class="proj-name">Campagne maïs : Plateaux</div>
+            <div class="proj-meta">Agriculture · 6 mois · Note B+</div>
+          </div>
+          <div class="proj-roi">24%<span>/an</span></div>
+        </div>
+        <div class="collect-foot">
+          <div class="semoa"><span class="d"></span>Séquestre SEMOA actif</div>
+          <div class="progress-label"><span>Collecte en cours</span><span>73%</span></div>
+          <div class="bar"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="num">10 000 FCFA</div>
+      <div class="lbl">Ticket minimum</div>
+    </div>
+    <div class="stat">
+      <div class="num">8–28%</div>
+      <div class="lbl">ROI annuel estimé</div>
+    </div>
+    <div class="stat">
+      <div class="num">100%</div>
+      <div class="lbl">Projets vérifiés terrain</div>
+    </div>
+    <div class="stat">
+      <div class="num small">T-Money · Flooz · Virement bancaire</div>
+      <div class="lbl">Paiement</div>
+    </div>
+  </div>
+</div>
+
+<!-- TIERS (editorial index) -->
+<section class="tiers">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="t-left">
+        <span class="eyebrow">Types de projets</span>
+        <h2 class="heading">Choisissez votre<br>niveau de risque</h2>
+      </div>
+      <p class="lead">Cinq catégories d'investissement, chacune avec son profil de rendement, de durée et de risque.</p>
+    </div>
+    <div class="index reveal">
+      <div class="idx-row">
+        <span class="idx-no">Nº01</span>
+        <div class="idx-main">
+          <div class="cat">Tier 1 : Accessible</div>
+          <div class="name">Immobilier locatif</div>
+        </div>
+        <p class="idx-detail">Appartement ou maison en location à Lomé. Tangible, vérifiable, stable. Durée 12–36 mois.</p>
+        <div class="idx-roi">8–14%<small>Faible risque</small></div>
+      </div>
+      <div class="idx-row">
+        <span class="idx-no">Nº02</span>
+        <div class="idx-main">
+          <div class="cat">Tier 2 : Court terme</div>
+          <div class="name">Commerce &amp; stock</div>
+        </div>
+        <p class="idx-detail">Financement de stock pour commerçants vérifiés. Cycle court, retour rapide. Durée 3–6 mois.</p>
+        <div class="idx-roi">15–20%<small>Moyen risque</small></div>
+      </div>
+      <div class="idx-row">
+        <span class="idx-no">Nº03</span>
+        <div class="idx-main">
+          <div class="cat">Tier 3 : Saisonnier</div>
+          <div class="name">Agriculture</div>
+        </div>
+        <p class="idx-detail">Financement de campagne agricole vérifiée. Risque plus élevé, rendement fort. Durée 4–8 mois.</p>
+        <div class="idx-roi">20–28%<small>Risque modéré</small></div>
+      </div>
+      <div class="idx-row">
+        <span class="idx-no">Nº04</span>
+        <div class="idx-main">
+          <div class="cat">Tier 4 : PME</div>
+          <div class="name">Expansion PME</div>
+        </div>
+        <p class="idx-detail">PME qui cherche à grandir : équipement, local, recrutement. Ticket min : 25 000 FCFA. Durée 6–18 mois.</p>
+        <div class="idx-roi">12–18%<small>Structuré</small></div>
+      </div>
+      <div class="idx-row">
+        <span class="idx-no">Nº05</span>
+        <div class="idx-main">
+          <div class="cat">Tier 5 : Impact</div>
+          <div class="name">Projets communautaires</div>
+        </div>
+        <p class="idx-detail">École, eau, santé, jeune entrepreneur. Zéro ROI financier. Rapport d'impact mensuel avec photos. Pour la diaspora qui veut donner intelligemment.</p>
+        <div class="idx-roi impact">Impact<small>Diaspora</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="how" id="comment-ca-marche">
+  <div class="container how-inner">
+    <div class="reveal">
+      <span class="eyebrow">Processus de sélection</span>
+      <h2 class="heading" style="margin-top:18px;">Quatre niveaux<br>de validation</h2>
+      <p class="lead" style="margin-top:20px;">Aucun projet n'est publié sans avoir passé chaque étape. La rigueur est notre garantie.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="n">0<span class="acc">1</span></div>
+          <div>
+            <h4>Soumission &amp; scoring automatique</h4>
+            <p>Le porteur remplit un dossier structuré. L'algorithme calcule un score basé sur l'historique financier, le secteur, la zone géographique et les documents fournis. Les dossiers sous seuil sont rejetés automatiquement.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">0<span class="acc">2</span></div>
+          <div>
+            <h4>Vérification terrain par un agent</h4>
+            <p>Un agent KPITAL visite physiquement le projet. Photos géolocalisées, vérification du titre foncier, registre de commerce, relevés bancaires. Aucun projet publié sans visite.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">0<span class="acc">3</span></div>
+          <div>
+            <h4>Validation comité expert</h4>
+            <p>Trois experts indépendants (finance, secteur, juridique) valident le projet et le rendement annoncé. Ils sont publiquement identifiés ; leur réputation est engagée, pas seulement la nôtre.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">0<span class="acc">4</span></div>
+          <div>
+            <h4>Publication avec notation A–D visible</h4>
+            <p>Chaque projet est noté de A (risque faible) à D (risque élevé / rendement fort). Score, rapport de visite, avis du comité, documents clés. Tout est visible. Rien n'est caché.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="verif">
+        <div class="vt">Vérification projet en cours</div>
+        <div class="vitem">
+          <div class="vcheck done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="vtext">Dossier soumis &amp; scoré</div>
+            <div class="vsub">Score : 84/100 · Seuil minimum : 60</div>
+          </div>
+        </div>
+        <div class="vitem">
+          <div class="vcheck done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="vtext">Visite terrain effectuée</div>
+            <div class="vsub">Agent : Kokou A. · 12 photos · GPS vérifié</div>
+          </div>
+        </div>
+        <div class="vitem">
+          <div class="vcheck done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="vtext">Comité expert validé</div>
+            <div class="vsub">3/3 experts · Avis : favorable</div>
+          </div>
+        </div>
+        <div class="vitem">
+          <div class="vcheck pending">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="vtext">Publication en cours</div>
+            <div class="vsub">Note attribuée : A · Mise en ligne dans 24h</div>
+          </div>
+        </div>
+        <div class="vbox">
+          <div class="h">Séquestre SEMOA</div>
+          <div class="m">Compte dédié créé · En attente de collecte</div>
+          <div class="a"><span class="d"></span>Activation à première mise</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROTECTION -->
+<section class="protect">
+  <div class="container">
+    <span class="eyebrow">Sécurité</span>
+    <h2 class="heading">3 mécanismes<br>de protection</h2>
+    <p class="pullquote">Votre capital est protégé à plusieurs niveaux, <b>indépendamment de KPITAL.</b></p>
+    <div class="prot-grid">
+      <div class="prot reveal">
+        <div class="pn">01</div>
+        <span class="picon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <h3>Séquestre SEMOA</h3>
+        <p>Votre argent est bloqué dans un compte dédié par projet chez SEMOA. Ni KPITAL ni le porteur ne peuvent y accéder seuls. Libération progressive par tranches validées.</p>
+        <div class="tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          Indépendant de KPITAL
+        </div>
+      </div>
+      <div class="prot reveal">
+        <div class="pn">02</div>
+        <span class="picon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <h3>Fonds de réserve</h3>
+        <p>5% de chaque collecte alimente un fonds commun de réserve. En cas d'échec partiel, la réserve couvre jusqu'à 50% de la perte. Géré par SEMOA, audité trimestriellement.</p>
+        <div class="tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          Audité tous les 3 mois
+        </div>
+      </div>
+      <div class="prot reveal">
+        <div class="pn">03</div>
+        <span class="picon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </span>
+        <h3>Caution porteur</h3>
+        <p>Chaque porteur de projet dépose une garantie avant d'accéder aux fonds. Bien, aval d'un tiers, ou co-signature. Tracé légalement via SEMOA. Le porteur ne peut pas disparaître sans conséquence.</p>
+        <div class="tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          Tracé légalement
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section class="journey">
+  <div class="container">
+    <div class="reveal">
+      <span class="eyebrow">Parcours investisseur</span>
+      <h2 class="heading" style="margin-top:18px;">De zéro à investi<br>en 5 étapes</h2>
+    </div>
+    <div class="j-grid reveal">
+      <div class="j-step">
+        <div class="j-no">Étape 01</div>
+        <span class="j-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+        </span>
+        <h4>Inscription</h4>
+        <p>Nom, numéro Mobile Money, photo d'identité. KYC via SEMOA. 2 minutes.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-no">Étape 02</div>
+        <span class="j-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <h4>Exploration</h4>
+        <p>Filtres par type, durée, ROI, risque. Fiche complète avec photos et documents.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-no">Étape 03</div>
+        <span class="j-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        </span>
+        <h4>Investissement</h4>
+        <p>Dès 10 000 FCFA via T-Money, Flooz ou virement bancaire local. L'argent va en séquestre SEMOA.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-no">Étape 04</div>
+        <span class="j-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </span>
+        <h4>Suivi</h4>
+        <p>Tableau de bord personnel. Rapports mensuels. Notifications automatiques.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-no">Étape 05</div>
+        <span class="j-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <h4>Retour</h4>
+        <p>Capital + ROI crédités sur votre solde KPITAL. Vous pouvez réinvestir ou retirer vers Mobile Money ou compte bancaire.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIASPORA -->
+<section class="diaspora" id="diaspora">
+  <div class="container dia-inner">
+    <div class="reveal">
+      <span class="eyebrow">Pour la diaspora</span>
+      <h2 class="heading" style="margin-top:18px;">Investissez au Togo<br>depuis l'étranger</h2>
+      <p class="dia-quote">Vous êtes en France, en Allemagne ou aux États-Unis ? Investissez dans des projets réels à Lomé.</p>
+      <div class="dia-frame frame" style="aspect-ratio:16/7;">
+        <div class="frame-glyph">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="frame-cap"><span class="dot"></span><span class="t">Diaspora → Lomé</span><span class="s">Virement · Mobile Money</span></div>
+      </div>
+      <p class="lead" style="margin-bottom:6px;">Virement ou Mobile Money, avec suivi de votre solde via KPITAL Wallet une fois remboursé.</p>
+      <div class="dia-feats">
+        <div class="dia-feat">
+          <span class="fi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <div>
+            <h4>Virement international</h4>
+            <p>SEPA ou SWIFT vers le compte séquestre SEMOA du projet, avec référence unique à indiquer en objet.</p>
+          </div>
+        </div>
+        <div class="dia-feat">
+          <span class="fi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </span>
+          <div>
+            <h4>Tableau de bord en temps réel</h4>
+            <p>Suivez l'avancement de votre projet avec photos, rapports et jalons de décaissement.</p>
+          </div>
+        </div>
+        <div class="dia-feat">
+          <span class="fi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <div>
+            <h4>Impact communautaire</h4>
+            <p>Option Tier 5 : financez une école, un puits, un jeune entrepreneur. Rapport d'impact mensuel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="waitlist reveal">
+      <div class="wk">Liste d'attente</div>
+      <h3>Rejoignez la liste d'attente</h3>
+      <p>KPITAL ouvre en juillet 2026. Inscrivez-vous pour être notifié en premier et accéder aux projets pilotes.</p>
+      <div class="countries">
+        <span class="country">FR · France</span>
+        <span class="country">DE · Allemagne</span>
+        <span class="country">US · États-Unis</span>
+        <span class="country">BE · Belgique</span>
+        <span class="country">CA · Canada</span>
+      </div>
+      <label for="wl-email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Adresse email</label>
+      <input id="wl-email" type="email" placeholder="votre@email.com">
+      <button class="btn-amber">Être notifié à l'ouverture →</button>
+      <p class="fine">Pas de spam. Vous pouvez vous désinscrire à tout moment.</p>
+    </aside>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="container">
+    <div class="reveal">
+      <span class="eyebrow">Questions fréquentes</span>
+      <h2 class="heading" style="margin-top:18px;">Tout ce que vous<br>devez savoir</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <span class="faq-no">Q1</span>
+        <div>
+          <div class="faq-q">Puis-je investir depuis n'importe quel opérateur mobile au Togo ?</div>
+          <div class="faq-a">Oui. KPITAL accepte T-Money (Togocel) et Flooz (Moov Africa) via l'agrégateur CashPay de SEMOA. Un seul point de paiement pour tous les opérateurs.</div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <span class="faq-no">Q2</span>
+        <div>
+          <div class="faq-q">Que se passe-t-il si un projet échoue ?</div>
+          <div class="faq-a">Le fonds de réserve (5% de chaque collecte) intervient et couvre jusqu'à 50% de votre perte. La caution déposée par le porteur est également activée. Vous êtes notifié immédiatement.</div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <span class="faq-no">Q3</span>
+        <div>
+          <div class="faq-q">KPITAL prend-il des parts dans les projets ?</div>
+          <div class="faq-a">Non. KPITAL perçoit une commission de 4% sur chaque collecte auprès du porteur de projet. Votre capital et votre ROI vous appartiennent entièrement.</div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <span class="faq-no">Q4</span>
+        <div>
+          <div class="faq-q">Comment mon argent est-il sécurisé entre ma mise et le remboursement ?</div>
+          <div class="faq-a">Votre argent est bloqué dans un compte séquestre SEMOA dédié au projet. Un compte distinct pour chaque projet. Ni KPITAL ni le porteur ne peuvent y accéder seuls.</div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <span class="faq-no">Q5</span>
+        <div>
+          <div class="faq-q">Quel est le niveau de maturité requis pour soumettre un projet ?</div>
+          <div class="faq-a">Votre projet doit être opérationnel ou en phase de démarrage avancée. Nous vérifions les documents légaux, financiers et l'existence physique du projet avant toute publication.</div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <span class="faq-no">Q6</span>
+        <div>
+          <div class="faq-q">Puis-je investir dans plusieurs projets en même temps ?</div>
+          <div class="faq-a">Oui. Vous pouvez diversifier votre portefeuille sur autant de projets que vous souhaitez, avec un minimum de 10 000 FCFA par projet.</div>
+        </div>
+      </div>
+    </div>
+    <div class="faq-more">
+      <a href="faq.html">Voir toutes les questions →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="container">
+    <h2>Votre argent peut travailler pour le <span class="em">Togo</span></h2>
+    <p>Rejoignez les premiers investisseurs KPITAL. Dès 10 000 FCFA, dès juillet 2026.</p>
+    <div class="final-btns">
+      <button class="btn-paper">Commencer à investir →</button>
+      <button class="btn-outline">Soumettre un projet</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo">KPIT<span>A</span>L</span>
+        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <div class="footer-semoa">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+          Fonds sécurisés via SEMOA · CashPay
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Plateforme</h4>
+        <ul>
+          <li><a href="projets.html">Projets</a></li>
+          <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+          <li><a href="securite.html">Sécurité</a></li>
+          <li><a href="soumettre.html">Soumettre un projet</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Investisseurs</h4>
+        <ul>
+          <li><a href="inscription.html">Inscription</a></li>
+          <li><a href="connexion.html">Connexion</a></li>
+          <li><a href="#diaspora">Diaspora</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Société</h4>
+        <ul>
+          <li><a href="a-propos.html">À propos</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="conditions.html">Conditions</a></li>
+          <li><a href="confidentialite.html">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <div class="footer-legal">
+        <a href="conditions.html">Conditions générales</a>
+        <a href="confidentialite.html">Politique de confidentialité</a>
+        <a href="mentions-legales.html">Mentions légales</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !('IntersectionObserver' in window)) return;
+  document.body.classList.add('js-on');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>

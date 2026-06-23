@@ -1,0 +1,80 @@
+/* Comment ça marche — KPITAL "Le Registre" */
+
+/* ── 4 LEVELS + VERIF PANEL (two-col, home idiom) ── */
+.ccm-how{display:grid;grid-template-columns:1fr .9fr;gap:72px;align-items:start}
+.ccm-how .section-head{margin-bottom:34px}
+
+.levels{list-style:none;border-top:1px solid var(--ink)}
+.level{display:grid;grid-template-columns:auto 1fr;gap:22px;padding:26px 0;border-bottom:1px solid var(--hairline);align-items:start}
+.level-no{font-family:var(--mono);font-weight:600;font-size:30px;color:var(--green-soft);letter-spacing:-0.02em;line-height:1;flex-shrink:0;font-variant-numeric:tabular-nums}
+.level:nth-child(odd) .level-no{color:var(--hairline)}
+.level-body h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:8px}
+.level-body p{font-size:14px;color:var(--muted);line-height:1.65}
+.level-body p .num{color:var(--ink)}
+
+/* aside / verif panel (redefined here — index.css not loaded on this page) */
+.ccm-aside{position:sticky;top:88px}
+.verif{border:1px solid var(--hairline);background:#fff;border-radius:3px}
+.verif-head{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:18px 22px;border-bottom:1px solid var(--hairline)}
+.vrow{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:16px 22px;border-bottom:1px solid var(--hairline);align-items:start}
+.vchk{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid}
+.vchk.done{background:var(--green-soft);color:var(--green);border-color:var(--green-soft)}
+.vchk.pending{color:var(--gold);border-color:var(--gold)}
+.vtext{font-size:13.5px;font-weight:500;color:var(--ink)}
+.vsub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.01em}
+.verif-foot{padding:18px 22px}
+.verif-foot .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.verif-foot .v{font-size:13px;color:var(--ink)}
+.verif-foot .a{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:12px;color:var(--gold)}
+.verif-foot .a .d{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* ── INVESTOR JOURNEY (hairline numbered rows) ── */
+.journey{list-style:none;border-top:1px solid var(--ink)}
+.jstep{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:30px;padding:26px 0;border-bottom:1px solid var(--hairline);align-items:baseline}
+.jstep-no{font-family:var(--mono);font-weight:600;font-size:30px;color:var(--green-soft);letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums}
+.jstep:nth-child(even) .jstep-no{color:var(--hairline)}
+.jstep-body h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:8px}
+.jstep-body p{font-size:14px;color:var(--muted);line-height:1.65;max-width:58ch}
+.jstep-body p .num{color:var(--ink)}
+.jstep-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:right;white-space:nowrap;align-self:center}
+
+/* ── COMPARISON TABLE (hairline ledger, tabular figures) ── */
+.compare{overflow-x:auto}
+.compare-table{width:100%;border-collapse:collapse;min-width:640px}
+.compare-table th,.compare-table td{text-align:left;padding:15px 18px;border-bottom:1px solid var(--hairline);font-size:13.5px;vertical-align:middle}
+.compare-table thead th{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--ink)}
+.compare-table tbody th{font-family:var(--display);font-weight:600;font-size:14px;color:var(--ink);letter-spacing:-0.01em}
+.compare-table tbody td{color:var(--muted)}
+.compare-table .num{color:var(--ink);font-weight:500}
+.compare-table tr:last-child th,.compare-table tr:last-child td{border-bottom:none}
+.ct-na{color:#9b9a92}
+/* KPITAL column — quiet emphasis, gold rule, no shadow */
+.compare-table .ct-kpital{color:var(--green);font-weight:500;position:relative;background:var(--green-soft)}
+.compare-table thead .ct-kpital{color:var(--green);background:var(--green-soft);border-bottom-color:var(--green)}
+.compare-table .ct-kpital.num{color:var(--green)}
+.compare-note{margin-top:20px;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:70ch}
+
+/* ── FINAL CTA (dark, matches securite .sec-cta) ── */
+.ccm-cta{background:var(--green-deep);text-align:center;padding:92px 0;border-top:1px solid var(--green-deep)}
+.ccm-cta h2{font-family:var(--display);font-weight:700;font-size:clamp(26px,4vw,40px);line-height:1.12;letter-spacing:-0.03em;color:#fff;margin-bottom:14px}
+.ccm-cta p{font-size:16px;color:rgba(255,255,255,.62);margin-bottom:32px}
+.ccm-cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--green-deep);border:1px solid #fff}
+.btn-white:hover{background:var(--green-soft)}
+.btn-line{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.28)}
+.btn-line:hover{border-color:#fff;color:#fff}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  .ccm-how{grid-template-columns:1fr;gap:48px}
+  .ccm-aside{position:static;max-width:560px}
+}
+@media (max-width:768px){
+  .jstep{grid-template-columns:auto 1fr;gap:18px}
+  .jstep-meta{grid-column:2;text-align:left;white-space:normal;margin-top:4px}
+}
+@media (max-width:480px){
+  .level{gap:16px}
+  .level-no,.jstep-no{font-size:24px}
+  .ccm-cta-actions .btn{width:100%;justify-content:center}
+}

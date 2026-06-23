@@ -1,0 +1,14 @@
+{
+  "name": "kpital-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KPITAL — site investissement participatif (Eleventy, HTML/CSS/JS, clean URLs)",
+  "scripts": {
+    "dev": "eleventy --serve",
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

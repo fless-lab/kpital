@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>KPITAL — logo animé</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FCFCFA;--ink:#14181A;--green:#0C5C45;--muted:#5B6360;--line:#E4E6E1}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Hanken Grotesk",sans-serif;background:var(--paper);color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px}
+
+.stage{display:flex;align-items:center;gap:22px}
+.mark{height:104px;width:auto;display:block;overflow:visible}
+.wm{font-weight:700;font-size:64px;letter-spacing:-.02em;color:var(--ink);
+  opacity:0;transform:translateX(-14px)}
+
+/* —— wordmark reveal —— */
+.play .wm{animation:reveal .75s cubic-bezier(.2,.7,.2,1) 1.35s forwards}
+@keyframes reveal{to{opacity:1;transform:translateX(0)}}
+
+/* —— stones drop & settle —— */
+.stone{transform-box:fill-box;transform-origin:50% 92%;opacity:0}
+.play .s1{animation:drop .72s cubic-bezier(.45,.05,.2,1) .20s forwards}
+.play .s2{animation:drop .72s cubic-bezier(.45,.05,.2,1) .52s forwards}
+.play .s3{animation:drop .72s cubic-bezier(.45,.05,.2,1) .84s forwards}
+.play .s4{animation:drop .72s cubic-bezier(.45,.05,.2,1) 1.16s forwards}
+@keyframes drop{
+  0%{opacity:0;transform:translateY(-30px) scale(1,1)}
+  45%{opacity:1;transform:translateY(0) scale(1,1)}
+  60%{transform:translateY(0) scale(1.09,.82)}
+  78%{transform:translateY(0) scale(.96,1.06)}
+  100%{opacity:1;transform:translateY(0) scale(1,1)}
+}
+/* —— light sweep —— */
+.gleam{opacity:0}
+.play .gleam{animation:sweep .85s cubic-bezier(.4,0,.3,1) 1.5s forwards}
+@keyframes sweep{
+  0%{opacity:0;transform:translateX(-12px)}
+  35%{opacity:1}
+  70%{opacity:.9}
+  100%{opacity:0;transform:translateX(40px)}
+}
+
+.replay{font-family:inherit;font-size:13px;font-weight:600;color:var(--green);
+  background:#fff;border:1px solid var(--line);border-radius:99px;padding:9px 20px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:border-color .2s}
+.replay:hover{border-color:var(--green)}
+.cap{font-size:12px;color:var(--muted);letter-spacing:.02em}
+
+@media(prefers-reduced-motion:reduce){
+  .stone,.wm{opacity:1!important;transform:none!important;animation:none!important}
+}
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <svg class="mark" viewBox="6 8 36 40" aria-label="KPITAL">
+    <defs>
+      <radialGradient id="lo" cx="38%" cy="24%" r="88%"><stop offset="0" stop-color="#36966F"/><stop offset="1" stop-color="#0B5641"/></radialGradient>
+      <radialGradient id="hi" cx="38%" cy="24%" r="88%"><stop offset="0" stop-color="#42A77E"/><stop offset="1" stop-color="#0E6249"/></radialGradient>
+      <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="0.5" stop-color="#fff" stop-opacity="0.65"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="sh" x="-70%" y="-70%" width="240%" height="240%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.15" flood-color="#04241C" flood-opacity="0.34"/></filter>
+      <clipPath id="stones">
+        <ellipse cx="24" cy="37.5" rx="12.5" ry="5"/>
+        <ellipse cx="22.5" cy="29.8" rx="10" ry="4.6"/>
+        <ellipse cx="25.5" cy="22.7" rx="8" ry="4.1"/>
+        <ellipse cx="23.5" cy="16.3" rx="5.6" ry="3.5"/>
+      </clipPath>
+    </defs>
+
+    <g class="stone s1">
+      <ellipse filter="url(#sh)" cx="24" cy="37.5" rx="12.5" ry="5" fill="url(#lo)"/>
+    </g>
+    <g class="stone s2">
+      <ellipse filter="url(#sh)" cx="22.5" cy="29.8" rx="10" ry="4.6" fill="url(#hi)"/>
+    </g>
+    <g class="stone s3">
+      <ellipse filter="url(#sh)" cx="25.5" cy="22.7" rx="8" ry="4.1" fill="url(#lo)"/>
+    </g>
+    <g class="stone s4">
+      <ellipse filter="url(#sh)" cx="23.5" cy="16.3" rx="5.6" ry="3.5" fill="url(#hi)"/>
+    </g>
+
+    <!-- light sweep, clipped to the stones -->
+    <g clip-path="url(#stones)">
+      <g class="gleam" style="transform-box:fill-box;transform-origin:center">
+        <rect x="6" y="8" width="11" height="40" fill="url(#sheen)" transform="skewX(-18)"/>
+      </g>
+    </g>
+  </svg>
+  <span class="wm">KPITAL</span>
+</div>
+
+<button class="replay" id="replay">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  Rejouer
+</button>
+<span class="cap">Le patrimoine se bâtit pierre par pierre.</span>
+
+<script>
+  const stage=document.getElementById('stage');
+  function play(){stage.classList.remove('play');void stage.offsetWidth;stage.classList.add('play');}
+  document.getElementById('replay').addEventListener('click',play);
+  window.addEventListener('load',play);
+</script>
+</body></html>

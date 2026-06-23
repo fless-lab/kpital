@@ -50,6 +50,30 @@
 }
 .lnp-link:hover { border-color: var(--green-600); color: var(--green-700); }
 .lnp-link.current { background: var(--green-50); border-color: var(--green-100); color: var(--green-700); font-weight: 500; }
+
+@media (max-width: 1024px) {
+  .legal-grid { grid-template-columns: 180px 1fr; gap: 40px; }
+}
+
+@media (max-width: 768px) {
+  .legal-page { padding: 48px 0 64px; }
+  .legal-grid { grid-template-columns: 1fr; gap: 40px; }
+  .legal-sidebar { position: static; top: auto; padding-bottom: 32px; border-bottom: 1px solid var(--gray-100); }
+  .legal-content { max-width: 100%; }
+  .legal-section { margin-bottom: 36px; padding-bottom: 36px; }
+  .legal-section h2 { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .legal-page { padding: 36px 0 48px; }
+  .legal-grid { gap: 28px; }
+  .legal-sidebar { padding-bottom: 24px; }
+  .legal-section { margin-bottom: 28px; padding-bottom: 28px; }
+  .legal-section h2 { font-size: 19px; }
+  .legal-section p, .legal-section ul li, .legal-section a, .legal-content { overflow-wrap: break-word; word-break: break-word; }
+  .legal-meta { flex-direction: column; gap: 8px; margin-bottom: 32px; }
+  .legal-nav-pages { margin-bottom: 32px; }
+}
 </style>
 </head>
 <body>
@@ -194,5 +218,6 @@ window.addEventListener('scroll', () => {
   links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
 });
 </script>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

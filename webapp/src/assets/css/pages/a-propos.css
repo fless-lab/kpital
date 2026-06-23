@@ -1,0 +1,170 @@
+/* À propos — KPITAL "Le Registre" */
+
+/* ── MISSION STATEMENT ── */
+.mission-inner{
+  display:grid;grid-template-columns:1.1fr .9fr;gap:72px;align-items:start;
+}
+.mission-statement p{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(24px,2.9vw,33px);line-height:1.28;
+  letter-spacing:-0.02em;color:var(--ink);
+}
+.mission-statement em{font-style:normal;color:var(--green)}
+.mission-body{padding-top:6px;border-top:1px solid var(--hairline)}
+.mission-body p{font-size:15.5px;color:var(--muted);line-height:1.8;margin-top:18px}
+.mission-body p:first-child{margin-top:22px}
+
+/* ── NUMBERS BAND (signature) ── */
+.numbers-band{
+  background:var(--green-deep);
+  border-top:1px solid var(--green-deep);border-bottom:1px solid var(--green-deep);
+}
+.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.nb-item{
+  padding:48px 28px;border-left:1px solid rgba(255,255,255,.14);
+}
+.nb-item:first-child{border-left:none;padding-left:0}
+.nb-val{
+  font-size:clamp(30px,3.8vw,46px);line-height:1;color:#fff;
+  font-weight:600;letter-spacing:-0.02em;
+}
+.nb-label{font-size:13px;color:rgba(255,255,255,.55);margin-top:16px;line-height:1.5;max-width:18ch}
+
+/* ── WHY (hairline ledger rows) ── */
+.why-list{border-top:1px solid var(--ink)}
+.why-row{
+  display:grid;grid-template-columns:64px 1fr;gap:28px;align-items:start;
+  padding:30px 0;border-bottom:1px solid var(--hairline);
+  transition:background .16s,padding-left .18s;
+}
+.why-row:hover{background:var(--green-soft);padding-left:12px}
+.why-no{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--green);letter-spacing:.04em;padding-top:3px;font-variant-numeric:tabular-nums}
+.why-main h3{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:9px}
+.why-main p{font-size:14.5px;color:var(--muted);line-height:1.7;max-width:64ch}
+
+/* ── VALUES (hairline quadrant) ── */
+.values-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-top:1px solid var(--ink);border-left:1px solid var(--hairline);
+}
+.value-item{
+  padding:34px 40px 34px 32px;
+  border-right:1px solid var(--hairline);border-bottom:1px solid var(--hairline);
+}
+.value-num{font-size:24px;color:var(--gold);font-weight:600;line-height:1;margin-bottom:18px;letter-spacing:.02em}
+.value-item h3{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:10px}
+.value-item p{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* ── TEAM (hairline grid, no shadows) ── */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink)}
+.team-card{
+  padding:30px 32px 32px 0;border-right:1px solid var(--hairline);
+  display:flex;flex-direction:column;
+}
+.team-card:last-child{border-right:none}
+.team-card:not(:first-child){padding-left:32px}
+.team-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.team-mark{
+  width:46px;height:46px;border:1px solid var(--hairline);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:600;color:var(--green);letter-spacing:.02em;
+  background:var(--green-soft);flex-shrink:0;
+}
+.team-name{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:3px}
+.team-role{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:13px}
+.team-bio{font-size:13.5px;color:var(--muted);line-height:1.6}
+
+.team-cta{
+  display:flex;align-items:center;justify-content:space-between;gap:28px;
+  margin-top:40px;padding:26px 30px;border:1px solid var(--hairline);border-radius:3px;background:#fff;
+}
+.team-cta h4{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:5px}
+.team-cta p{font-size:13.5px;color:var(--muted);line-height:1.55}
+.team-cta .btn{white-space:nowrap;flex-shrink:0}
+
+/* ── PARTNERS (ledger rows: role | detail) ── */
+.partners-list{border-top:1px solid var(--ink)}
+.partner-row{
+  display:grid;grid-template-columns:240px 1fr;gap:36px;align-items:start;
+  padding:30px 0;border-bottom:1px solid var(--hairline);
+}
+.partner-role{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+.partner-name{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:8px}
+.partner-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:62ch}
+
+/* ── ROADMAP (hairline vertical timeline + vision box) ── */
+.roadmap-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:72px;align-items:start}
+.timeline{list-style:none;position:relative;padding-left:30px}
+.timeline::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--hairline)}
+.tl-item{position:relative;padding:0 0 32px;}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{
+  content:"";position:absolute;left:-30px;top:5px;
+  width:11px;height:11px;border-radius:50%;
+  background:var(--paper);border:1.5px solid var(--hairline);
+}
+.tl-item.done::before{background:var(--green);border-color:var(--green)}
+.tl-item.active::before{background:var(--paper);border-color:var(--gold)}
+.tl-item.active::after{
+  content:"";position:absolute;left:-32px;top:3px;width:15px;height:15px;border-radius:50%;
+  border:1px solid var(--gold);opacity:.5;
+}
+.tl-year{display:block;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.01em;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.tl-status{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.tl-item.done .tl-status{color:var(--green)}
+.tl-item.active .tl-status{color:var(--gold)}
+.tl-body h3{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:6px}
+.tl-body p{font-size:13.5px;color:var(--muted);line-height:1.65;max-width:52ch}
+
+.vision-box{
+  border:1px solid var(--hairline);border-radius:3px;background:#fff;
+  padding:36px;position:sticky;top:88px;
+}
+.vision-box .eyebrow{margin-bottom:20px}
+.vision-box p{font-size:14.5px;color:var(--muted);line-height:1.75;margin-bottom:14px}
+.vision-box .vision-close{font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink);margin-bottom:26px}
+.vision-box .btn{width:100%;justify-content:center}
+
+/* ── FINAL CTA ── */
+.final{background:var(--green-deep);text-align:center;padding:92px 0;border-top:1px solid var(--green-deep)}
+.final h2{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.2vw,44px);line-height:1.1;letter-spacing:-0.03em;color:#fff;margin-bottom:16px}
+.final h2 em{font-style:normal;color:#fff;border-bottom:2px solid var(--gold);padding-bottom:2px}
+.final p{font-size:16px;color:rgba(255,255,255,.62);margin-bottom:34px}
+.final-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--green-deep);border:1px solid #fff}
+.btn-white:hover{background:var(--green-soft)}
+.btn-line{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.28)}
+.btn-line:hover{border-color:#fff;color:#fff}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  .mission-inner{grid-template-columns:1fr;gap:40px}
+  .mission-body{max-width:62ch}
+  .team-grid{grid-template-columns:1fr 1fr 1fr}
+  .roadmap-inner{grid-template-columns:1fr;gap:48px}
+  .vision-box{position:static;max-width:560px}
+}
+@media (max-width:768px){
+  .numbers-grid{grid-template-columns:1fr 1fr}
+  .nb-item{padding:34px 24px;border-left:1px solid rgba(255,255,255,.14)}
+  .nb-item:first-child{padding-left:24px}
+  .nb-item:nth-child(odd){border-left:none;padding-left:24px}
+  .nb-item:nth-child(3),.nb-item:nth-child(4){border-top:1px solid rgba(255,255,255,.14)}
+  .why-row{grid-template-columns:auto 1fr;gap:18px}
+  .values-grid{grid-template-columns:1fr;border-left:none}
+  .value-item{padding:28px 0;border-right:none}
+  .team-grid{grid-template-columns:1fr}
+  .team-card{padding:28px 0;border-right:none;border-bottom:1px solid var(--hairline)}
+  .team-card:not(:first-child){padding-left:0}
+  .team-card:last-child{border-bottom:none}
+  .team-cta{flex-direction:column;align-items:flex-start;gap:18px}
+  .partner-row{grid-template-columns:1fr;gap:12px}
+}
+@media (max-width:480px){
+  .numbers-grid{grid-template-columns:1fr}
+  .nb-item,.nb-item:nth-child(n){border-left:none;border-top:1px solid rgba(255,255,255,.14);padding:26px 0}
+  .nb-item:first-child{border-top:none}
+  .vision-box{padding:26px}
+  .team-cta{padding:22px}
+  .final-ctas .btn{width:100%;justify-content:center}
+}

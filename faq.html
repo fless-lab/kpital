@@ -139,6 +139,50 @@
   background: var(--green-50); padding: 2px 7px; border-radius: 99px;
   margin-left: 8px; vertical-align: middle;
 }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .faq-page { padding: 60px 0; }
+  .faq-columns { grid-template-columns: 180px 1fr; gap: 40px; }
+  .contact-cta { padding: 32px; gap: 24px; }
+}
+
+@media (max-width: 768px) {
+  .faq-page { padding: 48px 0; }
+  /* Collapse sidebar + content to single column */
+  .faq-columns { grid-template-columns: 1fr; gap: 24px; }
+  /* Category nav becomes a horizontal scroll row */
+  .faq-sidebar { position: static; top: auto; }
+  .faq-sidebar-title { margin-bottom: 12px; }
+  .faq-cat-nav {
+    flex-direction: row; flex-wrap: nowrap;
+    gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .faq-cat-link { flex: 0 0 auto; width: auto; white-space: nowrap; }
+  .faq-group { margin-bottom: 44px; }
+  .faq-group-title { font-size: 20px; }
+  /* Contact CTA stacks vertically */
+  .contact-cta {
+    flex-direction: column; align-items: flex-start;
+    gap: 20px; margin-top: 48px; padding: 28px;
+  }
+  .contact-btns { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .faq-page { padding: 36px 0; }
+  .faq-group { margin-bottom: 36px; }
+  .faq-group-title { font-size: 18px; }
+  .accordion-q { font-size: 14px; }
+  .accordion-trigger { padding: 16px 0; gap: 12px; }
+  .contact-cta { padding: 22px; margin-top: 36px; }
+  .contact-cta-left h3 { font-size: 19px; }
+  /* Stack CTA buttons full-width */
+  .contact-btns { flex-direction: column; gap: 8px; }
+  .contact-btns .btn-primary-lg,
+  .contact-btns .btn-ghost-lg { width: 100%; justify-content: center; }
+}
 </style>
 </head>
 <body>
@@ -787,5 +831,6 @@ document.querySelectorAll('.accordion-item.open .accordion-body').forEach(body =
 });
 </script>
 
+  <script src="kpital.js" defer></script>
 </body>
 </html>

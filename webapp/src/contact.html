@@ -1,0 +1,171 @@
+---
+layout: base.njk
+title: "Contact | KPITAL"
+description: "Contactez l'équipe KPITAL : email par sujet, WhatsApp, siège à Lomé. Réponse sous 24h ouvrées. Fonds sécurisés via séquestre SEMOA."
+pageCss: contact
+---
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Nous contacter</p>
+    <h1>On vous répond<br>en moins de 24h</h1>
+    <p>Une question sur un projet, votre compte ou l'équipe ? Écrivez-nous directement, ou choisissez le canal qui correspond à votre demande. Réponse garantie sous 24h ouvrées.</p>
+  </div>
+</section>
+
+<!-- CONTACT: FORM + INFO -->
+<section class="section ctc">
+  <div class="container ctc-grid">
+
+    <!-- FORM -->
+    <div class="ctc-form-col">
+      <div class="form-card">
+        <div class="ctc-form-head">
+          <h2>Envoyer un message</h2>
+          <p>Tous les champs sont requis. Vos données servent uniquement à vous répondre.</p>
+        </div>
+
+        <form class="ctc-form" action="mailto:contact@kpital.finance" method="post" enctype="text/plain">
+          <div class="field-row">
+            <div class="field">
+              <label for="ctc-name">Nom complet</label>
+              <input class="input" id="ctc-name" name="nom" type="text" placeholder="Kofi Amevor" required>
+            </div>
+            <div class="field">
+              <label for="ctc-email">Email</label>
+              <input class="input" id="ctc-email" name="email" type="email" placeholder="kofi@email.com" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ctc-sujet">Sujet</label>
+            <div class="select-wrap">
+              <select class="select" id="ctc-sujet" name="sujet" required>
+                <option value="" disabled selected>Choisissez un sujet</option>
+                <option>Question générale</option>
+                <option>Mon compte investisseur</option>
+                <option>Porteur de projet · soumission</option>
+                <option>Paiement &amp; séquestre</option>
+                <option>Diaspora · virement international</option>
+                <option>Partenariat &amp; presse</option>
+              </select>
+              <svg class="select-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ctc-msg">Message</label>
+            <textarea class="textarea" id="ctc-msg" name="message" placeholder="Décrivez votre question ou votre demande en détail…" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary ctc-submit">Envoyer le message →</button>
+          <p class="ctc-disclaimer">Vos données sont utilisées uniquement pour traiter votre demande. Aucune transmission à des tiers à des fins commerciales.</p>
+        </form>
+      </div>
+    </div>
+
+    <!-- INFO COLUMN -->
+    <aside class="ctc-info">
+
+      <!-- CHANNELS -->
+      <div class="ctc-block">
+        <p class="ctc-block-head">Canaux par sujet</p>
+        <div class="ctc-rows">
+          <a class="ctc-row" href="mailto:contact@kpital.finance">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Questions générales</span>
+              <span class="ctc-row-v">contact@kpital.finance</span>
+            </span>
+            <svg class="ctc-row-go" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+          <a class="ctc-row" href="mailto:porteurs@kpital.finance">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Porteurs de projets</span>
+              <span class="ctc-row-v">porteurs@kpital.finance</span>
+            </span>
+            <svg class="ctc-row-go" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+          <a class="ctc-row" href="mailto:diaspora@kpital.finance">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Diaspora · SEPA / SWIFT</span>
+              <span class="ctc-row-v">diaspora@kpital.finance</span>
+            </span>
+            <svg class="ctc-row-go" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+          <a class="ctc-row" href="mailto:partenaires@kpital.finance">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Partenariats &amp; presse</span>
+              <span class="ctc-row-v">partenaires@kpital.finance</span>
+            </span>
+            <svg class="ctc-row-go" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- COORDINATES -->
+      <div class="ctc-block">
+        <p class="ctc-block-head">Siège &amp; horaires</p>
+        <div class="ctc-rows">
+          <div class="ctc-row ctc-row-static">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Siège social · Lomé, Togo</span>
+              <span class="ctc-row-v ctc-row-v-mut">KPITAL Finance SARL · Hédzranawoé, Lomé</span>
+            </span>
+          </div>
+          <div class="ctc-row ctc-row-static">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">Lun–Ven · <span class="num">8h–18h</span> (WAT)</span>
+              <span class="ctc-row-v ctc-row-v-mut">Réponse email sous <span class="num">24h</span> ouvrées</span>
+            </span>
+          </div>
+          <a class="ctc-row" href="https://wa.me/228" rel="noopener">
+            <span class="ctc-row-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </span>
+            <span class="ctc-row-body">
+              <span class="ctc-row-k">WhatsApp</span>
+              <span class="ctc-row-v num">+228 9X XX XX XX</span>
+            </span>
+            <svg class="ctc-row-go" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- FAQ + SEMOA -->
+      <a class="ctc-faq" href="/faq">
+        <span class="ctc-faq-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <span>
+          <span class="ctc-faq-k">Votre réponse est peut-être déjà dans la FAQ</span>
+          <span class="ctc-faq-v"><span class="num">29</span> questions sur l'investissement, la sécurité, le paiement et la diaspora →</span>
+        </span>
+      </a>
+
+      <div class="ctc-semoa">
+        <span class="d"></span>
+        Fonds sécurisés via séquestre SEMOA · CashPay
+      </div>
+    </aside>
+
+  </div>
+</section>

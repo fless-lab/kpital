@@ -195,6 +195,54 @@
   color: var(--gray-900); letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 14px;
 }
 .cta-section-sec p { font-size: 16px; color: var(--gray-700); margin-bottom: 32px; }
+.cta-sec-actions { display: flex; gap: 12px; justify-content: center; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .layer-section { padding: 64px 0; }
+  .layer-grid { gap: 48px; }
+  .audit-grid { grid-template-columns: repeat(2, 1fr); }
+  .audit-section, .risk-section { padding: 64px 0; }
+  .cta-section-sec { padding: 64px 0; }
+}
+
+@media (max-width: 768px) {
+  .trust-inner { flex-wrap: wrap; gap: 14px 24px; }
+  .trust-inner > div:not(.trust-item) { display: none; }
+
+  .layer-section { padding: 48px 0; }
+  .layer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .layer-grid.reverse { direction: ltr; }
+  .layer-num { font-size: 64px; }
+  .layer-title { font-size: 26px; }
+
+  .audit-grid { grid-template-columns: 1fr; margin-top: 36px; }
+  .audit-section, .risk-section { padding: 48px 0; }
+
+  .risk-grid { grid-template-columns: 1fr; }
+  .risk-intro { margin-bottom: 36px; }
+
+  .cta-section-sec { padding: 48px 0; }
+  .cta-section-sec h2 { font-size: 30px; }
+}
+
+@media (max-width: 480px) {
+  .trust-inner { gap: 12px 18px; }
+  .trust-item { font-size: 12px; }
+
+  .layer-num { font-size: 52px; }
+  .layer-title { font-size: 23px; }
+  .visual-panel { padding: 22px; }
+  .semoa-header { padding: 20px; gap: 12px; }
+  .semoa-body { padding: 20px; }
+
+  .audit-card { padding: 22px; }
+
+  .cta-section-sec h2 { font-size: 26px; }
+  .cta-sec-actions { flex-direction: column; }
+  .cta-sec-actions .btn-primary-lg,
+  .cta-sec-actions .btn-ghost-lg { width: 100%; text-align: center; }
+}
 </style>
 </head>
 <body>
@@ -587,7 +635,7 @@
   <div class="container">
     <h2>Des questions sur la sécurité ?</h2>
     <p>Consultez notre FAQ ou contactez-nous directement. Nous répondons dans les 24h.</p>
-    <div style="display:flex;gap:12px;justify-content:center;">
+    <div class="cta-sec-actions">
       <a href="faq.html" class="btn-primary-lg">Voir la FAQ</a>
       <a href="mailto:contact@kpital.finance" class="btn-ghost-lg">Contacter l'équipe</a>
     </div>
@@ -645,5 +693,6 @@
   </div>
 </footer>
 
+  <script src="kpital.js" defer></script>
 </body>
 </html>

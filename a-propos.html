@@ -107,6 +107,56 @@
 .ap-vision h3 { font-family:var(--serif); font-size:24px; font-weight:400; color:var(--gray-900); margin-bottom:14px; letter-spacing:-0.3px; }
 .ap-vision p { font-size:14px; color:var(--gray-700); line-height:1.75; }
 .ap-vision p + p { margin-top:12px; }
+
+/* TEAM CTA (converted from inline) */
+.team-cta {
+  margin-top: 24px; padding: 20px 28px; background: var(--gray-50);
+  border-radius: var(--radius-lg); border: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+}
+
+/* ============ RESPONSIVE — page-specific layouts ============ */
+@media (max-width: 1024px) {
+  .mission-section { padding: 72px 0; }
+  .mission-grid { gap: 56px; }
+  .mission-quote { font-size: 30px; }
+  .why-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .partners-grid { grid-template-columns: repeat(2, 1fr); }
+  .numbers-grid { grid-template-columns: repeat(2, 1fr); }
+  .num-item:nth-child(2) { border-right: none; }
+  .num-item:nth-child(1), .num-item:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .ap-tl { gap: 48px; }
+}
+
+@media (max-width: 768px) {
+  .mission-section { padding: 56px 0; }
+  .mission-grid { grid-template-columns: 1fr; gap: 32px; }
+  .mission-quote { font-size: 26px; }
+  .why-grid, .values-grid, .team-grid, .partners-grid { grid-template-columns: 1fr; }
+  .why-section, .values-section, .team-section, .partners-section { padding: 56px 0; }
+  .numbers-section { padding: 48px 0; }
+  .num-item { padding: 28px 16px; }
+  .num-val { font-size: 34px; }
+  .team-cta { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .ap-tl { grid-template-columns: 1fr; gap: 40px; }
+  .timeline-section-ap { padding: 56px 0; }
+}
+
+@media (max-width: 480px) {
+  .mission-section { padding: 44px 0; }
+  .mission-quote { font-size: 23px; }
+  .why-card, .value-item, .team-card, .partner-card, .ap-vision { padding: 22px; }
+  .why-section, .values-section, .team-section, .partners-section { padding: 44px 0; }
+  .why-grid, .team-grid, .partners-grid { gap: 16px; margin-top: 32px; }
+  .values-grid { margin-top: 32px; }
+  .numbers-grid { grid-template-columns: 1fr; }
+  .num-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 24px 16px; }
+  .num-item:last-child { border-bottom: none; }
+  .num-val { font-size: 30px; }
+  .ap-vision h3 { font-size: 21px; }
+  .team-cta { padding: 18px 20px; }
+}
 </style>
 </head>
 <body>
@@ -258,7 +308,7 @@
         <p class="team-bio">Basée à Lyon. Développe les relations avec la diaspora togolaise en Europe et les partenariats institutionnels.</p>
       </div>
     </div>
-    <div style="margin-top:24px;padding:20px 28px;background:var(--gray-50);border-radius:var(--radius-lg);border:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:24px;">
+    <div class="team-cta">
       <div>
         <p style="font-size:14px;font-weight:500;color:var(--gray-900);margin-bottom:4px;">On recrute des agents terrain à Lomé</p>
         <p style="font-size:13px;color:var(--gray-700);">Vous connaissez le marché local ? Rejoignez notre réseau de vérification.</p>
@@ -378,5 +428,6 @@
     </div>
   </div>
 </footer>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

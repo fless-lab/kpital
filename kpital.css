@@ -240,3 +240,103 @@ footer {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE LAYER
+   Breakpoint contract — use ONLY these three on every page:
+     1024px  large tablet / small laptop
+      768px  tablet portrait  → mobile nav, single-column layouts
+      480px  phones
+   Patterns: multi-col grids collapse, container padding shrinks,
+   type scales down, stats/footer reflow.
+   ════════════════════════════════════════════════════════════════ */
+
+/* prevent any element from forcing horizontal scroll */
+img, svg, video, canvas, table { max-width: 100%; }
+
+/* ── Mobile-nav hamburger + drawer (injected by kpital.js) ── */
+.nav-toggle {
+  display: none;
+  width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--gray-100);
+  border-radius: var(--radius); cursor: pointer; color: var(--gray-900);
+  flex-shrink: 0; padding: 0;
+}
+.nav-toggle svg { width: 20px; height: 20px; }
+.nav-drawer { display: none; }
+
+@media (max-width: 1024px) {
+  .container { padding: 0 24px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 32px; }
+  .footer-grid > div:first-child { grid-column: 1 / -1; }
+  .section-title { font-size: 34px; }
+  .page-hero h1 { font-size: 38px; }
+}
+
+@media (max-width: 768px) {
+  /* nav → hamburger: hide desktop links AND all right-side actions
+     (lang / login / Investir) — they're reproduced inside the drawer */
+  .nav-links, .nav-right { display: none; }
+  .nav-toggle { display: inline-flex; }
+  .nav-inner { gap: 12px; }
+
+  /* slide-down drawer built from cloned nav items */
+  .nav-drawer {
+    display: block;
+    position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-100);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    padding: 12px 24px 20px;
+    transform: translateY(-12px); opacity: 0;
+    visibility: hidden; pointer-events: none;
+    transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s;
+    max-height: calc(100vh - 64px); overflow-y: auto;
+  }
+  .nav-drawer.open {
+    transform: translateY(0); opacity: 1;
+    visibility: visible; pointer-events: auto;
+  }
+  .nav-drawer a.drawer-link {
+    display: block; padding: 13px 4px;
+    font-size: 16px; color: var(--gray-900); text-decoration: none;
+    border-bottom: 1px solid var(--gray-50);
+  }
+  .nav-drawer a.drawer-link.active { color: var(--green-700); }
+  .nav-drawer .drawer-actions {
+    display: flex; flex-direction: column; gap: 10px; margin-top: 16px;
+  }
+  .nav-drawer .drawer-actions > * { width: 100%; justify-content: center; text-align: center; }
+
+  /* layout */
+  section { padding: 64px 0; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .stat-item { border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px 24px; padding-bottom: 36px; }
+  .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+  .footer-legal { flex-wrap: wrap; justify-content: center; gap: 16px; }
+
+  .page-hero { padding: 100px 0 48px; }
+  .page-hero h1 { font-size: 32px; }
+  .page-hero p { font-size: 16px; }
+  .section-title { font-size: 30px; }
+  .section-sub, .page-hero p { max-width: 100%; }
+
+  /* generic two/three-column collapse helper */
+  .resp-stack { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 18px; }
+  section { padding: 48px 0; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-item { border-right: none; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .footer-tagline { max-width: 100%; }
+  .page-hero h1 { font-size: 27px; }
+  .section-title { font-size: 26px; }
+  .btn-primary-lg, .btn-ghost-lg { width: 100%; justify-content: center; }
+}

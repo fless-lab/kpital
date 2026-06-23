@@ -77,6 +77,30 @@
 }
 .btn-send:hover { background: var(--green-800); }
 .cf-disclaimer { font-size: 11px; color: var(--gray-400); margin-top: 10px; text-align: center; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .contact-grid { grid-template-columns: 1fr 340px; gap: 48px; }
+}
+@media (max-width: 768px) {
+  .contact-section { padding: 56px 0 64px; }
+  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+  .contact-form-card { position: static; top: auto; padding: 28px; }
+  .contact-form-title { font-size: 20px; }
+  .contact-channel { padding: 16px; }
+  .location-card { padding: 20px; }
+  .cf-input, .cf-select, .cf-textarea { width: 100%; }
+}
+@media (max-width: 480px) {
+  .contact-section { padding: 44px 0 52px; }
+  .contact-grid { gap: 32px; }
+  .contact-form-card { padding: 20px; }
+  .contact-form-title { font-size: 18px; }
+  .contact-channel { gap: 12px; padding: 14px; }
+  .channel-arrow { display: none; }
+  .topic-btns { gap: 6px; }
+  .btn-send { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -257,5 +281,6 @@ function setTopic(btn) {
   btn.classList.add('active');
 }
 </script>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

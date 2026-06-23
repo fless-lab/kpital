@@ -1,0 +1,68 @@
+/* FAQ — KPITAL (V1) */
+.faq-grid{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+
+/* category nav (sticky) */
+.faq-nav{position:sticky;top:88px}
+.faq-nav-head{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.faq-nav-list{list-style:none;display:flex;flex-direction:column}
+.faq-nav-list li{border-top:1px solid var(--hairline)}
+.faq-nav-list li:last-child{border-bottom:1px solid var(--hairline)}
+.faq-nav-list a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 2px;font-size:14px;color:var(--muted);transition:color .16s}
+.faq-nav-list a:hover{color:var(--ink)}
+.faq-nav-ct{color:var(--muted);font-size:12px;font-weight:500}
+.faq-nav-aside{margin-top:22px;padding-top:18px;border-top:1px solid var(--hairline)}
+.faq-nav-link{font-size:14px;color:var(--green);font-weight:500}
+.faq-nav-link:hover{color:var(--green-deep)}
+
+/* category blocks */
+.faq-cat{margin-bottom:46px}
+.faq-cat:last-child{margin-bottom:0}
+.faq-cat-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:4px;padding-bottom:12px}
+.faq-cat-head h2{font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:-.01em;color:var(--ink)}
+.faq-cat-ct{font-size:12.5px;color:var(--muted)}
+
+/* accordion rows (native <details>, no JS) */
+.faq-rows{border-top:1px solid var(--hairline)}
+.faq-row{border-bottom:1px solid var(--hairline)}
+.faq-row summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 2px;cursor:pointer;list-style:none}
+.faq-row summary::-webkit-details-marker{display:none}
+.faq-row summary:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.faq-q{font-family:var(--display);font-weight:500;font-size:15.5px;color:var(--ink);display:flex;align-items:center;gap:10px;line-height:1.35}
+.faq-pop{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--green);background:var(--green-soft);border-radius:2px;padding:3px 7px;white-space:nowrap}
+.faq-ico{position:relative;width:14px;height:14px;flex-shrink:0;margin-top:3px}
+.faq-ico::before,.faq-ico::after{content:"";position:absolute;background:var(--muted);transition:transform .2s,opacity .2s}
+.faq-ico::before{top:6.2px;left:0;width:14px;height:1.6px}
+.faq-ico::after{left:6.2px;top:0;width:1.6px;height:14px}
+.faq-row[open] .faq-ico::after{transform:scaleY(0);opacity:0}
+.faq-row[open] .faq-q{color:var(--green)}
+.faq-a{padding:0 2px 22px;max-width:64ch}
+.faq-a p{font-size:14.5px;color:var(--muted);line-height:1.7}
+.faq-a p+p{margin-top:10px}
+.faq-note{margin-top:12px;padding:11px 14px;background:var(--green-soft);border-radius:2px;font-size:13.5px;color:var(--green-deep);line-height:1.6}
+.faq-note-gold{background:#FAF3E6;color:#6E4E12}
+
+/* bottom CTA (dark band) */
+.sec-cta{background:var(--green-deep);text-align:center}
+.sec-cta .eyebrow{justify-content:center;color:rgba(255,255,255,.6)}
+.sec-cta .eyebrow::before{background:var(--gold)}
+.sec-cta h2{font-family:var(--display);font-weight:700;letter-spacing:-.02em;font-size:clamp(26px,3.4vw,34px);color:#fff;line-height:1.12}
+.sec-cta p{color:rgba(255,255,255,.65);max-width:48ch;margin:14px auto 0;line-height:1.6}
+.sec-cta-actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--green-deep);border:1px solid #fff}
+.btn-white:hover{background:var(--green-soft)}
+.btn-line{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn-line:hover{border-color:#fff;color:#fff}
+
+@media (max-width:768px){
+  .faq-grid{grid-template-columns:1fr;gap:30px}
+  .faq-nav{position:static}
+  .faq-nav-head{margin-bottom:10px}
+  .faq-nav-list{flex-flow:row wrap;gap:8px}
+  .faq-nav-list li{border:1px solid var(--hairline);border-radius:2px}
+  .faq-nav-list a{padding:8px 12px}
+  .faq-nav-ct{display:none}
+}
+@media (max-width:480px){
+  .faq-q{font-size:14.5px}
+  .faq-pop{display:none}
+}

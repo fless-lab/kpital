@@ -1,0 +1,45 @@
+/* Partenaires — KPITAL "Le Registre" */
+
+/* partner profiles */
+.pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pt-card{
+  border:1px solid var(--hairline);border-radius:2px;padding:28px 26px;
+  display:flex;flex-direction:column;transition:border-color .18s;
+}
+.pt-card:hover{border-color:var(--green)}
+.pt-no{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--gold);letter-spacing:.06em;margin-bottom:18px}
+.pt-card h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:10px;line-height:1.25}
+.pt-card p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.pt-card .tag{margin-top:auto;align-self:flex-start}
+
+/* why partner — numbered hairline rows */
+.pt-why{border-top:1px solid var(--hairline)}
+.pt-why-row{display:grid;grid-template-columns:auto 1fr;gap:24px;padding:28px 0;border-bottom:1px solid var(--hairline);align-items:start}
+.pt-why-k{font-family:var(--mono);font-weight:600;font-size:14px;color:var(--green);padding-top:2px}
+.pt-why-b h4{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink);margin-bottom:8px}
+.pt-why-b p{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:70ch}
+
+/* become a partner — form */
+.pt-form-grid{display:grid;grid-template-columns:0.85fr 1.15fr;gap:56px;align-items:start}
+.pt-form-intro .sub{margin-bottom:0}
+.pt-contact{list-style:none;margin-top:24px;display:flex;flex-direction:column;gap:13px}
+.pt-contact li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.pt-contact svg{color:var(--green);flex-shrink:0}
+.pt-contact a{color:var(--green);font-weight:500;transition:color .16s}
+.pt-contact a:hover{color:var(--green-deep)}
+
+.pt-check-lbl{display:block;font-size:13px;font-weight:500;color:var(--ink);margin-bottom:11px}
+.pt-checks{display:flex;flex-direction:column;gap:10px}
+.pt-check{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);cursor:pointer}
+.pt-check input{width:15px;height:15px;accent-color:var(--green);flex-shrink:0}
+.pt-submit{width:100%;justify-content:center;padding:14px;margin-top:4px}
+.pt-note{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+
+/* responsive */
+@media (max-width:980px){
+  .pt-grid{grid-template-columns:repeat(2,1fr)}
+  .pt-form-grid{grid-template-columns:1fr;gap:36px}
+}
+@media (max-width:560px){
+  .pt-grid{grid-template-columns:1fr}
+}

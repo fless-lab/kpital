@@ -1,0 +1,362 @@
+---
+layout: base.njk
+title: "Soumettre un projet | KPITAL"
+description: "Porteurs : soumettez votre projet à KPITAL. Un dossier, quatre sections. Validation en 4 étapes, commission 4%, séquestre SEMOA. Réponse sous 15 jours ouvrés."
+pageCss: soumettre
+---
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Porteur de projet</p>
+    <h1>Soumettez votre projet<br>au registre KPITAL</h1>
+    <p>Un seul dossier, quatre sections. Soyez précis et vérifiable : un dossier complet passe en traitement prioritaire. Délai de réponse : <span class="num">15</span> jours ouvrés.</p>
+  </div>
+</section>
+
+<!-- SUBMIT: FORM + STICKY SIDEBAR -->
+<section class="section submit">
+  <div class="container submit-grid">
+
+    <!-- ── FORM ── -->
+    <form class="form-card submit-form" autocomplete="on" novalidate>
+
+      <!-- SECTION 01 · LE PORTEUR -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">01</span>
+          <div>
+            <h2 class="fset-title">Le porteur</h2>
+            <p class="fset-sub">Traité par SEMOA pour le KYC. Ces données ne sont jamais publiées.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="prenom">Prénom</label>
+            <input class="input" id="prenom" name="prenom" type="text" placeholder="Prénom" required>
+          </div>
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input class="input" id="nom" name="nom" type="text" placeholder="Nom de famille" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" placeholder="votre@email.com" required>
+          </div>
+          <div class="field">
+            <label for="tel">Numéro Mobile Money</label>
+            <input class="input" id="tel" name="tel" type="tel" placeholder="+228 9X XX XX XX" required>
+            <p class="hint">T-Money ou Flooz. Ce numéro recevra les décaissements.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="idfile">Pièce d'identité (CNI ou passeport)</label>
+          <label class="dropzone" for="idfile">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="dz-txt"><strong>Recto + verso</strong> en bonne qualité</span>
+            <span class="dz-meta num">PDF, JPG, PNG · Max 10 Mo</span>
+            <input id="idfile" name="idfile" type="file" accept=".pdf,.jpg,.png" hidden>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 02 · LE PROJET -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">02</span>
+          <div>
+            <h2 class="fset-title">Le projet</h2>
+            <p class="fset-sub">Commencez par l'essentiel. Un bon dossier accélère la validation.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cat">Catégorie de projet</label>
+          <select class="select" id="cat" name="cat" required>
+            <option value="">Sélectionner une catégorie…</option>
+            <option value="immo">Immobilier locatif · Tier 1 · 8–14%/an · faible risque</option>
+            <option value="commerce">Commerce &amp; stock · Tier 2 · 15–20%/an · moyen risque</option>
+            <option value="agri">Agriculture saisonnière · Tier 3 · 20–28%/an · risque modéré</option>
+            <option value="pme">Expansion PME · Tier 4 · 12–18%/an · structuré</option>
+            <option value="impact">Projet communautaire · Tier 5 · impact social · diaspora</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="nomprojet">Nom du projet</label>
+          <input class="input" id="nomprojet" name="nomprojet" type="text" placeholder="Ex : Épicerie moderne Hédzranawoé" required>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ville">Ville</label>
+            <select class="select" id="ville" name="ville" required>
+              <option value="">Sélectionner…</option>
+              <option>Lomé</option>
+              <option>Kpalimé</option>
+              <option>Atakpamé</option>
+              <option>Sokodé</option>
+              <option>Kara</option>
+              <option>Dapaong</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quartier">Quartier / Localité</label>
+            <input class="input" id="quartier" name="quartier" type="text" placeholder="Ex : Tokoin, Adétikopé…">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="desc">Description du projet</label>
+          <textarea class="textarea" id="desc" name="desc" placeholder="Décrivez votre activité, son historique, pourquoi vous cherchez ce financement, et comment vous comptez rembourser les investisseurs." required></textarea>
+          <p class="hint">Minimum <span class="num">150</span> caractères. Soyez concret : chiffres, dates, données.</p>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 03 · MONTANT & DURÉE -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">03</span>
+          <div>
+            <h2 class="fset-title">Montant recherché &amp; durée</h2>
+            <p class="fset-sub">Vérifié par le comité expert. Soyez réaliste : surestimer le ROI entraîne un refus.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="montant">Montant à lever (FCFA)</label>
+            <input class="input" id="montant" name="montant" type="number" inputmode="numeric" placeholder="1 500 000" required>
+            <p class="hint">Entre <span class="num">200 000</span> et <span class="num">50 000 000</span> FCFA.</p>
+          </div>
+          <div class="field">
+            <label for="duree">Durée du projet</label>
+            <select class="select" id="duree" name="duree" required>
+              <option>3 mois</option>
+              <option>4 mois</option>
+              <option>6 mois</option>
+              <option>8 mois</option>
+              <option>12 mois</option>
+              <option>18 mois</option>
+              <option>24 mois</option>
+              <option>36 mois</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="roi">ROI annuel proposé (%)</label>
+            <input class="input" id="roi" name="roi" type="number" inputmode="numeric" min="4" max="30" placeholder="16" required>
+            <p class="hint">Basé sur vos projections financières vérifiables.</p>
+          </div>
+          <div class="field">
+            <label for="jalons">Jalons de décaissement</label>
+            <select class="select" id="jalons" name="jalons">
+              <option>2 tranches</option>
+              <option>3 tranches</option>
+              <option>4 tranches</option>
+              <option>Mensuel</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="caution">Type de caution proposée</label>
+          <select class="select" id="caution" name="caution" required>
+            <option value="">Sélectionner…</option>
+            <option>Bien immobilier (hypothèque)</option>
+            <option>Aval d'un tiers solvable</option>
+            <option>Co-signature institutionnelle</option>
+          </select>
+          <p class="hint">La caution doit être constituée avant le premier décaissement.</p>
+        </div>
+
+        <div class="field">
+          <label for="usage">Utilisation prévue des fonds</label>
+          <textarea class="textarea" id="usage" name="usage" placeholder="Détaillez chaque tranche. Ex : Tranche 1 (60%) : achat stock initial. Tranche 2 (40%) : loyer 3 mois + fonds de roulement." required></textarea>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 04 · DOCUMENTS -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">04</span>
+          <div>
+            <h2 class="fset-title">Documents &amp; justificatifs</h2>
+            <p class="fset-sub">Formats acceptés : PDF, JPG, PNG. Taille max : <span class="num">10</span> Mo par fichier.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="rccm">RCCM ou titre professionnel</label>
+            <label class="dropzone" for="rccm">
+              <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="dz-txt"><strong>Cliquez pour sélectionner</strong></span>
+              <span class="dz-meta num">PDF, JPG, PNG</span>
+              <input id="rccm" name="rccm" type="file" accept=".pdf,.jpg,.png" hidden>
+            </label>
+          </div>
+          <div class="field">
+            <label for="foncier">Titre foncier ou contrat de bail</label>
+            <label class="dropzone" for="foncier">
+              <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="dz-txt"><strong>Cliquez pour sélectionner</strong></span>
+              <span class="dz-meta num">PDF, JPG, PNG</span>
+              <input id="foncier" name="foncier" type="file" accept=".pdf,.jpg,.png" hidden>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="releves">Relevés bancaires (6 derniers mois)</label>
+          <label class="dropzone" for="releves">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="dz-txt"><strong>Plusieurs fichiers acceptés</strong> · glissez ou cliquez</span>
+            <span class="dz-meta">Sélectionnez tous les mois en une fois</span>
+            <input id="releves" name="releves" type="file" accept=".pdf,.jpg,.png" multiple hidden>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="photos">Photos actuelles du projet <span class="opt">(recommandé)</span></label>
+          <label class="dropzone" for="photos">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="dz-txt"><strong>Site, stock, activité</strong> · glissez ou cliquez</span>
+            <span class="dz-meta">Accélère le traitement par l'agent terrain</span>
+            <input id="photos" name="photos" type="file" accept=".jpg,.png" multiple hidden>
+          </label>
+        </div>
+
+        <label class="consent" for="consent">
+          <input type="checkbox" id="consent" name="consent" required>
+          <span>J'accepte que mes informations soient transmises à SEMOA pour la vérification KYC et la gestion du séquestre, conformément à la <a href="/confidentialite">politique de confidentialité</a> de KPITAL.</span>
+        </label>
+      </fieldset>
+
+      <!-- SUBMIT -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          Soumettre le dossier
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="form-actions-note">Confirmation par SMS et email sous quelques heures. Aucun engagement avant validation du comité.</p>
+      </div>
+    </form>
+
+    <!-- ── STICKY SIDEBAR ── -->
+    <aside class="submit-aside">
+
+      <!-- 4-step validation -->
+      <div class="aside-card">
+        <div class="aside-head">Après votre soumission</div>
+        <ol class="vsteps">
+          <li class="vstep">
+            <span class="vstep-no num">1</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Scoring automatique</p>
+              <p class="vstep-s">Immédiat à la soumission</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">2</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Visite terrain</p>
+              <p class="vstep-s"><span class="num">5</span> jours ouvrés · agent KPITAL</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">3</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Comité expert</p>
+              <p class="vstep-s"><span class="num">5</span> jours ouvrés · décision motivée</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">4</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Mise en collecte</p>
+              <p class="vstep-s"><span class="num">3</span> jours ouvrés · publication</p>
+            </div>
+          </li>
+        </ol>
+        <div class="aside-total">
+          <span>Total estimé</span>
+          <span class="num">12–15 jours</span>
+        </div>
+      </div>
+
+      <!-- Eligibility criteria -->
+      <div class="aside-card">
+        <div class="aside-head">Prérequis pour soumettre</div>
+        <ul class="crit">
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>Projet opérationnel ou en démarrage avancé, pas une simple idée</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>RCCM valide ou titre professionnel en cours</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>Relevés bancaires des <span class="num">6</span> derniers mois</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>Une caution constituable (bien immobilier ou aval tiers)</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>Adresse physique vérifiable au Togo</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Commission -->
+      <div class="aside-card aside-fee">
+        <div class="aside-head">Commission KPITAL</div>
+        <div class="fee-figure">
+          <span class="fee-val num">4%</span>
+          <span class="fee-lbl">de la collecte réussie</span>
+        </div>
+        <p class="fee-note">Prélevée uniquement si le projet est financé. Aucun frais de dossier, aucun frais caché. <span class="num">5%</span> supplémentaires alimentent le fonds de réserve qui protège vos investisseurs.</p>
+      </div>
+
+      <!-- Reassurance / contact -->
+      <div class="aside-card aside-contact">
+        <div class="aside-head">Une question sur votre dossier ?</div>
+        <a class="contact-link" href="mailto:porteurs@kpital.finance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          porteurs@kpital.finance
+        </a>
+        <p class="contact-note">Réponse sous <span class="num">24h</span> ouvrées. Fonds sécurisés en séquestre SEMOA.</p>
+      </div>
+
+    </aside>
+  </div>
+</section>
+
+<script>
+(function () {
+  // dropzone: show selected filename(s) in place of the prompt
+  document.querySelectorAll(".dropzone input[type=file]").forEach(function (input) {
+    var zone = input.closest(".dropzone");
+    var txt = zone.querySelector(".dz-txt");
+    var original = txt.innerHTML;
+    input.addEventListener("change", function () {
+      var n = input.files.length;
+      if (!n) { txt.innerHTML = original; zone.classList.remove("has-file"); return; }
+      txt.textContent = n === 1 ? input.files[0].name : n + " fichiers sélectionnés";
+      zone.classList.add("has-file");
+    });
+  });
+})();
+</script>

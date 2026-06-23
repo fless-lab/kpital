@@ -147,6 +147,32 @@ body { background: var(--gray-50); }
   font-size: 11px; color: var(--gray-400); justify-content: center;
   margin-top: 20px;
 }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .auth-left { padding: 48px 40px; }
+  .auth-right { padding: 48px 40px; }
+  .auth-headline { font-size: 32px; }
+}
+
+@media (max-width: 768px) {
+  .auth-nav { padding: 16px 24px; }
+  /* Split-screen collapses to single column: hide brand panel, form fills screen */
+  .auth-main { display: block; }
+  .auth-left { display: none; }
+  .auth-right { padding: 40px 24px; }
+  .auth-form-wrap { max-width: 420px; }
+}
+
+@media (max-width: 480px) {
+  .auth-nav { padding: 14px 18px; }
+  .auth-nav-right { font-size: 12px; }
+  .auth-right { padding: 32px 18px; }
+  .auth-form-wrap { max-width: 100%; }
+  .auth-form-title { font-size: 24px; }
+  .btn-auth, .momo-btn { width: 100%; }
+  .auth-options { flex-wrap: wrap; gap: 8px; }
+}
 </style>
 </head>
 <body class="auth-page">
@@ -253,5 +279,6 @@ body { background: var(--gray-50); }
   </div>
 
 </div>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

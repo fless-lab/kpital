@@ -373,6 +373,65 @@
   transition: border-color 0.2s, color 0.2s;
 }
 .btn-white-outline:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
+
+/* ── RESPONSIVE: page-unique layouts ── */
+@media (max-width: 1024px) {
+  .tiers-grid { grid-template-columns: repeat(2, 1fr); }
+  .protection-grid { grid-template-columns: repeat(2, 1fr); }
+  .how-inner { gap: 40px; }
+  .diaspora-inner { gap: 40px; }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 120px 0 64px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero h1 { font-size: 40px; }
+  .hero p { max-width: none; }
+
+  .tiers-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .tiers-grid { grid-template-columns: 1fr; }
+  .tiers-grid-bottom { grid-template-columns: 1fr; }
+
+  .how-inner { grid-template-columns: 1fr; gap: 40px; }
+  .verif-visual { position: static; top: auto; }
+
+  .protection-grid { grid-template-columns: 1fr; }
+
+  .journey-steps { flex-direction: column; gap: 24px; }
+  .journey-steps::before { display: none; }
+  .journey-step { padding: 0; }
+
+  .diaspora-inner { grid-template-columns: 1fr; gap: 40px; }
+
+  .faq-grid { grid-template-columns: 1fr; }
+
+  .final-cta { padding: 72px 0; }
+  .final-cta h2 { font-size: 34px; }
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 104px 0 48px; }
+  .hero h1 { font-size: 32px; }
+  .hero-ctas { flex-direction: column; align-items: stretch; }
+  .hero-ctas .btn-primary-lg,
+  .hero-ctas .btn-ghost-lg { width: 100%; justify-content: center; }
+
+  .hero-card { padding: 20px; }
+  .tier-card { padding: 20px; }
+  .prot-card { padding: 20px; }
+  .faq-item { padding: 20px; }
+  .verif-visual { padding: 20px; }
+  .diaspora-cta-box { padding: 24px; }
+
+  .tier-roi { font-size: 28px; }
+  .prot-num { font-size: 40px; }
+
+  .final-cta { padding: 56px 0; }
+  .final-cta h2 { font-size: 28px; }
+  .final-cta-btns { flex-direction: column; }
+  .final-cta-btns .btn-white-solid,
+  .final-cta-btns .btn-white-outline { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -886,5 +945,6 @@
   </div>
 </footer>
 
+  <script src="kpital.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,35 @@
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="logo" aria-label="KPITAL — accueil">
+      <svg class="logo-mark" viewBox="8 10 32 35" aria-hidden="true">
+        <ellipse filter="url(#kp-sh)" cx="24" cy="37.5" rx="12.5" ry="5" fill="url(#kp-lo)"/>
+        <ellipse filter="url(#kp-sh)" cx="22.5" cy="29.8" rx="10" ry="4.6" fill="url(#kp-hi)"/>
+        <ellipse filter="url(#kp-sh)" cx="25.5" cy="22.7" rx="8" ry="4.1" fill="url(#kp-lo)"/>
+        <ellipse filter="url(#kp-sh)" cx="23.5" cy="16.3" rx="5.6" ry="3.5" fill="url(#kp-hi)"/>
+      </svg>
+      KPITAL
+    </a>
+    <ul class="nav-links">
+      <li><a href="/projets"{% if "/projets" in page.url %} class="active" aria-current="page"{% endif %}>Projets</a></li>
+      <li><a href="/comment-ca-marche"{% if "/comment-ca-marche" in page.url %} class="active" aria-current="page"{% endif %}>Comment ça marche</a></li>
+      <li><a href="/securite"{% if "/securite" in page.url %} class="active" aria-current="page"{% endif %}>Sécurité</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn-lang">FR / EN</button>
+      <a href="/connexion" class="btn-login">Connexion</a>
+      <a href="/inscription" class="btn-cta">Investir</a>
+    </div>
+    <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navDrawer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="/projets">Projets</a>
+    <a href="/comment-ca-marche">Comment ça marche</a>
+    <a href="/securite">Sécurité</a>
+    <div class="drawer-actions">
+      <a href="/connexion" class="btn btn-ghost">Connexion</a>
+      <a href="/inscription" class="btn btn-primary">Investir</a>
+    </div>
+  </div>
+</nav>

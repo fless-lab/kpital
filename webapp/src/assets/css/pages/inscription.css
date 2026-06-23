@@ -1,0 +1,220 @@
+/* Inscription — KPITAL "Le Registre" · sectioned onboarding card */
+
+.auth{padding:56px 0 88px}
+.auth-inner{width:100%;max-width:540px;margin:0 auto}
+
+.auth-head{text-align:center;margin-bottom:30px}
+.auth-head .eyebrow{justify-content:center;margin-bottom:16px}
+.auth-title{
+  font-family:var(--display);font-weight:700;letter-spacing:-0.02em;
+  font-size:clamp(28px,4vw,34px);line-height:1.08;color:var(--ink);
+}
+.auth-sub{font-size:14.5px;color:var(--muted);line-height:1.55;margin-top:10px}
+
+/* ── STEP INDICATOR — slim hairline, tabular numbers ── */
+.steps{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  list-style:none;border-top:1px solid var(--hairline);margin-bottom:28px;
+}
+.step{
+  display:flex;align-items:baseline;gap:8px;
+  padding:14px 4px 0;
+  border-top:2px solid transparent;margin-top:-1px;
+  color:var(--muted);transition:color .18s,border-color .18s;
+}
+.step-no{
+  font-family:var(--mono);font-weight:600;font-size:12px;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--hairline);
+  transition:color .18s;
+}
+.step-lbl{font-size:12px;letter-spacing:.01em}
+.step.done{color:var(--muted);border-top-color:var(--green-soft)}
+.step.done .step-no{color:var(--green)}
+.step.active{color:var(--ink);border-top-color:var(--green)}
+.step.active .step-no{color:var(--green)}
+
+/* ── CARD ── */
+.auth-card{padding:34px 36px}
+
+.pane-head{margin-bottom:24px}
+.pane-kicker{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--green);
+  margin-bottom:10px;
+}
+.pane-kicker .num{font-variant-numeric:tabular-nums}
+.pane-title{
+  font-family:var(--display);font-weight:700;letter-spacing:-0.015em;
+  font-size:23px;line-height:1.15;color:var(--ink);
+}
+.pane-sub{font-size:14px;color:var(--muted);line-height:1.55;margin-top:7px}
+
+/* caption (acts as a label for groups without a single control) */
+.field-cap{display:block;font-size:13px;font-weight:500;color:var(--ink);margin-bottom:7px}
+.req{color:var(--muted)}
+
+/* ── PROFILE SELECTOR ── */
+.profiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.profile{
+  display:flex;flex-direction:column;gap:9px;text-align:left;
+  padding:18px 16px;border:1px solid var(--hairline);border-radius:3px;
+  background:#fff;color:var(--ink);transition:border-color .15s,background .15s;
+}
+.profile svg{color:var(--muted);transition:color .15s}
+.profile:hover{border-color:var(--ink)}
+.profile.selected{border-color:var(--green);background:var(--green-soft)}
+.profile.selected svg{color:var(--green)}
+.profile-name{font-size:14.5px;font-weight:500;letter-spacing:-0.01em}
+.profile-desc{font-size:12.5px;color:var(--muted);line-height:1.4}
+
+/* ── UPLOAD ── */
+.upload{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:20px 16px;text-align:center;cursor:pointer;
+  border:1px dashed var(--hairline);border-radius:3px;
+  transition:border-color .15s,background .15s;
+}
+.upload:hover{border-color:var(--green);background:var(--green-soft)}
+.upload input{display:none}
+.upload svg{color:var(--muted);margin-bottom:3px}
+.upload-t{font-size:13px;color:var(--muted)}
+.upload-t strong{color:var(--ink);font-weight:500}
+.upload-s{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.01em}
+
+/* ── NOTICE (SEMOA info) ── */
+.notice{
+  display:flex;gap:10px;align-items:flex-start;
+  margin-top:18px;padding:13px 15px;
+  background:var(--green-soft);border:1px solid var(--hairline);border-radius:3px;
+}
+.notice svg{color:var(--green);flex-shrink:0;margin-top:2px}
+.notice p{font-size:12.5px;color:var(--green-deep);line-height:1.5}
+.notice strong{font-weight:600}
+
+/* ── MOBILE MONEY ── */
+.momo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.momo-opt{
+  display:flex;align-items:center;gap:11px;text-align:left;
+  padding:12px 13px;border:1px solid var(--hairline);border-radius:3px;
+  background:#fff;transition:border-color .15s,background .15s;
+}
+.momo-opt:hover{border-color:var(--ink)}
+.momo-opt.selected{border-color:var(--green);background:var(--green-soft)}
+.momo-badge{
+  width:30px;height:30px;border-radius:3px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:14px;
+  background:var(--ink);color:var(--paper);
+}
+.momo-opt.selected .momo-badge{background:var(--green)}
+.momo-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.momo-name{font-size:13.5px;font-weight:500;color:var(--ink)}
+.momo-net{font-size:11px;color:var(--muted)}
+
+/* ── OTP ── */
+.otp-row{display:flex;gap:10px}
+.otp-input{
+  flex:1;min-width:0;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  letter-spacing:.4em;font-size:18px;font-weight:600;text-align:center;
+}
+.otp-send{flex-shrink:0;white-space:nowrap;font-size:13px;padding:0 16px}
+
+/* ── WALLET TEASER ── */
+.wallet{
+  display:flex;gap:12px;align-items:flex-start;
+  margin-top:24px;padding:16px 18px;
+  border:1px solid var(--hairline);border-left:2px solid var(--gold);border-radius:3px;
+  background:#fff;
+}
+.wallet>svg{color:var(--gold);flex-shrink:0;margin-top:2px}
+.wallet-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.wallet-s{font-size:12.5px;color:var(--muted);line-height:1.55}
+
+/* ── CONSENTS ── */
+.consents{list-style:none;margin-bottom:22px}
+.consent{
+  display:flex;gap:11px;align-items:flex-start;
+  padding:11px 0;border-bottom:1px solid var(--hairline);
+}
+.consent:first-child{padding-top:0}
+.consent:last-child{border-bottom:none}
+.consent input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--green)}
+.consent label{font-size:13px;color:var(--muted);line-height:1.5;cursor:pointer}
+.consent a{color:var(--green);text-decoration:underline}
+
+/* ── RECAP ── */
+.recap{padding:16px 18px;border:1px solid var(--hairline);border-radius:3px;background:#fff}
+.recap-head{
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;
+}
+.recap-row{display:flex;justify-content:space-between;gap:14px;font-size:13px;padding:5px 0}
+.recap-row>span:first-child{color:var(--muted)}
+.recap-v{font-weight:500;color:var(--ink)}
+.recap-free{color:var(--green)}
+.recap-pending{color:var(--gold)}
+
+/* ── FOOTER ROW ── */
+.pane-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  margin-top:28px;padding-top:22px;border-top:1px solid var(--hairline);
+}
+.pane-note{font-size:13px;color:var(--muted)}
+.pane-foot .btn{white-space:nowrap}
+
+/* ── SUCCESS ── */
+.done{text-align:center;padding:12px 0}
+.done-mark{
+  width:60px;height:60px;border-radius:50%;margin:0 auto 22px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--green-soft);color:var(--green);
+}
+.done .pane-title{font-size:26px}
+.done .pane-sub{max-width:42ch;margin:9px auto 0}
+.done-steps{list-style:none;text-align:left;margin:28px 0;display:flex;flex-direction:column;gap:10px}
+.done-step{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border:1px solid var(--hairline);border-radius:3px;background:#fff;
+}
+.done-no{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:600;font-size:12px;font-variant-numeric:tabular-nums;
+  background:var(--hairline);color:var(--muted);
+}
+.done-step.is-done .done-no{background:var(--green-soft);color:var(--green)}
+.done-step.is-pending .done-no{background:rgba(176,121,31,.12);color:var(--gold)}
+.done-step p{font-size:13px;color:var(--muted)}
+.done-cta{width:100%;justify-content:center;padding:14px}
+.done-alt{display:inline-block;margin-top:14px;font-size:13px;color:var(--muted);transition:color .16s}
+.done-alt:hover{color:var(--green)}
+
+/* ── SWITCH ── */
+.auth-switch{text-align:center;margin-top:26px;font-size:13.5px;color:var(--muted)}
+.auth-switch a{color:var(--green);font-weight:500;transition:color .16s}
+.auth-switch a:hover{color:var(--green-deep)}
+
+/* ── RESPONSIVE ── */
+@media (max-width:768px){
+  .auth{padding:40px 0 64px}
+  .auth-card{padding:28px 24px}
+  .field-row{grid-template-columns:1fr;gap:0}
+  .field-row .field{margin-bottom:18px}
+}
+@media (max-width:480px){
+  .auth{padding:30px 0 52px}
+  .auth-card{padding:24px 18px}
+  .steps{grid-template-columns:repeat(4,1fr)}
+  .step{flex-direction:column;gap:2px;padding:12px 2px 0}
+  .step-lbl{font-size:0;height:0;overflow:hidden}
+  .step-no{font-size:13px}
+  .profiles{grid-template-columns:1fr}
+  .momo{grid-template-columns:1fr}
+  .pane-title{font-size:20px}
+  .otp-row{flex-direction:column}
+  .otp-send{padding:11px 16px}
+  .pane-foot{flex-wrap:wrap}
+  .pane-foot .btn{flex:1;justify-content:center}
+  .pane-note{flex-basis:100%;text-align:center;order:2}
+}

@@ -195,6 +195,50 @@ body { background: var(--gray-50); }
   display: flex; align-items: center; gap: 6px;
 }
 .btn-next-sm:hover { background: var(--green-800); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .onboard-progress { padding: 0 24px; }
+  .onboard-main { padding: 40px 20px 80px; }
+  .onboard-header { padding: 32px 32px 0; }
+  .onboard-body { padding: 24px 32px; }
+  .onboard-footer { padding: 18px 32px; }
+}
+
+@media (max-width: 768px) {
+  .auth-nav { padding: 16px 24px; flex-wrap: wrap; gap: 8px; }
+  .onboard-progress { padding: 0 16px; }
+  .progress-step { font-size: 11px; padding: 14px 4px; }
+  .onboard-main { min-height: auto; padding: 28px 16px 64px; }
+  .onboard-card { max-width: 100%; }
+  .onboard-header { padding: 28px 24px 0; }
+  .onboard-body { padding: 22px 24px; }
+  .onboard-footer { padding: 16px 24px; }
+  /* 2-col field grids collapse to single column */
+  .field-row { grid-template-columns: 1fr; gap: 0; }
+  .field-row .field { margin-bottom: 18px; }
+}
+
+@media (max-width: 480px) {
+  .auth-nav { padding: 14px 18px; }
+  .auth-nav-right { font-size: 12px; }
+  .onboard-progress { padding: 0 8px; }
+  .progress-step { font-size: 0; padding: 14px 2px; }
+  .progress-step .ps-num { margin-bottom: 0; }
+  .onboard-main { padding: 20px 12px 56px; }
+  .onboard-header { padding: 24px 18px 0; }
+  .onboard-body { padding: 20px 18px; }
+  /* allow flex inputs (e.g. SMS code row) to shrink below intrinsic width */
+  .field-input { min-width: 0; }
+  .onboard-footer { padding: 14px 18px; flex-wrap: wrap; gap: 12px; }
+  .onboard-footer > * { flex: 1; }
+  .btn-back-sm, .btn-next-sm { justify-content: center; width: 100%; }
+  .onboard-title, .success-title { font-size: 22px; }
+  /* Profile + MoMo selectors stack on narrow screens */
+  .profile-selector { flex-direction: column; }
+  .momo-selector { flex-direction: column; }
+  .success-panel { padding: 36px 18px; }
+}
 </style>
 </head>
 <body>
@@ -547,5 +591,6 @@ function goStep(n) {
 }
 </script>
 
+  <script src="kpital.js" defer></script>
 </body>
 </html>

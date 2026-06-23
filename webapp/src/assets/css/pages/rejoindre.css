@@ -1,0 +1,39 @@
+/* Rejoignez KPITAL — careers "Le Registre" */
+
+/* values */
+.rj-values{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;border-top:1px solid var(--hairline);padding-top:36px}
+.rj-value h3{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:10px}
+.rj-value p{font-size:14.5px;color:var(--muted);line-height:1.65}
+
+/* open positions — ledger rows */
+.rj-jobs{list-style:none;border-top:1px solid var(--ink)}
+.rj-job{
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;
+  padding:24px 0;border-bottom:1px solid var(--hairline);
+}
+.rj-job-main{flex:1 1 300px;min-width:0}
+.rj-job-main h3{font-family:var(--display);font-weight:600;font-size:16.5px;letter-spacing:-0.01em;color:var(--ink);margin-bottom:5px}
+.rj-job-main p{font-size:13.5px;color:var(--muted);line-height:1.5;max-width:54ch}
+.rj-job-team{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.rj-job-loc{font-size:13.5px;color:var(--muted);white-space:nowrap}
+.rj-job-type{white-space:nowrap}
+.rj-job-cta{margin-left:auto;font-size:14px;color:var(--green);font-weight:500;white-space:nowrap;transition:color .16s}
+.rj-job-cta:hover{color:var(--green-deep)}
+
+/* spontaneous application band */
+.rj-spont{
+  display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;
+  background:var(--green-soft);border-radius:2px;padding:40px 44px;
+}
+.rj-spont-h{font-family:var(--display);font-weight:700;letter-spacing:-0.02em;font-size:clamp(22px,2.6vw,28px);color:var(--ink);line-height:1.15;margin-top:14px}
+.rj-spont-p{font-size:14.5px;color:var(--muted);line-height:1.6;margin-top:10px;max-width:54ch}
+.rj-spont-cta{flex-shrink:0}
+
+/* responsive */
+@media (max-width:860px){
+  .rj-values{grid-template-columns:1fr;gap:26px;padding-top:30px}
+}
+@media (max-width:560px){
+  .rj-job-cta{margin-left:0}
+  .rj-spont{padding:30px 26px}
+}

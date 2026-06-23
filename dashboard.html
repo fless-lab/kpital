@@ -309,6 +309,91 @@ body { background: var(--gray-50); }
 .kyc-banner-body p { font-size: 12px; color: var(--gold-700); }
 .btn-kyc { font-size: 12px; font-weight: 500; font-family: var(--sans); background: var(--gold-600); color: var(--white); border: none; padding: 8px 14px; border-radius: var(--radius); cursor: pointer; white-space: nowrap; transition: background 0.15s; }
 .btn-kyc:hover { background: var(--gold-700); }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — dashboard-specific overrides
+   (global nav drawer + footer handled in kpital.css)
+   ══════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  /* narrow the sticky sidebar, reduce big grids */
+  .dash-layout { grid-template-columns: 200px 1fr; }
+  .dash-main { padding: 28px 24px; max-width: none; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .stats-row .stat-card:nth-child(3) { grid-column: 1 / -1; }
+}
+
+@media (max-width: 768px) {
+  /* ── TASK A: dash-nav mobile ── */
+  /* hide the inline nav links — the global hamburger drawer takes over */
+  .dash-nav-links { display: none; }
+  .dash-nav-sep { display: none; }
+  /* keep logo left, push the injected .nav-toggle / actions to the right */
+  .dash-nav-inner { gap: 12px; padding: 0 18px; }
+  .dash-nav-logo { margin-right: auto; }
+  .dash-nav-right { gap: 8px; }
+  /* hide the user name text on cramped widths; avatar stays */
+  .user-name { display: none; }
+  /* dash-nav is 60px tall (global drawer assumes 64px) → align drawer */
+  .nav-drawer { top: 60px; max-height: calc(100vh - 60px); }
+
+  /* ── TASK B: content → single column ── */
+  /* the sidebar duplicates the drawer nav; hide it and go full width */
+  .dash-sidebar { display: none; }
+  .dash-layout { grid-template-columns: 1fr; padding-top: 60px; }
+  .dash-main { padding: 24px 18px; max-width: none; }
+
+  /* every multi-column grid collapses to one column */
+  .stats-row { grid-template-columns: 1fr; gap: 10px; }
+  .stats-row .stat-card:nth-child(3) { grid-column: auto; }
+  .reinvest-projects { grid-template-columns: 1fr; }
+
+  /* wallet card: stack header + amount, fluid type */
+  .wallet-card { padding: 24px 20px; }
+  .wallet-top { flex-direction: column; gap: 16px; }
+  .wallet-semoa-badge { text-align: left; align-self: flex-start; }
+  .wallet-amount { font-size: 36px; }
+  .wallet-actions { flex-wrap: wrap; }
+  .btn-wallet-reinvest, .btn-wallet-withdraw { flex: 1 1 auto; justify-content: center; }
+
+  /* investment rows: reflow the fixed-width progress / amount columns
+     so the 140px track never blows out the viewport.
+     icon+name on line 1, full-width progress on line 2,
+     amount + badge bottom-right — no order juggling (DOM order stacks cleanly) */
+  .investment-row { flex-wrap: wrap; padding: 16px 18px; gap: 12px; }
+  .inv-body { flex: 1 1 auto; }
+  .inv-progress { width: 100%; }
+  .inv-amount-col { text-align: right; margin-left: auto; }
+
+  /* withdraw confirm row stacks instead of overflowing */
+  .withdraw-card .withdraw-actions,
+  .withdraw-card > div[style*="flex"] { flex-wrap: wrap; }
+  .withdraw-card input[type="number"] { flex: 1 1 100% !important; }
+
+  /* greeting / headings shrink */
+  .dash-greeting { font-size: 23px; }
+  .dash-main .section-header { flex-wrap: wrap; gap: 4px 12px; }
+}
+
+@media (max-width: 480px) {
+  /* tighten padding + gaps, scale headings down */
+  .dash-main { padding: 20px 14px; }
+  .dash-page-header { margin-bottom: 22px; }
+  .dash-greeting { font-size: 20px; }
+  .wallet-card { padding: 20px 16px; }
+  .wallet-amount { font-size: 30px; }
+  .wallet-currency { font-size: 14px; }
+  .stat-card { padding: 16px; }
+  .stat-card-val { font-size: 24px; }
+  .investment-row { padding: 14px 14px; }
+  .inv-cat-icon { width: 34px; height: 34px; }
+  .history-row { padding: 12px 14px; gap: 10px; }
+  .hist-amount { font-size: 13px; }
+  .withdraw-channel { padding: 12px; gap: 10px; }
+  .wc-icon { width: 32px; height: 32px; }
+  .kyc-banner { flex-wrap: wrap; padding: 14px 16px; }
+  .btn-kyc { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -696,5 +781,6 @@ function selectChannel(el) {
   el.classList.add('selected');
 }
 </script>
+  <script src="kpital.js" defer></script>
 </body>
 </html>

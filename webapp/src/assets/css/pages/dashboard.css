@@ -1,0 +1,244 @@
+/* Tableau de bord — KPITAL · "Le Registre" investor dashboard */
+
+/* ── DASHBOARD HEADER ── */
+.dash-head{padding:56px 0 0;border-bottom:1px solid var(--hairline)}
+.dash-head-inner{
+  display:grid;grid-template-columns:1fr auto;gap:48px;align-items:end;
+  padding-bottom:34px;
+}
+.dash-greet .eyebrow{margin-bottom:16px}
+.dash-greet h1{
+  font-family:var(--display);font-weight:700;letter-spacing:-0.02em;
+  font-size:clamp(28px,4vw,40px);line-height:1.06;color:var(--ink);
+}
+.dash-greet-sub{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:12px;letter-spacing:.01em}
+
+.dash-acct{
+  border:1px solid var(--hairline);border-radius:3px;background:#fff;
+  min-width:280px;
+}
+.dash-acct-row{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:11px 18px;border-bottom:1px solid var(--hairline);
+}
+.dash-acct-row:last-child{border-bottom:none}
+.dash-acct-row .k{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dash-acct-row .v{font-size:13px;color:var(--ink);font-weight:500}
+.dash-acct-row .v.num{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.dash-kyc-flag{display:inline-flex;align-items:center;gap:7px;color:var(--gold)}
+.dash-kyc-flag i{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* ── PORTFOLIO SUMMARY BAND ── */
+.dash-summary-band{background:#fff;border-bottom:1px solid var(--hairline)}
+.dash-summary{display:grid;grid-template-columns:repeat(4,1fr)}
+.dsm{
+  padding:30px 30px 30px 30px;border-left:1px solid var(--hairline);
+}
+.dsm:first-child{border-left:none;padding-left:0}
+.dsm:last-child{padding-right:0}
+.dsm-k{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.dsm-v{
+  font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;
+  font-size:clamp(26px,3vw,34px);letter-spacing:-0.02em;line-height:1;color:var(--ink);
+  display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;
+}
+.dsm-v.dsm-pos{color:var(--green)}
+.dsm-u{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.02em}
+.dsm-s{font-size:12.5px;color:var(--muted);margin-top:11px;line-height:1.4}
+.dsm-s .num{color:var(--ink);font-weight:500}
+.dsm-pos{color:var(--green)}
+
+/* ── SECTIONS ── */
+.dash-section{padding:64px 0;border-bottom:1px solid var(--hairline)}
+.dash-section--tight{padding:28px 0}
+.dash-section--last{border-bottom:none}
+.dash-sec-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  margin-bottom:30px;flex-wrap:wrap;
+}
+.dash-sec-head .eyebrow{margin-bottom:12px}
+.dash-h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,28px);letter-spacing:-0.02em;line-height:1.1;color:var(--ink)}
+.dash-h2 .num{color:var(--green)}
+.dash-sec-link{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.01em;white-space:nowrap;transition:color .16s}
+.dash-sec-link:hover{color:var(--green-deep)}
+
+/* ── KYC NOTE ── */
+.kyc-note{
+  display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+  padding:18px 22px;border:1px solid var(--hairline);border-radius:3px;
+  background:var(--green-soft);
+}
+.kyc-note-ico{
+  width:38px;height:38px;border-radius:3px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(176,121,31,.1);color:var(--gold);
+}
+.kyc-note-body h4{font-family:var(--display);font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.kyc-note-body p{font-size:13px;color:var(--muted);line-height:1.55;max-width:70ch}
+.kyc-note-cta{white-space:nowrap;background:#fff}
+
+/* ── HOLDINGS LEDGER ── */
+.ledger-scroll{min-width:0}
+.ledger-head,
+.ledger-row,
+.ledger-total{
+  display:grid;
+  grid-template-columns:minmax(220px,2.4fr) 1.2fr .9fr .9fr 1.3fr .9fr .9fr;
+  gap:18px;align-items:center;
+}
+.ledger-head{
+  padding:0 6px 12px;border-bottom:1px solid var(--ink);
+}
+.ledger-head .lc{
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+}
+.ledger-row{
+  padding:20px 6px;border-bottom:1px solid var(--hairline);
+  transition:background .16s;color:inherit;
+}
+.ledger-row:hover{background:var(--green-soft)}
+.lc-amt,.lc-roi,.lc-due,.lc-status{text-align:right;justify-self:end}
+.ledger-head .lc-amt,.ledger-head .lc-roi,.ledger-head .lc-due,.ledger-head .lc-status{text-align:right}
+
+.lr-title{display:block;font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-0.01em;line-height:1.25;color:var(--ink)}
+.lr-place{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.01em}
+.lc-amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:var(--ink);letter-spacing:-0.01em}
+.lc-roi{font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;letter-spacing:-0.01em}
+.lc-roi.dsm-pos{color:var(--green)}
+.lc-due{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);letter-spacing:.01em}
+
+.lr-bar{display:block;height:2px;background:var(--hairline);border-radius:2px;overflow:hidden}
+.lr-bar i{display:block;height:100%;background:var(--green);border-radius:2px}
+.lr-bar-l{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.01em}
+.lr-bar-l .num{color:var(--green);font-weight:500}
+
+.st{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid var(--hairline);border-radius:2px;white-space:nowrap}
+.st-on{border-color:var(--green);color:var(--green)}
+.st-open{border-color:var(--gold);color:var(--gold)}
+
+.ledger-total{
+  padding:18px 6px;border-top:1px solid var(--ink);
+}
+.ledger-total .lc-name{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.ledger-total .lc-name .num{color:var(--ink);font-weight:600}
+.ledger-total .lc-amt{font-size:16px}
+.ledger-total .lc-roi{font-size:15px}
+
+/* ── WALLET (dark panel) ── */
+.wallet{
+  display:grid;grid-template-columns:1.25fr 1fr;
+  border:1px solid var(--green-deep);border-radius:3px;overflow:hidden;
+  background:var(--green-deep);
+}
+.wallet-main{padding:36px 38px;display:flex;flex-direction:column}
+.wallet-kicker{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.wallet-amt{
+  font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;
+  font-size:clamp(38px,6vw,52px);letter-spacing:-0.03em;line-height:1;color:#fff;
+  display:flex;align-items:baseline;gap:10px;
+}
+.wallet-cur{font-family:var(--mono);font-size:15px;font-weight:500;color:rgba(255,255,255,.5);letter-spacing:.02em}
+.wallet-note{font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.6;margin:20px 0 26px;max-width:46ch}
+.wallet-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:auto}
+.wallet .btn-white{background:#fff;color:var(--green-deep);border:1px solid #fff}
+.wallet .btn-white:hover{background:var(--green-soft)}
+.wallet .btn-line{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.28)}
+.wallet .btn-line:hover{border-color:#fff;color:#fff}
+
+.wallet-side{
+  border-left:1px solid rgba(255,255,255,.14);
+  padding:0;display:flex;flex-direction:column;
+}
+.wallet-side-head{
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);padding:22px 26px 16px;
+}
+.wallet-chan{padding:0 26px;flex:1}
+.wchan{
+  display:flex;flex-direction:column;gap:3px;
+  padding:14px 0;border-top:1px solid rgba(255,255,255,.14);
+}
+.wchan-t{font-size:13.5px;font-weight:500;color:#fff}
+.wchan-s{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.01em}
+.wallet-side-foot{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  padding:16px 26px;border-top:1px solid rgba(255,255,255,.14);
+}
+.wallet-side-foot .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.wallet-side-foot .v{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;font-size:15px;color:#fff;letter-spacing:-0.01em}
+
+/* ── REINVEST SUGGESTIONS ── */
+.reinvest{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink)}
+.rcard{
+  display:flex;flex-direction:column;
+  padding:26px 26px 22px;
+  border-bottom:1px solid var(--hairline);border-right:1px solid var(--hairline);
+  background:var(--paper);transition:background .16s;color:inherit;
+}
+.reinvest .rcard:last-child{border-right:none}
+.rcard:hover{background:var(--green-soft)}
+.rcard-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.rcard-sector{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rcard-name{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em;line-height:1.25;color:var(--ink);margin-bottom:6px}
+.rcard-meta{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.01em}
+.rcard-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin:20px 0 18px;padding-top:18px;border-top:1px solid var(--hairline);
+}
+.rst{display:flex;flex-direction:column;gap:5px}
+.rst-v{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;font-size:19px;letter-spacing:-0.02em;color:var(--green)}
+.rst-l{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rcard-go{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.01em;margin-top:auto;transition:color .16s}
+.rcard:hover .rcard-go{color:var(--green-deep)}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+@media (max-width:1024px){
+  .dash-head-inner{grid-template-columns:1fr;gap:28px;align-items:start}
+  .dash-acct{min-width:0;max-width:340px}
+  .dash-summary{grid-template-columns:1fr 1fr}
+  .dsm{padding:26px 24px;border-left:1px solid var(--hairline)}
+  .dsm:nth-child(odd){padding-left:0;border-left:none}
+  .dsm:nth-child(3),.dsm:nth-child(4){border-top:1px solid var(--hairline)}
+  .dsm:last-child{padding-right:24px}
+
+  /* ledger: horizontal scroll preserves the tabular grid */
+  .ledger{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .ledger-scroll{min-width:840px;padding-bottom:2px}
+
+  .wallet{grid-template-columns:1fr}
+  .wallet-side{border-left:none;border-top:1px solid rgba(255,255,255,.14)}
+
+  .reinvest{grid-template-columns:1fr 1fr}
+  .reinvest .rcard:nth-child(2n){border-right:none}
+  .reinvest .rcard:nth-child(3){border-right:none}
+}
+
+@media (max-width:768px){
+  .dash-head{padding-top:44px}
+  .dash-summary{grid-template-columns:1fr 1fr}
+  .dash-section{padding:48px 0}
+  .kyc-note{grid-template-columns:auto 1fr;row-gap:14px}
+  .kyc-note-cta{grid-column:1 / -1;justify-content:center;text-align:center}
+  .wallet-main{padding:30px 26px}
+  .reinvest{grid-template-columns:1fr}
+  .reinvest .rcard,
+  .reinvest .rcard:nth-child(n){border-right:none}
+}
+
+@media (max-width:480px){
+  .dash-head{padding-top:36px}
+  .dash-acct{max-width:none}
+  .dash-summary{grid-template-columns:1fr}
+  .dsm,.dsm:nth-child(n){padding:22px 0;border-left:none;border-top:1px solid var(--hairline)}
+  .dsm:first-child{border-top:none}
+  .dash-section{padding:40px 0}
+  .ledger-scroll{min-width:680px}
+  .wallet-main{padding:26px 20px}
+  .wallet-side-head{padding:20px 20px 14px}
+  .wallet-chan{padding:0 20px}
+  .wallet-side-foot{padding:14px 20px}
+  .wallet-actions .btn{flex:1 1 100%;justify-content:center}
+  .rcard{padding:24px 20px 20px}
+  .rcard-stats{gap:10px}
+}
