@@ -1,5 +1,10 @@
+{%- set lang = lang or "fr" -%}
+{%- set isEn = lang == "en" -%}
+{%- set langPrefix = "/en" if isEn else "" -%}
+{%- if isEn -%}{%- set frUrl = page.url | replace("/en", "") -%}{%- set enUrl = page.url -%}
+{%- else -%}{%- set frUrl = page.url -%}{%- set enUrl = "/en" + page.url -%}{%- endif -%}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

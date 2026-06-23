@@ -187,3 +187,14 @@ footer{border-top:1px solid var(--hairline);padding:64px 0 40px;background:#fff}
 @media (max-width:560px){.field-row{grid-template-columns:1fr}}
 .form-card{border:1px solid var(--hairline);border-radius:4px;padding:32px;background:#fff}
 @media (max-width:480px){.form-card{padding:22px}}
+
+/* ── LANGUAGE SWITCH ── */
+.lang-switch{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--muted)}
+.lang-switch a{color:var(--muted);transition:color .16s}
+.lang-switch a:hover{color:var(--ink)}
+.lang-switch a.is-on{color:var(--ink);font-weight:600}
+.lang-switch span{color:var(--hairline)}
+.drawer-lang{display:flex;align-items:center;gap:8px;padding:13px 4px;border-bottom:1px solid var(--green-soft);font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:var(--muted)}
+.drawer-lang a{color:var(--muted);transition:color .16s}
+.drawer-lang a:hover{color:var(--ink)}
+.drawer-lang a.is-on{color:var(--green);font-weight:600}

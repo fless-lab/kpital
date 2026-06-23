@@ -1,0 +1,362 @@
+---
+layout: base.njk
+title: "Submit a project | KPITAL"
+description: "Project owners: submit your project to KPITAL. One application, four sections. 4-step validation, 4% commission, SEMOA escrow. Response within 15 business days."
+pageCss: soumettre
+---
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Project owner</p>
+    <h1>Submit your project<br>to the KPITAL registry</h1>
+    <p>One application, four sections. Be precise and verifiable: a complete application moves to priority processing. Response time: <span class="num">15</span> business days.</p>
+  </div>
+</section>
+
+<!-- SUBMIT: FORM + STICKY SIDEBAR -->
+<section class="section submit">
+  <div class="container submit-grid">
+
+    <!-- ── FORM ── -->
+    <form class="form-card submit-form" autocomplete="on" novalidate>
+
+      <!-- SECTION 01 · THE OWNER -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">01</span>
+          <div>
+            <h2 class="fset-title">The owner</h2>
+            <p class="fset-sub">Processed by SEMOA for KYC. This data is never published.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="prenom">First name</label>
+            <input class="input" id="prenom" name="prenom" type="text" placeholder="First name" required>
+          </div>
+          <div class="field">
+            <label for="nom">Last name</label>
+            <input class="input" id="nom" name="nom" type="text" placeholder="Last name" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" placeholder="your@email.com" required>
+          </div>
+          <div class="field">
+            <label for="tel">Mobile Money number</label>
+            <input class="input" id="tel" name="tel" type="tel" placeholder="+228 9X XX XX XX" required>
+            <p class="hint">T-Money or Flooz. This number will receive disbursements.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="idfile">ID document (national ID card or passport)</label>
+          <label class="dropzone" for="idfile">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="dz-txt"><strong>Front + back</strong> in good quality</span>
+            <span class="dz-meta num">PDF, JPG, PNG · Max 10 MB</span>
+            <input id="idfile" name="idfile" type="file" accept=".pdf,.jpg,.png" hidden>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 02 · THE PROJECT -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">02</span>
+          <div>
+            <h2 class="fset-title">The project</h2>
+            <p class="fset-sub">Start with the essentials. A strong application speeds up validation.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cat">Project category</label>
+          <select class="select" id="cat" name="cat" required>
+            <option value="">Select a category…</option>
+            <option value="immo">Rental real estate · Tier 1 · 8–14%/yr · low risk</option>
+            <option value="commerce">Trade &amp; inventory · Tier 2 · 15–20%/yr · medium risk</option>
+            <option value="agri">Seasonal agriculture · Tier 3 · 20–28%/yr · moderate risk</option>
+            <option value="pme">SME expansion · Tier 4 · 12–18%/yr · structured</option>
+            <option value="impact">Community project · Tier 5 · social impact · diaspora</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="nomprojet">Project name</label>
+          <input class="input" id="nomprojet" name="nomprojet" type="text" placeholder="e.g. Modern grocery store, Hédzranawoé" required>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ville">City</label>
+            <select class="select" id="ville" name="ville" required>
+              <option value="">Select…</option>
+              <option>Lomé</option>
+              <option>Kpalimé</option>
+              <option>Atakpamé</option>
+              <option>Sokodé</option>
+              <option>Kara</option>
+              <option>Dapaong</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quartier">Neighborhood / Locality</label>
+            <input class="input" id="quartier" name="quartier" type="text" placeholder="e.g. Tokoin, Adétikopé…">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="desc">Project description</label>
+          <textarea class="textarea" id="desc" name="desc" placeholder="Describe your activity, its track record, why you are seeking this funding, and how you plan to repay investors." required></textarea>
+          <p class="hint">Minimum <span class="num">150</span> characters. Be concrete: figures, dates, data.</p>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 03 · AMOUNT & DURATION -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">03</span>
+          <div>
+            <h2 class="fset-title">Amount sought &amp; duration</h2>
+            <p class="fset-sub">Verified by the expert committee. Be realistic: overstating ROI leads to rejection.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="montant">Amount to raise (FCFA)</label>
+            <input class="input" id="montant" name="montant" type="number" inputmode="numeric" placeholder="1 500 000" required>
+            <p class="hint">Between <span class="num">200 000</span> and <span class="num">50 000 000</span> FCFA.</p>
+          </div>
+          <div class="field">
+            <label for="duree">Project duration</label>
+            <select class="select" id="duree" name="duree" required>
+              <option>3 months</option>
+              <option>4 months</option>
+              <option>6 months</option>
+              <option>8 months</option>
+              <option>12 months</option>
+              <option>18 months</option>
+              <option>24 months</option>
+              <option>36 months</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="roi">Proposed annual ROI (%)</label>
+            <input class="input" id="roi" name="roi" type="number" inputmode="numeric" min="4" max="30" placeholder="16" required>
+            <p class="hint">Based on your verifiable financial projections.</p>
+          </div>
+          <div class="field">
+            <label for="jalons">Disbursement milestones</label>
+            <select class="select" id="jalons" name="jalons">
+              <option>2 tranches</option>
+              <option>3 tranches</option>
+              <option>4 tranches</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="caution">Type of guarantee offered</label>
+          <select class="select" id="caution" name="caution" required>
+            <option value="">Select…</option>
+            <option>Real estate (mortgage)</option>
+            <option>Guarantee from a solvent third party</option>
+            <option>Institutional co-signature</option>
+          </select>
+          <p class="hint">The guarantee must be in place before the first disbursement.</p>
+        </div>
+
+        <div class="field">
+          <label for="usage">Planned use of funds</label>
+          <textarea class="textarea" id="usage" name="usage" placeholder="Break down each tranche. e.g. Tranche 1 (60%): initial inventory purchase. Tranche 2 (40%): 3 months' rent + working capital." required></textarea>
+        </div>
+      </fieldset>
+
+      <!-- SECTION 04 · DOCUMENTS -->
+      <fieldset class="fset">
+        <div class="fset-head">
+          <span class="fset-no num">04</span>
+          <div>
+            <h2 class="fset-title">Documents &amp; supporting evidence</h2>
+            <p class="fset-sub">Accepted formats: PDF, JPG, PNG. Max size: <span class="num">10</span> MB per file.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="rccm">RCCM or professional license</label>
+            <label class="dropzone" for="rccm">
+              <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="dz-txt"><strong>Click to select</strong></span>
+              <span class="dz-meta num">PDF, JPG, PNG</span>
+              <input id="rccm" name="rccm" type="file" accept=".pdf,.jpg,.png" hidden>
+            </label>
+          </div>
+          <div class="field">
+            <label for="foncier">Land title or lease agreement</label>
+            <label class="dropzone" for="foncier">
+              <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="dz-txt"><strong>Click to select</strong></span>
+              <span class="dz-meta num">PDF, JPG, PNG</span>
+              <input id="foncier" name="foncier" type="file" accept=".pdf,.jpg,.png" hidden>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="releves">Bank statements (last 6 months)</label>
+          <label class="dropzone" for="releves">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="dz-txt"><strong>Multiple files accepted</strong> · drag or click</span>
+            <span class="dz-meta">Select all months at once</span>
+            <input id="releves" name="releves" type="file" accept=".pdf,.jpg,.png" multiple hidden>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="photos">Current photos of the project <span class="opt">(recommended)</span></label>
+          <label class="dropzone" for="photos">
+            <svg class="dz-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="dz-txt"><strong>Site, inventory, activity</strong> · drag or click</span>
+            <span class="dz-meta">Speeds up processing by the field agent</span>
+            <input id="photos" name="photos" type="file" accept=".jpg,.png" multiple hidden>
+          </label>
+        </div>
+
+        <label class="consent" for="consent">
+          <input type="checkbox" id="consent" name="consent" required>
+          <span>I agree that my information may be shared with SEMOA for KYC verification and escrow management, in accordance with KPITAL's <a href="/en/confidentialite">privacy policy</a>.</span>
+        </label>
+      </fieldset>
+
+      <!-- SUBMIT -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          Submit application
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="form-actions-note">Confirmation by SMS and email within a few hours. No commitment until committee approval.</p>
+      </div>
+    </form>
+
+    <!-- ── STICKY SIDEBAR ── -->
+    <aside class="submit-aside">
+
+      <!-- 4-step validation -->
+      <div class="aside-card">
+        <div class="aside-head">After you submit</div>
+        <ol class="vsteps">
+          <li class="vstep">
+            <span class="vstep-no num">1</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Automatic scoring</p>
+              <p class="vstep-s">Immediate on submission</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">2</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Field visit</p>
+              <p class="vstep-s"><span class="num">5</span> business days · KPITAL agent</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">3</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Expert committee</p>
+              <p class="vstep-s"><span class="num">5</span> business days · reasoned decision</p>
+            </div>
+          </li>
+          <li class="vstep">
+            <span class="vstep-no num">4</span>
+            <div class="vstep-body">
+              <p class="vstep-t">Funding launch</p>
+              <p class="vstep-s"><span class="num">3</span> business days · publication</p>
+            </div>
+          </li>
+        </ol>
+        <div class="aside-total">
+          <span>Estimated total</span>
+          <span class="num">12–15 days</span>
+        </div>
+      </div>
+
+      <!-- Eligibility criteria -->
+      <div class="aside-card">
+        <div class="aside-head">Requirements to submit</div>
+        <ul class="crit">
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>An operational or advanced-stage project, not just an idea</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>A valid RCCM or professional license in progress</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>Bank statements for the last <span class="num">6</span> months</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>A guarantee that can be put in place (real estate or third-party backing)</p>
+          </li>
+          <li class="crit-row">
+            <span class="crit-chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <p>A verifiable physical address in Togo</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Commission -->
+      <div class="aside-card aside-fee">
+        <div class="aside-head">KPITAL commission</div>
+        <div class="fee-figure">
+          <span class="fee-val num">4%</span>
+          <span class="fee-lbl">of the successful raise</span>
+        </div>
+        <p class="fee-note">Charged only if the project is funded. No application fees, no hidden fees. An additional <span class="num">5%</span> feeds the reserve fund that protects your investors.</p>
+      </div>
+
+      <!-- Reassurance / contact -->
+      <div class="aside-card aside-contact">
+        <div class="aside-head">A question about your application?</div>
+        <a class="contact-link" href="mailto:porteurs@kpital.finance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          porteurs@kpital.finance
+        </a>
+        <p class="contact-note">Response within <span class="num">24h</span> business hours. Funds secured in SEMOA escrow.</p>
+      </div>
+
+    </aside>
+  </div>
+</section>
+
+<script>
+(function () {
+  // dropzone: show selected filename(s) in place of the prompt
+  document.querySelectorAll(".dropzone input[type=file]").forEach(function (input) {
+    var zone = input.closest(".dropzone");
+    var txt = zone.querySelector(".dz-txt");
+    var original = txt.innerHTML;
+    input.addEventListener("change", function () {
+      var n = input.files.length;
+      if (!n) { txt.innerHTML = original; zone.classList.remove("has-file"); return; }
+      txt.textContent = n === 1 ? input.files[0].name : n + " files selected";
+      zone.classList.add("has-file");
+    });
+  });
+})();
+</script>

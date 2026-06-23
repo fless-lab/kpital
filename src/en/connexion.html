@@ -1,7 +1,7 @@
 ---
 layout: base.njk
-title: "Connexion | KPITAL"
-description: "Connectez-vous à votre espace KPITAL pour suivre votre portefeuille, vos projets en cours et découvrir de nouvelles opportunités vérifiées."
+title: "Log in | KPITAL"
+description: "Log in to your KPITAL account to track your portfolio, your active projects and discover new verified opportunities."
 pageCss: connexion
 ---
 
@@ -10,22 +10,22 @@ pageCss: connexion
   <div class="container auth-inner">
 
     <div class="auth-card form-card">
-      <p class="eyebrow">Espace investisseur</p>
-      <h1 class="auth-title">Connexion</h1>
-      <p class="auth-sub">Accédez à votre portefeuille, suivez vos projets et vos remboursements.</p>
+      <p class="eyebrow">Investor area</p>
+      <h1 class="auth-title">Log in</h1>
+      <p class="auth-sub">Access your portfolio, track your projects and your repayments.</p>
 
       <!-- ===== PASSWORD LOGIN ===== -->
       <form class="auth-form" id="pwForm" novalidate>
         <div class="field">
-          <label for="login-id">Email ou numéro Mobile Money</label>
+          <label for="login-id">Email or Mobile Money number</label>
           <input class="input" id="login-id" name="login-id" type="text" autocomplete="username"
-                 placeholder="votre@email.com ou +228 9X XX XX XX">
+                 placeholder="your@email.com or +228 9X XX XX XX">
         </div>
 
         <div class="field auth-pw-field">
           <div class="auth-label-row">
-            <label for="login-pw">Mot de passe</label>
-            <a class="auth-forgot" href="#">Oublié ?</a>
+            <label for="login-pw">Password</label>
+            <a class="auth-forgot" href="#">Forgot?</a>
           </div>
           <input class="input" id="login-pw" name="login-pw" type="password" autocomplete="current-password"
                  placeholder="••••••••">
@@ -33,57 +33,57 @@ pageCss: connexion
 
         <label class="auth-remember">
           <input type="checkbox" name="remember">
-          <span>Se souvenir de moi sur cet appareil</span>
+          <span>Remember me on this device</span>
         </label>
 
-        <button class="btn btn-primary auth-submit" type="submit">Se connecter →</button>
+        <button class="btn btn-primary auth-submit" type="submit">Log in →</button>
 
-        <div class="auth-divider"><span>ou</span></div>
+        <div class="auth-divider"><span>or</span></div>
 
         <button class="btn btn-ghost auth-otp" type="button" id="otpStart">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
-          Recevoir un code unique par SMS ou email
+          Get a one-time code by SMS or email
         </button>
       </form>
 
       <!-- ===== OTP (CODE) LOGIN ===== -->
       <form class="auth-form" id="otpForm" novalidate hidden>
-        <div class="otp-seg" role="group" aria-label="Recevoir le code par">
+        <div class="otp-seg" role="group" aria-label="Get the code by">
           <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
-          <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Téléphone</button>
+          <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Phone</button>
         </div>
 
         <div class="field">
           <div class="auth-label-row">
-            <label for="otp-id" id="otpIdLabel">Adresse email</label>
-            <button type="button" class="auth-forgot" id="otpEdit" hidden>Modifier</button>
+            <label for="otp-id" id="otpIdLabel">Email address</label>
+            <button type="button" class="auth-forgot" id="otpEdit" hidden>Edit</button>
           </div>
           <input class="input" id="otp-id" name="otp-id" type="email" autocomplete="email"
-                 placeholder="votre@email.com">
+                 placeholder="your@email.com">
         </div>
 
-        <button class="btn btn-primary auth-submit" type="button" id="otpRequest">Recevoir le code →</button>
+        <button class="btn btn-primary auth-submit" type="button" id="otpRequest">Get the code →</button>
 
         <div class="field otp-code-field" id="otpCodeField" hidden>
-          <label for="otp-code">Code reçu <span id="otpSentTo" class="otp-sent"></span></label>
+          <label for="otp-code">Code received <span id="otpSentTo" class="otp-sent"></span></label>
           <input class="input otp-code" id="otp-code" name="otp-code" inputmode="numeric" maxlength="6"
-                 autocomplete="one-time-code" placeholder="6 chiffres">
-          <p class="otp-resend">Pas reçu ? <button type="button" class="auth-forgot" id="otpResend">Renvoyer le code</button></p>
+                 autocomplete="one-time-code" placeholder="6 digits">
+          <p class="otp-resend">Not received? <button type="button" class="auth-forgot" id="otpResend">Resend the code</button></p>
         </div>
 
-        <button class="btn btn-primary auth-submit" type="submit" id="otpVerify" hidden>Se connecter →</button>
+        <button class="btn btn-primary auth-submit" type="submit" id="otpVerify" hidden>Log in →</button>
 
-        <button type="button" class="auth-back" id="otpBack">← Connexion par mot de passe</button>
+        <button type="button" class="auth-back" id="otpBack">← Password login</button>
       </form>
 
       <p class="auth-switch">
-        Pas encore de compte ? <a href="/inscription">Créer un compte gratuit →</a>
+        No account yet? <a href="/en/inscription">Create a free account →</a>
       </p>
     </div>
 
     <p class="auth-note">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Connexion chiffrée · KYC opéré par SEMOA · Fonds en séquestre
+      Encrypted connection · KYC handled by SEMOA · Funds held in escrow
     </p>
 
   </div>
@@ -113,10 +113,10 @@ pageCss: connexion
       b.setAttribute("aria-pressed", on ? "true" : "false");
     });
     if (m === "email") {
-      otpIdLabel.textContent = "Adresse email";
-      otpId.type = "email"; otpId.placeholder = "votre@email.com"; otpId.autocomplete = "email";
+      otpIdLabel.textContent = "Email address";
+      otpId.type = "email"; otpId.placeholder = "your@email.com"; otpId.autocomplete = "email";
     } else {
-      otpIdLabel.textContent = "Numéro de téléphone";
+      otpIdLabel.textContent = "Phone number";
       otpId.type = "tel"; otpId.placeholder = "+228 9X XX XX XX"; otpId.autocomplete = "tel";
     }
   }
@@ -130,7 +130,7 @@ pageCss: connexion
     codeField.hidden = false;
     otpVerify.hidden = false;
     seg.forEach(function (b) { b.disabled = true; });
-    sentTo.textContent = "· envoyé à " + otpId.value.trim();
+    sentTo.textContent = "· sent to " + otpId.value.trim();
     otpCode.focus();
   }
 

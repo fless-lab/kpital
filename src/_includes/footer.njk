@@ -11,46 +11,46 @@
           </svg>
           KPITAL
         </span>
-        <p class="footer-tagline">La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.</p>
+        <p class="footer-tagline">{{ t[lang].footer.tagline }}</p>
         <div class="footer-semoa">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          Fonds sécurisés via SEMOA · CashPay
+          {{ t[lang].footer.secured }}
         </div>
       </div>
       <div class="footer-col">
-        <h4>Plateforme</h4>
+        <h4>{{ t[lang].footer.platform }}</h4>
         <ul>
-          <li><a href="/projets">Projets</a></li>
-          <li><a href="/comment-ca-marche">Comment ça marche</a></li>
-          <li><a href="/securite">Sécurité</a></li>
-          <li><a href="/soumettre">Soumettre un projet</a></li>
+          <li><a href="{{ langPrefix }}/projets">{{ t[lang].footer.projets }}</a></li>
+          <li><a href="{{ langPrefix }}/comment-ca-marche">{{ t[lang].footer.comment }}</a></li>
+          <li><a href="{{ langPrefix }}/securite">{{ t[lang].footer.securite }}</a></li>
+          <li><a href="{{ langPrefix }}/soumettre">{{ t[lang].footer.soumettre }}</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Investisseurs</h4>
+        <h4>{{ t[lang].footer.investors }}</h4>
         <ul>
-          <li><a href="/inscription">Inscription</a></li>
-          <li><a href="/connexion">Connexion</a></li>
-          <li><a href="/#diaspora">Diaspora</a></li>
-          <li><a href="/faq">FAQ</a></li>
+          <li><a href="{{ langPrefix }}/inscription">{{ t[lang].footer.inscription }}</a></li>
+          <li><a href="{{ langPrefix }}/connexion">{{ t[lang].footer.connexion }}</a></li>
+          <li><a href="{{ langPrefix }}/#diaspora">{{ t[lang].footer.diaspora }}</a></li>
+          <li><a href="{{ langPrefix }}/faq">{{ t[lang].footer.faq }}</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Société</h4>
+        <h4>{{ t[lang].footer.company }}</h4>
         <ul>
-          <li><a href="/a-propos">À propos</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/partenaires">Partenaires</a></li>
-          <li><a href="/rejoindre">Rejoignez KPITAL</a></li>
+          <li><a href="{{ langPrefix }}/a-propos">{{ t[lang].footer.apropos }}</a></li>
+          <li><a href="{{ langPrefix }}/contact">{{ t[lang].footer.contact }}</a></li>
+          <li><a href="{{ langPrefix }}/partenaires">{{ t[lang].footer.partenaires }}</a></li>
+          <li><a href="{{ langPrefix }}/rejoindre">{{ t[lang].footer.rejoindre }}</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">© 2026 KPITAL Finance · Lomé, Togo</span>
+      <span class="footer-copy">{{ t[lang].footer.copy }}</span>
       <div class="footer-legal">
-        <a href="/conditions">Conditions générales</a>
-        <a href="/confidentialite">Politique de confidentialité</a>
-        <a href="/mentions-legales">Mentions légales</a>
+        <a href="{{ langPrefix }}/conditions">{{ t[lang].footer.conditions }}</a>
+        <a href="{{ langPrefix }}/confidentialite">{{ t[lang].footer.confidentialite }}</a>
+        <a href="{{ langPrefix }}/mentions-legales">{{ t[lang].footer.mentions }}</a>
       </div>
     </div>
   </div>

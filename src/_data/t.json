@@ -1,0 +1,76 @@
+{
+  "fr": {
+    "ogLocale": "fr_TG",
+    "seoDescription": "Investissez dès 10 000 FCFA dans l'économie réelle togolaise : immobilier, commerce, agriculture. Projets vérifiés sur le terrain, fonds sécurisés par séquestre SEMOA. Accessible depuis le Togo et la diaspora.",
+    "ogImageAlt": "KPITAL · investir dans l'économie réelle togolaise",
+    "menu": "Ouvrir le menu",
+    "homeAria": "KPITAL, accueil",
+    "nav": {
+      "projets": "Projets",
+      "comment": "Comment ça marche",
+      "securite": "Sécurité",
+      "connexion": "Connexion",
+      "investir": "Investir"
+    },
+    "footer": {
+      "tagline": "La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.",
+      "secured": "Fonds sécurisés via SEMOA · CashPay",
+      "platform": "Plateforme",
+      "investors": "Investisseurs",
+      "company": "Société",
+      "projets": "Projets",
+      "comment": "Comment ça marche",
+      "securite": "Sécurité",
+      "soumettre": "Soumettre un projet",
+      "inscription": "Inscription",
+      "connexion": "Connexion",
+      "diaspora": "Diaspora",
+      "faq": "FAQ",
+      "apropos": "À propos",
+      "contact": "Contact",
+      "partenaires": "Partenaires",
+      "rejoindre": "Rejoignez KPITAL",
+      "copy": "© 2026 KPITAL Finance · Lomé, Togo",
+      "conditions": "Conditions générales",
+      "confidentialite": "Politique de confidentialité",
+      "mentions": "Mentions légales"
+    }
+  },
+  "en": {
+    "ogLocale": "en_US",
+    "seoDescription": "Invest from 10,000 FCFA in Togo's real economy: real estate, trade, agriculture. Projects verified on the ground, funds secured by SEMOA escrow. Open from Togo and the diaspora.",
+    "ogImageAlt": "KPITAL · invest in Togo's real economy",
+    "menu": "Open menu",
+    "homeAria": "KPITAL, home",
+    "nav": {
+      "projets": "Projects",
+      "comment": "How it works",
+      "securite": "Security",
+      "connexion": "Log in",
+      "investir": "Invest"
+    },
+    "footer": {
+      "tagline": "The first participatory-investment platform rooted in Togo's real economy. From 10,000 FCFA.",
+      "secured": "Funds secured via SEMOA · CashPay",
+      "platform": "Platform",
+      "investors": "Investors",
+      "company": "Company",
+      "projets": "Projects",
+      "comment": "How it works",
+      "securite": "Security",
+      "soumettre": "Submit a project",
+      "inscription": "Sign up",
+      "connexion": "Log in",
+      "diaspora": "Diaspora",
+      "faq": "FAQ",
+      "apropos": "About",
+      "contact": "Contact",
+      "partenaires": "Partners",
+      "rejoindre": "Join KPITAL",
+      "copy": "© 2026 KPITAL Finance · Lomé, Togo",
+      "conditions": "Terms of use",
+      "confidentialite": "Privacy policy",
+      "mentions": "Legal notice"
+    }
+  }
+}

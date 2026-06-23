@@ -1,12 +1,13 @@
 {%- set metaTitle = title or site.name -%}
-{%- set metaDesc = description or site.description -%}
+{%- set metaDesc = description or t[lang].seoDescription -%}
 {%- set canonical = site.url + page.url -%}
 {%- set ogImg = site.url + (ogImage or site.ogImage) -%}
 <meta name="description" content="{{ metaDesc }}">
 <meta name="robots" content="{% if noindex %}noindex, nofollow{% else %}index, follow, max-image-preview:large, max-snippet:-1{% endif %}">
 <link rel="canonical" href="{{ canonical }}">
-<link rel="alternate" hreflang="fr" href="{{ canonical }}">
-<link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+<link rel="alternate" hreflang="fr" href="{{ site.url }}{{ frUrl }}">
+<link rel="alternate" hreflang="en" href="{{ site.url }}{{ enUrl }}">
+<link rel="alternate" hreflang="x-default" href="{{ site.url }}{{ frUrl }}">
 <meta name="author" content="{{ site.legalName }}">
 <meta name="theme-color" content="{{ site.themeColor }}">
 
@@ -19,14 +20,14 @@
 <!-- Open Graph -->
 <meta property="og:type" content="{{ ogType or 'website' }}">
 <meta property="og:site_name" content="{{ site.name }}">
-<meta property="og:locale" content="{{ site.locale }}">
+<meta property="og:locale" content="{{ t[lang].ogLocale }}">
 <meta property="og:title" content="{{ metaTitle }}">
 <meta property="og:description" content="{{ metaDesc }}">
 <meta property="og:url" content="{{ canonical }}">
 <meta property="og:image" content="{{ ogImg }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="KPITAL · investir dans l'économie réelle togolaise">
+<meta property="og:image:alt" content="{{ t[lang].ogImageAlt }}">
 
 <!-- Twitter / X -->
 <meta name="twitter:card" content="summary_large_image">
@@ -34,7 +35,7 @@
 <meta name="twitter:title" content="{{ metaTitle }}">
 <meta name="twitter:description" content="{{ metaDesc }}">
 <meta name="twitter:image" content="{{ ogImg }}">
-<meta name="twitter:image:alt" content="KPITAL · investir dans l'économie réelle togolaise">
+<meta name="twitter:image:alt" content="{{ t[lang].ogImageAlt }}">
 
 <!-- Icons & manifest -->
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -53,8 +54,8 @@
       "legalName": "{{ site.legalName }}",
       "url": "{{ site.url }}/",
       "logo": "{{ site.url }}/assets/icon-512.png",
-      "image": "{{ site.url }}{{ site.ogImage }}",
-      "description": "{{ site.description }}",
+      "image": "{{ ogImg }}",
+      "description": "{{ t[lang].seoDescription }}",
       "email": "contact@kpital.finance",
       "areaServed": { "@type": "Country", "name": "Togo" },
       "address": { "@type": "PostalAddress", "addressLocality": "Lomé", "addressCountry": "TG" },
@@ -65,8 +66,8 @@
       "@id": "{{ site.url }}/#website",
       "url": "{{ site.url }}/",
       "name": "KPITAL",
-      "description": "{{ site.description }}",
-      "inLanguage": "fr",
+      "description": "{{ t[lang].seoDescription }}",
+      "inLanguage": "{{ lang }}",
       "publisher": { "@id": "{{ site.url }}/#organization" },
       "potentialAction": {
         "@type": "SearchAction",

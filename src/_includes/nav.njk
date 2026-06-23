@@ -1,6 +1,6 @@
 <nav>
   <div class="container nav-inner">
-    <a href="/" class="logo" aria-label="KPITAL, accueil">
+    <a href="{{ langPrefix }}/" class="logo" aria-label="{{ t[lang].homeAria }}">
       <svg class="logo-mark" viewBox="8 10 32 35" aria-hidden="true">
         <ellipse filter="url(#kp-sh)" cx="24" cy="37.5" rx="12.5" ry="5" fill="url(#kp-lo)"/>
         <ellipse filter="url(#kp-sh)" cx="22.5" cy="29.8" rx="10" ry="4.6" fill="url(#kp-hi)"/>
@@ -10,26 +10,35 @@
       KPITAL
     </a>
     <ul class="nav-links">
-      <li><a href="/projets"{% if "/projets" in page.url %} class="active" aria-current="page"{% endif %}>Projets</a></li>
-      <li><a href="/comment-ca-marche"{% if "/comment-ca-marche" in page.url %} class="active" aria-current="page"{% endif %}>Comment ça marche</a></li>
-      <li><a href="/securite"{% if "/securite" in page.url %} class="active" aria-current="page"{% endif %}>Sécurité</a></li>
+      <li><a href="{{ langPrefix }}/projets"{% if "/projets" in page.url %} class="active" aria-current="page"{% endif %}>{{ t[lang].nav.projets }}</a></li>
+      <li><a href="{{ langPrefix }}/comment-ca-marche"{% if "/comment-ca-marche" in page.url %} class="active" aria-current="page"{% endif %}>{{ t[lang].nav.comment }}</a></li>
+      <li><a href="{{ langPrefix }}/securite"{% if "/securite" in page.url %} class="active" aria-current="page"{% endif %}>{{ t[lang].nav.securite }}</a></li>
     </ul>
     <div class="nav-right">
-      <button class="btn-lang">FR / EN</button>
-      <a href="/connexion" class="btn-login">Connexion</a>
-      <a href="/inscription" class="btn-cta">Investir</a>
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <a href="{{ frUrl }}" hreflang="fr"{% if not isEn %} class="is-on" aria-current="true"{% endif %}>FR</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ enUrl }}" hreflang="en"{% if isEn %} class="is-on" aria-current="true"{% endif %}>EN</a>
+      </div>
+      <a href="{{ langPrefix }}/connexion" class="btn-login">{{ t[lang].nav.connexion }}</a>
+      <a href="{{ langPrefix }}/inscription" class="btn-cta">{{ t[lang].nav.investir }}</a>
     </div>
-    <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navDrawer">
+    <button class="nav-toggle" aria-label="{{ t[lang].menu }}" aria-expanded="false" aria-controls="navDrawer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </div>
   <div class="nav-drawer" id="navDrawer">
-    <a href="/projets">Projets</a>
-    <a href="/comment-ca-marche">Comment ça marche</a>
-    <a href="/securite">Sécurité</a>
+    <a href="{{ langPrefix }}/projets">{{ t[lang].nav.projets }}</a>
+    <a href="{{ langPrefix }}/comment-ca-marche">{{ t[lang].nav.comment }}</a>
+    <a href="{{ langPrefix }}/securite">{{ t[lang].nav.securite }}</a>
+    <div class="drawer-lang">
+      <a href="{{ frUrl }}" hreflang="fr"{% if not isEn %} class="is-on"{% endif %}>FR</a>
+      <span aria-hidden="true">/</span>
+      <a href="{{ enUrl }}" hreflang="en"{% if isEn %} class="is-on"{% endif %}>EN</a>
+    </div>
     <div class="drawer-actions">
-      <a href="/connexion" class="btn btn-ghost">Connexion</a>
-      <a href="/inscription" class="btn btn-primary">Investir</a>
+      <a href="{{ langPrefix }}/connexion" class="btn btn-ghost">{{ t[lang].nav.connexion }}</a>
+      <a href="{{ langPrefix }}/inscription" class="btn btn-primary">{{ t[lang].nav.investir }}</a>
     </div>
   </div>
 </nav>
