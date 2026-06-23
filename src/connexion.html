@@ -14,11 +14,12 @@ pageCss: connexion
       <h1 class="auth-title">Connexion</h1>
       <p class="auth-sub">Accédez à votre portefeuille, suivez vos projets et vos remboursements.</p>
 
-      <form class="auth-form" id="loginForm" novalidate>
+      <!-- ===== PASSWORD LOGIN ===== -->
+      <form class="auth-form" id="pwForm" novalidate>
         <div class="field">
           <label for="login-id">Email ou numéro Mobile Money</label>
           <input class="input" id="login-id" name="login-id" type="text" autocomplete="username"
-                 placeholder="votre@email.com ou +228 9X XX XX XX" autofocus>
+                 placeholder="votre@email.com ou +228 9X XX XX XX">
         </div>
 
         <div class="field auth-pw-field">
@@ -39,10 +40,40 @@ pageCss: connexion
 
         <div class="auth-divider"><span>ou</span></div>
 
-        <a class="btn btn-ghost auth-otp" href="#">
+        <button class="btn btn-ghost auth-otp" type="button" id="otpStart">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
           Recevoir un code unique par SMS ou email
-        </a>
+        </button>
+      </form>
+
+      <!-- ===== OTP (CODE) LOGIN ===== -->
+      <form class="auth-form" id="otpForm" novalidate hidden>
+        <div class="otp-seg" role="group" aria-label="Recevoir le code par">
+          <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
+          <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Téléphone</button>
+        </div>
+
+        <div class="field">
+          <div class="auth-label-row">
+            <label for="otp-id" id="otpIdLabel">Adresse email</label>
+            <button type="button" class="auth-forgot" id="otpEdit" hidden>Modifier</button>
+          </div>
+          <input class="input" id="otp-id" name="otp-id" type="email" autocomplete="email"
+                 placeholder="votre@email.com">
+        </div>
+
+        <button class="btn btn-primary auth-submit" type="button" id="otpRequest">Recevoir le code →</button>
+
+        <div class="field otp-code-field" id="otpCodeField" hidden>
+          <label for="otp-code">Code reçu <span id="otpSentTo" class="otp-sent"></span></label>
+          <input class="input otp-code" id="otp-code" name="otp-code" inputmode="numeric" maxlength="6"
+                 autocomplete="one-time-code" placeholder="6 chiffres">
+          <p class="otp-resend">Pas reçu ? <button type="button" class="auth-forgot" id="otpResend">Renvoyer le code</button></p>
+        </div>
+
+        <button class="btn btn-primary auth-submit" type="submit" id="otpVerify" hidden>Se connecter →</button>
+
+        <button type="button" class="auth-back" id="otpBack">← Connexion par mot de passe</button>
       </form>
 
       <p class="auth-switch">
@@ -57,3 +88,80 @@ pageCss: connexion
 
   </div>
 </section>
+
+<script>
+(function () {
+  var pwForm = document.getElementById("pwForm");
+  var otpForm = document.getElementById("otpForm");
+  var otpStart = document.getElementById("otpStart");
+  var otpBack = document.getElementById("otpBack");
+  var seg = otpForm.querySelectorAll(".otp-seg-btn");
+  var otpId = document.getElementById("otp-id");
+  var otpIdLabel = document.getElementById("otpIdLabel");
+  var otpRequest = document.getElementById("otpRequest");
+  var otpEdit = document.getElementById("otpEdit");
+  var codeField = document.getElementById("otpCodeField");
+  var otpCode = document.getElementById("otp-code");
+  var otpVerify = document.getElementById("otpVerify");
+  var sentTo = document.getElementById("otpSentTo");
+  var otpResend = document.getElementById("otpResend");
+
+  function setMethod(m) {
+    seg.forEach(function (b) {
+      var on = b.dataset.method === m;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (m === "email") {
+      otpIdLabel.textContent = "Adresse email";
+      otpId.type = "email"; otpId.placeholder = "votre@email.com"; otpId.autocomplete = "email";
+    } else {
+      otpIdLabel.textContent = "Numéro de téléphone";
+      otpId.type = "tel"; otpId.placeholder = "+228 9X XX XX XX"; otpId.autocomplete = "tel";
+    }
+  }
+
+  // step 1 -> step 2 : identifier locked + code field shown
+  function requestCode() {
+    if (!otpId.value.trim()) { otpId.focus(); return; }
+    otpId.disabled = true;
+    otpEdit.hidden = false;
+    otpRequest.hidden = true;
+    codeField.hidden = false;
+    otpVerify.hidden = false;
+    seg.forEach(function (b) { b.disabled = true; });
+    sentTo.textContent = "· envoyé à " + otpId.value.trim();
+    otpCode.focus();
+  }
+
+  // "Modifier" -> back to step 1 : code field removed, identifier editable
+  function editIdentifier() {
+    otpId.disabled = false;
+    otpEdit.hidden = true;
+    otpRequest.hidden = false;
+    codeField.hidden = true;
+    otpVerify.hidden = true;
+    otpCode.value = "";
+    sentTo.textContent = "";
+    seg.forEach(function (b) { b.disabled = false; });
+    otpId.focus();
+  }
+
+  function showOtp() { pwForm.hidden = true; otpForm.hidden = false; editIdentifier(); }
+  function showPassword() { otpForm.hidden = true; pwForm.hidden = false; }
+
+  otpStart.addEventListener("click", showOtp);
+  otpBack.addEventListener("click", showPassword);
+  otpEdit.addEventListener("click", editIdentifier);
+  otpRequest.addEventListener("click", requestCode);
+  otpResend.addEventListener("click", function () { otpCode.focus(); });
+  seg.forEach(function (b) {
+    b.addEventListener("click", function () { if (!b.disabled) setMethod(b.dataset.method); });
+  });
+  otpCode.addEventListener("input", function () { otpCode.value = otpCode.value.replace(/\D/g, ""); });
+
+  // demo: no backend — avoid page reload on submit
+  pwForm.addEventListener("submit", function (e) { e.preventDefault(); });
+  otpForm.addEventListener("submit", function (e) { e.preventDefault(); });
+})();
+</script>

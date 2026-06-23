@@ -77,3 +77,22 @@
   .auth-title{font-size:26px}
   .auth-note{font-size:10.5px;gap:6px}
 }
+
+/* ===== OTP (code) flow ===== */
+[hidden]{display:none !important}
+
+.otp-seg{display:flex;border:1px solid var(--hairline);border-radius:2px;padding:3px;margin-bottom:20px}
+.otp-seg-btn{flex:1;font-family:var(--body);font-size:13.5px;font-weight:500;color:var(--muted);padding:9px;border-radius:1px;cursor:pointer;transition:background .16s,color .16s}
+.otp-seg-btn.is-on{background:var(--green);color:#fff}
+.otp-seg-btn:disabled{opacity:.55;cursor:default}
+
+/* greyed / locked identifier */
+.input:disabled{background:#F2F1EC;color:var(--muted);cursor:not-allowed;border-color:var(--hairline)}
+
+.otp-sent{font-family:var(--body);font-size:12px;font-weight:400;color:var(--muted)}
+.otp-code{letter-spacing:.35em;font-weight:600;font-variant-numeric:tabular-nums}
+.otp-resend{font-size:12.5px;color:var(--muted);margin-top:10px}
+.otp-resend .auth-forgot{font-size:12.5px}
+
+.auth-back{display:block;width:100%;text-align:center;margin-top:18px;font-size:13px;color:var(--muted);background:none;cursor:pointer;transition:color .16s}
+.auth-back:hover{color:var(--ink)}
