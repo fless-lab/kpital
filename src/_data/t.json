@@ -1,7 +1,7 @@
 {
   "fr": {
     "ogLocale": "fr_TG",
-    "seoDescription": "Investissez dès 10 000 FCFA dans l'économie réelle togolaise : immobilier, commerce, agriculture. Projets vérifiés sur le terrain, fonds sécurisés par séquestre SEMOA. Accessible depuis le Togo et la diaspora.",
+    "seoDescription": "Investissez dès 10 000 FCFA dans l'économie réelle togolaise : immobilier, commerce, agriculture. Projets vérifiés sur le terrain, fonds sécurisés par séquestre dédié. Accessible depuis le Togo et la diaspora.",
     "ogImageAlt": "KPITAL · investir dans l'économie réelle togolaise",
     "menu": "Ouvrir le menu",
     "homeAria": "KPITAL, accueil",
@@ -14,7 +14,7 @@
     },
     "footer": {
       "tagline": "La première plateforme d'investissement participatif ancré dans l'économie réelle togolaise. Dès 10 000 FCFA.",
-      "secured": "Fonds sécurisés via SEMOA · CashPay",
+      "secured": "Fonds sécurisés en séquestre dédié",
       "platform": "Plateforme",
       "investors": "Investisseurs",
       "company": "Société",
@@ -38,7 +38,7 @@
   },
   "en": {
     "ogLocale": "en_US",
-    "seoDescription": "Invest from 10,000 FCFA in Togo's real economy: real estate, trade, agriculture. Projects verified on the ground, funds secured by SEMOA escrow. Open from Togo and the diaspora.",
+    "seoDescription": "Invest from 10,000 FCFA in Togo's real economy: real estate, trade, agriculture. Projects verified on the ground, funds secured by a dedicated escrow account. Open from Togo and the diaspora.",
     "ogImageAlt": "KPITAL · invest in Togo's real economy",
     "menu": "Open menu",
     "homeAria": "KPITAL, home",
@@ -51,7 +51,7 @@
     },
     "footer": {
       "tagline": "The first participatory-investment platform rooted in Togo's real economy. From 10,000 FCFA.",
-      "secured": "Funds secured via SEMOA · CashPay",
+      "secured": "Funds secured in a dedicated escrow account",
       "platform": "Platform",
       "investors": "Investors",
       "company": "Company",

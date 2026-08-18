@@ -1,0 +1,147 @@
+---
+layout: base.njk
+title: "My investments | KPITAL"
+description: "Track your KPITAL investments in progress, in funding and already repaid, with capital invested and expected ROI."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: invest
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Investor space</p>
+      <h1>My investments</h1>
+      <p class="dash-phead-sub">The detail of your positions: projects in progress, projects in funding and projects already repaid. Each line leads to the full tracking of the investment.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="/en/projets" class="btn btn-primary">Explore projects →</a>
+    </div>
+  </div>
+</section>
+
+<!-- SUMMARY STRIP -->
+<section class="dash-summary-band">
+  <div class="container">
+    <div class="dash-summary">
+      <div class="dsm">
+        <div class="dsm-k">Capital invested</div>
+        <div class="dsm-v num">820&#8239;000<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s">Spread across <span class="num">3</span> active projects</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Expected ROI</div>
+        <div class="dsm-v num dsm-pos">+148&#8239;200<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s">Over the remaining term of the projects</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Active projects</div>
+        <div class="dsm-v num">3</div>
+        <div class="dsm-s"><span class="num">2</span> in progress, <span class="num">1</span> in funding</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Already repaid</div>
+        <div class="dsm-v num">1</div>
+        <div class="dsm-s"><span class="num">230&#8239;000</span> FCFA paid back to the wallet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOLDINGS TABLE -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-sec-head">
+      <div>
+        <p class="eyebrow">Wallet</p>
+        <h2 class="dash-h2">All my positions</h2>
+      </div>
+      <a href="/en/dashboard/portefeuille" class="dash-sec-link">See my repayments →</a>
+    </div>
+
+    <div class="ledger" role="table" aria-label="All my investments">
+      <div class="ledger-scroll">
+        <div class="ledger-head" role="row">
+          <span class="lc lc-name" role="columnheader">Project</span>
+          <span class="lc lc-sector" role="columnheader">Sector</span>
+          <span class="lc lc-amt" role="columnheader">Amount</span>
+          <span class="lc lc-roi" role="columnheader">Expected ROI</span>
+          <span class="lc lc-prog" role="columnheader">Progress</span>
+          <span class="lc lc-due" role="columnheader">Maturity</span>
+          <span class="lc lc-status" role="columnheader">Status</span>
+        </div>
+
+        <!-- Villa Tokoin -->
+        <a class="ledger-row" href="/en/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Villa Tokoin: long-term rental</span>
+            <span class="lr-place">Tokoin, Lomé · <span class="num">24</span> months</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag tag-green">Real estate · A</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">300&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+66&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:73%"></i></span>
+            <span class="lr-bar-l"><span class="num">73%</span> funded</span>
+          </span>
+          <span class="lc lc-due num" role="cell">Jul 2028</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">In progress</span></span>
+        </a>
+
+        <!-- Stock tissu wax -->
+        <a class="ledger-row" href="/en/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Wax fabric stock: Grand Marché</span>
+            <span class="lr-place">Grand Marché, Lomé · <span class="num">4</span> months</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Retail · B</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">200&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+30&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:40%"></i></span>
+            <span class="lr-bar-l"><span class="num">40%</span> of term elapsed</span>
+          </span>
+          <span class="lc lc-due num" role="cell">Oct 2026</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">In progress</span></span>
+        </a>
+
+        <!-- Campagne maïs -->
+        <a class="ledger-row" href="/en/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Maize campaign: Plateaux Region</span>
+            <span class="lr-place">Kpalimé, Plateaux · <span class="num">6</span> months</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Agriculture · B+</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">320&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+52&#8239;200</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:88%"></i></span>
+            <span class="lr-bar-l"><span class="num">88%</span> funded</span>
+          </span>
+          <span class="lc lc-due num" role="cell">Jan 2027</span>
+          <span class="lc lc-status" role="cell"><span class="st st-open">Funding</span></span>
+        </a>
+
+        <!-- TOTALS -->
+        <div class="ledger-total" role="row">
+          <span class="lc lc-name" role="cell">Total · <span class="num">3</span> active investments</span>
+          <span class="lc lc-sector" role="cell"></span>
+          <span class="lc lc-amt num" role="cell">820&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+148&#8239;200</span>
+          <span class="lc lc-prog" role="cell"></span>
+          <span class="lc lc-due" role="cell"></span>
+          <span class="lc lc-status" role="cell"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

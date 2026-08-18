@@ -13,7 +13,7 @@
 
 /* ── STEP INDICATOR — slim hairline, tabular numbers ── */
 .steps{
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(3,1fr);
   list-style:none;border-top:1px solid var(--hairline);margin-bottom:28px;
 }
 .step{
@@ -205,7 +205,7 @@
 @media (max-width:480px){
   .auth{padding:30px 0 52px}
   .auth-card{padding:24px 18px}
-  .steps{grid-template-columns:repeat(4,1fr)}
+  .steps{grid-template-columns:repeat(3,1fr)}
   .step{flex-direction:column;gap:2px;padding:12px 2px 0}
   .step-lbl{font-size:0;height:0;overflow:hidden}
   .step-no{font-size:13px}

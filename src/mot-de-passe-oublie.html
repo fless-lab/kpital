@@ -1,0 +1,153 @@
+---
+layout: base.njk
+title: "Mot de passe oublié | KPITAL"
+description: "Réinitialisez votre mot de passe KPITAL. Recevez un lien par email ou un code par SMS pour définir un nouveau mot de passe en toute sécurité."
+pageCss: connexion
+---
+
+<!-- AUTH · FORGOT PASSWORD -->
+<section class="auth">
+  <div class="container auth-inner">
+
+    <div class="auth-card form-card">
+      <p class="eyebrow">Récupération de compte</p>
+      <h1 class="auth-title">Mot de passe oublié</h1>
+      <p class="auth-sub">Indiquez votre email ou votre numéro. Nous vous envoyons de quoi définir un nouveau mot de passe.</p>
+
+      <!-- ===== STATE 1 · REQUEST ===== -->
+      <form class="auth-form" id="reqForm" novalidate>
+        <div class="otp-seg" role="group" aria-label="Recevoir par">
+          <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
+          <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Téléphone</button>
+        </div>
+
+        <div class="field">
+          <label for="rp-id" id="rpIdLabel">Adresse email</label>
+          <input class="input" id="rp-id" name="rp-id" type="email" autocomplete="email"
+                 placeholder="votre@email.com">
+          <p class="auth-field-msg is-error" id="rpErr" hidden></p>
+        </div>
+
+        <button class="btn btn-primary auth-submit" type="submit" id="rpSend">Envoyer le lien →</button>
+
+        <a class="auth-back" href="/connexion">← Retour à la connexion</a>
+      </form>
+
+      <!-- ===== STATE 2a · EMAIL LINK SENT ===== -->
+      <div class="auth-result" id="sentEmail" hidden>
+        <div class="auth-result-mark">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+        </div>
+        <h2>Vérifiez votre boîte mail</h2>
+        <p>Si un compte existe pour <strong id="sentAddr"></strong>, vous recevrez un lien de réinitialisation valable <span class="num">30</span> minutes.</p>
+        <p class="auth-hint">Pas reçu ? Vérifiez vos spams, ou <button type="button" class="auth-forgot" id="resendEmail">renvoyez le lien</button>.</p>
+        <a class="btn btn-ghost" href="/connexion">Retour à la connexion</a>
+      </div>
+
+      <!-- ===== STATE 2b · PHONE CODE ===== -->
+      <form class="auth-form" id="codeForm" novalidate hidden>
+        <div class="field">
+          <label for="rp-code">Code reçu <span class="otp-sent" id="codeSentTo"></span></label>
+          <input class="input otp-code" id="rp-code" name="rp-code" inputmode="numeric" maxlength="6"
+                 autocomplete="one-time-code" placeholder="6 chiffres">
+          <p class="otp-resend">Pas reçu ? <button type="button" class="auth-forgot" id="resendCode">Renvoyer le code</button></p>
+        </div>
+        <button class="btn btn-primary auth-submit" type="submit" id="codeVerify">Continuer →</button>
+        <button type="button" class="auth-back" id="codeBack">← Changer de numéro</button>
+      </form>
+    </div>
+
+    <p class="auth-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Lien à usage unique · expire après <span class="num">30</span> min · connexion chiffrée
+    </p>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var reqForm   = document.getElementById("reqForm");
+  var seg       = reqForm.querySelectorAll(".otp-seg-btn");
+  var rpId      = document.getElementById("rp-id");
+  var rpIdLabel = document.getElementById("rpIdLabel");
+  var rpSend    = document.getElementById("rpSend");
+  var rpErr     = document.getElementById("rpErr");
+
+  var sentEmail = document.getElementById("sentEmail");
+  var sentAddr  = document.getElementById("sentAddr");
+
+  var codeForm  = document.getElementById("codeForm");
+  var codeSent  = document.getElementById("codeSentTo");
+  var rpCode    = document.getElementById("rp-code");
+  var codeBack  = document.getElementById("codeBack");
+
+  var method = "email";
+
+  function setMethod(m) {
+    method = m;
+    seg.forEach(function (b) {
+      var on = b.dataset.method === m;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (m === "email") {
+      rpIdLabel.textContent = "Adresse email";
+      rpId.type = "email"; rpId.placeholder = "votre@email.com"; rpId.autocomplete = "email";
+      rpSend.textContent = "Envoyer le lien →";
+    } else {
+      rpIdLabel.textContent = "Numéro de téléphone";
+      rpId.type = "tel"; rpId.placeholder = "+228 9X XX XX XX"; rpId.autocomplete = "tel";
+      rpSend.textContent = "Envoyer le code →";
+    }
+    rpErr.hidden = true;
+  }
+
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function validPhone(v) { return v.replace(/[^\d]/g, "").length >= 8; }
+
+  reqForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = rpId.value.trim();
+    if (method === "email" && !validEmail(v)) {
+      rpErr.textContent = "Entrez une adresse email valide."; rpErr.hidden = false; rpId.focus(); return;
+    }
+    if (method === "phone" && !validPhone(v)) {
+      rpErr.textContent = "Entrez un numéro de téléphone valide."; rpErr.hidden = false; rpId.focus(); return;
+    }
+    rpErr.hidden = true;
+    reqForm.hidden = true;
+    if (method === "email") {
+      sentAddr.textContent = v;
+      sentEmail.hidden = false;
+    } else {
+      codeSent.textContent = "· envoyé au " + v;
+      codeForm.hidden = false;
+      rpCode.focus();
+    }
+  });
+
+  seg.forEach(function (b) {
+    b.addEventListener("click", function () { setMethod(b.dataset.method); });
+  });
+
+  rpCode.addEventListener("input", function () { rpCode.value = rpCode.value.replace(/\D/g, ""); });
+
+  // phone path: after verifying the code, go to the reset screen
+  codeForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (rpCode.value.length !== 6) { rpCode.focus(); return; }
+    window.location.href = "/nouveau-mot-de-passe";
+  });
+
+  codeBack.addEventListener("click", function () {
+    codeForm.hidden = true;
+    reqForm.hidden = false;
+    rpCode.value = "";
+    rpId.focus();
+  });
+
+  document.getElementById("resendEmail").addEventListener("click", function () {});
+  document.getElementById("resendCode").addEventListener("click", function () { rpCode.focus(); });
+})();
+</script>

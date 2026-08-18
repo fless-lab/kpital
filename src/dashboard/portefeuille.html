@@ -1,0 +1,146 @@
+---
+layout: base.njk
+title: "Portefeuille | KPITAL"
+description: "Votre solde retirable KPITAL, vos remboursements reçus et l'historique de vos mouvements."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: wallet
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Espace investisseur</p>
+      <h1>Portefeuille</h1>
+      <p class="dash-phead-sub">Votre solde provient des remboursements de projets terminés. Il n'est pas rechargeable directement : vous pouvez le retirer ou le réinvestir.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="#retrait" class="btn btn-primary">Retirer par Mobile Money →</a>
+    </div>
+  </div>
+</section>
+
+<!-- WALLET BALANCE (dark panel) -->
+<section class="dash-section">
+  <div class="container">
+    <div class="wallet">
+      <div class="wallet-main">
+        <p class="wallet-kicker">Solde retirable · Wallet</p>
+        <div class="wallet-amt num">230&#8239;000<span class="wallet-cur">FCFA</span></div>
+        <p class="wallet-note">Issu de remboursements de projets terminés. Ce wallet ne peut pas être rechargé directement : il s'alimente uniquement par les remboursements des projets.</p>
+        <div class="wallet-actions">
+          <a href="#retrait" class="btn btn-white">Retirer par Mobile Money →</a>
+          <a href="/projets" class="btn btn-line">Réinvestir le solde</a>
+        </div>
+      </div>
+      <div class="wallet-side" id="retrait">
+        <div class="wallet-side-head">Retrait Mobile Money</div>
+        <div class="wallet-chan">
+          <div class="wchan">
+            <span class="wchan-t">T-Money · Togocel</span>
+            <span class="wchan-s">Crédit immédiat · frais opérateur standard</span>
+          </div>
+          <div class="wchan">
+            <span class="wchan-t">Flooz · Moov Africa</span>
+            <span class="wchan-s">Crédit immédiat · frais opérateur standard</span>
+          </div>
+          <div class="wchan">
+            <span class="wchan-t">Compte bancaire · Togo</span>
+            <span class="wchan-s"><span class="num">1</span> à <span class="num">2</span> jours ouvrés · sans frais</span>
+          </div>
+        </div>
+        <div class="wallet-side-foot">
+          <span class="k">Disponible</span>
+          <span class="v num">230&#8239;000 FCFA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS + TRANSACTIONS -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-grid-2">
+
+      <!-- Transactions -->
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h3>Historique des mouvements</h3>
+          <a href="/dashboard/documents" class="dash-sec-link">Relevés →</a>
+        </div>
+        <div class="dash-card-body pad0">
+          <div class="txn-row">
+            <span class="txn-ico">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </span>
+            <span class="txn-main">
+              <span class="txn-t">Remboursement · Campagne maïs Plateaux</span>
+              <span class="txn-s"><span class="num">14</span> juin 2026 · capital + ROI</span>
+            </span>
+            <span class="txn-amt is-pos">+230&#8239;000</span>
+          </div>
+          <div class="txn-row">
+            <span class="txn-ico is-out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </span>
+            <span class="txn-main">
+              <span class="txn-t">Retrait · T-Money</span>
+              <span class="txn-s"><span class="num">2</span> juin 2026 · +228 90 XX XX XX</span>
+            </span>
+            <span class="txn-amt">-120&#8239;000</span>
+          </div>
+          <div class="txn-row">
+            <span class="txn-ico">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </span>
+            <span class="txn-main">
+              <span class="txn-t">Remboursement · Boutique Adéwi</span>
+              <span class="txn-s"><span class="num">28</span> mai 2026 · capital + ROI</span>
+            </span>
+            <span class="txn-amt is-pos">+120&#8239;000</span>
+          </div>
+          <div class="txn-row">
+            <span class="txn-ico is-out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-6 6-4-4-3 3"/></svg>
+            </span>
+            <span class="txn-main">
+              <span class="txn-t">Réinvestissement · Villa Tokoin</span>
+              <span class="txn-s"><span class="num">12</span> mai 2026 · depuis le solde</span>
+            </span>
+            <span class="txn-amt">-300&#8239;000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side: cumulative stats -->
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h3>Récapitulatif</h3>
+        </div>
+        <div class="dash-card-body pad0">
+          <div class="dash-kv">
+            <span class="k">Remboursements reçus</span>
+            <span class="v num">350&#8239;000 FCFA</span>
+          </div>
+          <div class="dash-kv">
+            <span class="k">Total retiré</span>
+            <span class="v num">120&#8239;000 FCFA</span>
+          </div>
+          <div class="dash-kv">
+            <span class="k">Réinvesti depuis le solde</span>
+            <span class="v num">300&#8239;000 FCFA</span>
+          </div>
+          <div class="dash-kv">
+            <span class="k">Solde disponible</span>
+            <span class="v num">230&#8239;000 FCFA</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

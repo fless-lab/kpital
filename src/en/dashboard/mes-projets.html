@@ -1,0 +1,159 @@
+---
+layout: base.njk
+title: "My projects | KPITAL"
+description: "Track the projects you have submitted for KPITAL funding, their fundraising, tranche disbursement and the documents to provide."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: projects
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Project owner space</p>
+      <h1>My projects</h1>
+      <p class="dash-phead-sub">Here you track the projects you have submitted for funding: fundraising progress, disbursement of funds in tranches and the supporting documents to provide. Your account can be both investor and project owner.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="/en/soumettre" class="btn btn-primary">Submit a project →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVE PROJECT -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Adéwi Store: expansion and stock</h3>
+        <span class="pill is-ok"><i></i>Raising</span>
+      </div>
+      <div class="dash-card-body">
+        <span class="lr-bar"><i style="width:62%"></i></span>
+        <span class="lr-bar-l"><span class="num">62%</span> raised</span>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="dash-kv">
+          <span class="k">Fundraising target</span>
+          <span class="v num">1&#8239;500&#8239;000 FCFA</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Already raised</span>
+          <span class="v num">930&#8239;000 FCFA (62%)</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Investors</span>
+          <span class="v num">47</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Proposed ROI</span>
+          <span class="v num">16% / year</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Duration</span>
+          <span class="v num">6 months</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">KPITAL rating</span>
+          <span class="v">B+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISBURSEMENT BY TRANCHES -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Tranche disbursement</h3>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="dash-kv">
+          <span class="k">Tranche 1 · 60% · stock purchase</span>
+          <span class="v"><span class="pill is-ok"><i></i>Disbursed</span></span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Tranche 2 · 40% · rent + working capital</span>
+          <span class="v"><span class="pill is-pending"><i></i>Awaiting full funding</span></span>
+        </div>
+      </div>
+      <div class="dash-card-body">
+        <p class="dsm-s">Each tranche is released after KPITAL validates the corresponding supporting documents (invoices, receipts, contracts).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORTING DOCUMENTS -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Documents to provide</h3>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">RCCM</span>
+            <span class="doc-s">Trade and personal property credit register</span>
+          </span>
+          <span class="pill is-ok"><i></i>Provided</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Land title / lease</span>
+            <span class="doc-s">Proof of premises occupancy</span>
+          </span>
+          <span class="pill is-ok"><i></i>Provided</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Bank statements · 6 months</span>
+            <span class="doc-s">Over the last <span class="num">6</span> months</span>
+          </span>
+          <span class="pill is-ok"><i></i>Provided</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Guarantee proof</span>
+            <span class="doc-s">Guarantee or surety to upload</span>
+          </span>
+          <span class="pill is-pending"><i></i>Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBMIT ANOTHER PROJECT -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-empty">
+        <div class="dash-empty-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h4>Another project to fund?</h4>
+        <p>Present your activity, your need and your repayment plan. Our team reviews each application before it goes into fundraising.</p>
+        <a href="/en/soumettre" class="btn btn-ghost">Submit a project →</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -5,6 +5,7 @@ description: "Votre tableau de bord investisseur KPITAL."
 pageCss: dashboard
 noindex: true
 hideFooter: true
+dashActive: overview
 ---
 
 <!-- DASHBOARD HEADER -->
@@ -22,7 +23,7 @@ hideFooter: true
       </div>
       <div class="dash-acct-row">
         <span class="k">Séquestre</span>
-        <span class="v">SEMOA · CashPay</span>
+        <span class="v">Partenaire de paiement agréé</span>
       </div>
       <div class="dash-acct-row">
         <span class="k">Statut KYC</span>
@@ -31,6 +32,8 @@ hideFooter: true
     </div>
   </div>
 </section>
+
+{% include "dash-nav.njk" %}
 
 <!-- PORTFOLIO SUMMARY -->
 <section class="dash-summary-band">
@@ -68,10 +71,10 @@ hideFooter: true
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </span>
       <div class="kyc-note-body">
-        <h4>Vérification KYC en cours · SEMOA</h4>
+        <h4>Vérification KYC en cours</h4>
         <p>Votre dossier est en cours de vérification, généralement résolu sous 24h. Vous pouvez explorer les projets, mais pas encore confirmer de nouvel investissement.</p>
       </div>
-      <a href="/securite" class="btn btn-ghost kyc-note-cta">Voir le statut</a>
+      <a href="/dashboard/parametres" class="btn btn-ghost kyc-note-cta">Voir le statut</a>
     </div>
   </div>
 </section>
@@ -176,9 +179,9 @@ hideFooter: true
   <div class="container">
     <div class="wallet">
       <div class="wallet-main">
-        <p class="wallet-kicker">Solde retirable · Wallet SEMOA</p>
+        <p class="wallet-kicker">Solde retirable · Wallet</p>
         <div class="wallet-amt num">230&#8239;000<span class="wallet-cur">FCFA</span></div>
-        <p class="wallet-note">Issu de remboursements de projets terminés. Ce wallet ne peut pas être rechargé directement : il s'alimente uniquement par les remboursements SEMOA.</p>
+        <p class="wallet-note">Issu de remboursements de projets terminés. Ce wallet ne peut pas être rechargé directement : il s'alimente uniquement par les remboursements des projets.</p>
         <div class="wallet-actions">
           <a href="#retrait" class="btn btn-white">Retirer par Mobile Money →</a>
           <a href="/projets" class="btn btn-line">Réinvestir le solde</a>

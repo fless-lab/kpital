@@ -1,0 +1,23 @@
+{%- set isEn = lang == "en" -%}
+{%- set p = "/en" if isEn else "" -%}
+{%- set items = [
+  { key: "overview",   u: "/dashboard/",                fr: "Vue d'ensemble", en: "Overview" },
+  { key: "wallet",     u: "/dashboard/portefeuille/",   fr: "Portefeuille",   en: "Wallet" },
+  { key: "invest",     u: "/dashboard/investissements/",fr: "Investissements",en: "Investments" },
+  { key: "projects",   u: "/dashboard/mes-projets/",    fr: "Mes projets",    en: "My projects" },
+  { key: "documents",  u: "/dashboard/documents/",      fr: "Documents",      en: "Documents" },
+  { key: "notifs",     u: "/dashboard/notifications/",  fr: "Notifications",  en: "Notifications" },
+  { key: "settings",   u: "/dashboard/parametres/",     fr: "Paramètres",     en: "Settings" }
+] -%}
+<nav class="dash-nav" aria-label="{{ "Dashboard navigation" if isEn else "Navigation du tableau de bord" }}">
+  <div class="container dash-nav-inner">
+    <ul class="dash-tabs">
+      {%- for it in items %}
+      <li><a href="{{ p }}{{ it.u }}"{% if it.key == dashActive %} class="is-active" aria-current="page"{% endif %}>{{ it.en if isEn else it.fr }}</a></li>
+      {%- endfor %}
+    </ul>
+    <div class="dash-nav-side">
+      <span class="pill is-pending"><i></i>{{ "KYC pending" if isEn else "KYC en vérification" }}</span>
+    </div>
+  </div>
+</nav>

@@ -1,7 +1,7 @@
 ---
 layout: base.njk
 title: "Inscription | KPITAL"
-description: "Créez votre compte KPITAL : profil, vérification d'identité KYC par SEMOA et numéro Mobile Money. Inscription gratuite, fonds sécurisés en séquestre."
+description: "Créez votre compte KPITAL : choisissez votre profil (investisseur et/ou porteur) et vérifiez votre identité (KYC). Inscription gratuite, fonds sécurisés en séquestre."
 pageCss: inscription
 ---
 
@@ -12,15 +12,14 @@ pageCss: inscription
     <div class="auth-head">
       <p class="eyebrow">Créer un compte</p>
       <h1 class="auth-title">Rejoindre KPITAL</h1>
-      <p class="auth-sub">Quatre étapes, environ trois minutes. Inscription 100% gratuite.</p>
+      <p class="auth-sub">Trois étapes, environ deux minutes. Inscription 100% gratuite.</p>
     </div>
 
     <!-- STEP INDICATOR -->
     <ol class="steps" id="steps" aria-label="Progression de l'inscription">
       <li class="step active" data-step="1"><span class="step-no">01</span><span class="step-lbl">Profil</span></li>
       <li class="step" data-step="2"><span class="step-no">02</span><span class="step-lbl">Identité</span></li>
-      <li class="step" data-step="3"><span class="step-no">03</span><span class="step-lbl">Mobile Money</span></li>
-      <li class="step" data-step="4"><span class="step-no">04</span><span class="step-lbl">Confirmation</span></li>
+      <li class="step" data-step="3"><span class="step-no">03</span><span class="step-lbl">Confirmation</span></li>
     </ol>
 
     <div class="auth-card form-card">
@@ -28,18 +27,18 @@ pageCss: inscription
       <!-- STEP 1 · PROFIL -->
       <div class="pane" id="pane1">
         <div class="pane-head">
-          <p class="pane-kicker">Étape <span class="num">01</span> / <span class="num">04</span></p>
-          <h2 class="pane-title">Quel est votre profil ?</h2>
-          <p class="pane-sub">Choisissez comment vous souhaitez utiliser KPITAL.</p>
+          <p class="pane-kicker">Étape <span class="num">01</span> / <span class="num">03</span></p>
+          <h2 class="pane-title">Que souhaitez-vous faire ?</h2>
+          <p class="pane-sub">Vous pouvez choisir les deux : un même compte peut investir et porter des projets.</p>
         </div>
 
-        <div class="profiles" role="radiogroup" aria-label="Type de profil">
-          <button type="button" class="profile selected" id="prof-invest" role="radio" aria-checked="true" onclick="selectProfile('invest')">
+        <div class="profiles" role="group" aria-label="Type de profil (plusieurs choix possibles)">
+          <button type="button" class="profile selected" id="prof-invest" aria-pressed="true" onclick="toggleProfile('invest')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
             <span class="profile-name">Investisseur</span>
             <span class="profile-desc">Placer mon argent dans des projets vérifiés</span>
           </button>
-          <button type="button" class="profile" id="prof-porteur" role="radio" aria-checked="false" onclick="selectProfile('porteur')">
+          <button type="button" class="profile" id="prof-porteur" aria-pressed="false" onclick="toggleProfile('porteur')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span class="profile-name">Porteur de projet</span>
             <span class="profile-desc">Faire financer mon projet par la communauté</span>
@@ -90,17 +89,17 @@ pageCss: inscription
       <!-- STEP 2 · IDENTITÉ / KYC -->
       <div class="pane" id="pane2" hidden>
         <div class="pane-head">
-          <p class="pane-kicker">Étape <span class="num">02</span> / <span class="num">04</span> · Vérification KYC</p>
+          <p class="pane-kicker">Étape <span class="num">02</span> / <span class="num">03</span> · Vérification KYC</p>
           <h2 class="pane-title">Vérifiez votre identité</h2>
-          <p class="pane-sub">Requis par SEMOA pour sécuriser votre compte et vos fonds.</p>
+          <p class="pane-sub">Requis pour sécuriser votre compte et vos fonds.</p>
         </div>
 
         <div class="field">
           <label for="doc-type">Type de document <span class="req">*</span></label>
-          <select class="select" id="doc-type">
-            <option>Carte Nationale d'Identité (CNI)</option>
-            <option>Passeport</option>
-            <option>Titre de séjour</option>
+          <select class="select" id="doc-type" onchange="updateDocUpload()">
+            <option value="cni">Carte Nationale d'Identité (CNI)</option>
+            <option value="passeport">Passeport</option>
+            <option value="sejour">Titre de séjour</option>
           </select>
         </div>
 
@@ -126,29 +125,32 @@ pageCss: inscription
           </div>
         </div>
 
-        <div class="field">
-          <span class="field-cap">Photo du document (recto) <span class="req">*</span></span>
-          <label class="upload">
-            <input type="file" accept=".jpg,.png,.pdf">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span class="upload-t"><strong>Recto du document</strong></span>
-            <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
-          </label>
-        </div>
+        <div id="docUploads">
+          <!-- Rempli dynamiquement selon le type de document (voir updateDocUpload) -->
+          <div class="field">
+            <span class="field-cap" id="cap-front">Photo du document (recto) <span class="req">*</span></span>
+            <label class="upload">
+              <input type="file" accept=".jpg,.png,.pdf">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="upload-t"><strong id="txt-front">Recto du document</strong></span>
+              <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
+            </label>
+          </div>
 
-        <div class="field" style="margin-bottom:0">
-          <span class="field-cap">Photo du document (verso) <span class="req">*</span></span>
-          <label class="upload">
-            <input type="file" accept=".jpg,.png,.pdf">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span class="upload-t"><strong>Verso du document</strong></span>
-            <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
-          </label>
+          <div class="field" id="field-back" style="margin-bottom:0">
+            <span class="field-cap">Photo du document (verso) <span class="req">*</span></span>
+            <label class="upload">
+              <input type="file" accept=".jpg,.png,.pdf">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="upload-t"><strong>Verso du document</strong></span>
+              <span class="upload-s">JPG, PNG ou PDF · max <span class="num">10</span> Mo</span>
+            </label>
+          </div>
         </div>
 
         <div class="notice">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <p>Vos documents sont transmis à <strong>SEMOA</strong> uniquement pour le KYC. Ils ne sont pas stockés par KPITAL.</p>
+          <p>Vos documents sont chiffrés et conservés de façon sécurisée, utilisés uniquement pour vérifier votre identité (KYC). Détails dans notre <a href="/confidentialite">politique de confidentialité</a>.</p>
         </div>
 
         <div class="pane-foot">
@@ -157,61 +159,10 @@ pageCss: inscription
         </div>
       </div>
 
-      <!-- STEP 3 · MOBILE MONEY -->
+      <!-- STEP 3 · CONFIRMATION -->
       <div class="pane" id="pane3" hidden>
         <div class="pane-head">
-          <p class="pane-kicker">Étape <span class="num">03</span> / <span class="num">04</span></p>
-          <h2 class="pane-title">Votre Mobile Money</h2>
-          <p class="pane-sub">Ce numéro recevra vos remboursements et votre ROI à échéance.</p>
-        </div>
-
-        <div class="field">
-          <span class="field-cap">Opérateur <span class="req">*</span></span>
-          <div class="momo" role="radiogroup" aria-label="Opérateur Mobile Money">
-            <button type="button" class="momo-opt selected" id="momo-tmoney" role="radio" aria-checked="true" onclick="selectMomo('tmoney')">
-              <span class="momo-badge">T</span>
-              <span class="momo-text"><span class="momo-name">T-Money</span><span class="momo-net">Togocel</span></span>
-            </button>
-            <button type="button" class="momo-opt" id="momo-flooz" role="radio" aria-checked="false" onclick="selectMomo('flooz')">
-              <span class="momo-badge">F</span>
-              <span class="momo-text"><span class="momo-name">Flooz</span><span class="momo-net">Moov Africa</span></span>
-            </button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="momo-num">Numéro Mobile Money <span class="req">*</span></label>
-          <input class="input" id="momo-num" type="tel" placeholder="+228 9X XX XX XX">
-          <p class="hint">Le numéro associé à votre compte Mobile Money.</p>
-        </div>
-
-        <div class="field" style="margin-bottom:0">
-          <label for="otp">Code de confirmation SMS <span class="req">*</span></label>
-          <div class="otp-row">
-            <input class="input otp-input" id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="XXXXXX">
-            <button type="button" class="btn btn-ghost otp-send">Envoyer le code</button>
-          </div>
-          <p class="hint">Un code à <span class="num">6</span> chiffres sera envoyé sur votre numéro.</p>
-        </div>
-
-        <div class="wallet">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
-          <div>
-            <p class="wallet-t">KPITAL Wallet · bientôt disponible</p>
-            <p class="wallet-s">Votre solde affichera capital + ROI une fois les projets remboursés. L'argent reste géré par SEMOA ; KPITAL affiche le solde disponible que vous pouvez réinvestir ou retirer.</p>
-          </div>
-        </div>
-
-        <div class="pane-foot">
-          <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Retour</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(4)">Finaliser →</button>
-        </div>
-      </div>
-
-      <!-- STEP 4 · CONFIRMATION -->
-      <div class="pane" id="pane4" hidden>
-        <div class="pane-head">
-          <p class="pane-kicker">Étape <span class="num">04</span> / <span class="num">04</span> · Finalisation</p>
+          <p class="pane-kicker">Étape <span class="num">03</span> / <span class="num">03</span> · Finalisation</p>
           <h2 class="pane-title">Presque terminé</h2>
           <p class="pane-sub">Lisez et acceptez les conditions avant de créer votre compte.</p>
         </div>
@@ -223,7 +174,7 @@ pageCss: inscription
           </li>
           <li class="consent">
             <input type="checkbox" id="c2">
-            <label for="c2">J'accepte la <a href="/confidentialite">Politique de confidentialité</a> et le traitement de mes données par SEMOA pour le KYC.</label>
+            <label for="c2">J'accepte la <a href="/confidentialite">Politique de confidentialité</a> et le traitement de mes données pour la vérification d'identité (KYC).</label>
           </li>
           <li class="consent">
             <input type="checkbox" id="c3">
@@ -238,24 +189,25 @@ pageCss: inscription
         <div class="recap">
           <p class="recap-head">Récapitulatif</p>
           <div class="recap-row"><span>Profil</span><span class="recap-v" id="recap-profil">Investisseur</span></div>
+          <div class="recap-row"><span>Portefeuille KPITAL</span><span class="recap-v recap-free">Créé automatiquement</span></div>
           <div class="recap-row"><span>Frais d'inscription</span><span class="recap-v recap-free">Gratuit</span></div>
-          <div class="recap-row"><span>KYC SEMOA</span><span class="recap-v recap-pending">En attente de validation</span></div>
+          <div class="recap-row"><span>KYC</span><span class="recap-v recap-pending">En attente de validation</span></div>
         </div>
 
         <div class="pane-foot">
-          <button type="button" class="btn btn-ghost" onclick="goStep(3)">← Retour</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(5)">✓ Créer mon compte</button>
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Retour</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(4)">✓ Créer mon compte</button>
         </div>
       </div>
 
-      <!-- STEP 5 · SUCCÈS -->
-      <div class="pane" id="pane5" hidden>
+      <!-- STEP 4 · SUCCÈS -->
+      <div class="pane" id="pane4" hidden>
         <div class="done">
           <div class="done-mark">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <h2 class="pane-title">Compte créé</h2>
-          <p class="pane-sub">Bienvenue sur KPITAL. Votre KYC est en cours de vérification par SEMOA, généralement moins de <span class="num">24</span> heures.</p>
+          <p class="pane-sub">Bienvenue sur KPITAL. Votre KYC est en cours de vérification, généralement moins de <span class="num">24</span> heures.</p>
 
           <ol class="done-steps">
             <li class="done-step is-done">
@@ -264,7 +216,7 @@ pageCss: inscription
             </li>
             <li class="done-step is-pending">
               <span class="done-no num">2</span>
-              <p>KYC SEMOA en cours · résultat sous <span class="num">24</span>h</p>
+              <p>KYC en cours · résultat sous <span class="num">24</span>h</p>
             </li>
             <li class="done-step">
               <span class="done-no num">3</span>
@@ -288,33 +240,53 @@ pageCss: inscription
 
 <script>
 (function () {
-  var profile = "invest";
-  var momo = "tmoney";
+  // Rôles cumulables : un compte peut être investisseur ET/OU porteur.
+  var roles = { invest: true, porteur: false };
 
-  window.selectProfile = function (p) {
-    profile = p;
-    var inv = document.getElementById("prof-invest");
-    var por = document.getElementById("prof-porteur");
-    inv.classList.toggle("selected", p === "invest");
-    inv.setAttribute("aria-checked", p === "invest");
-    por.classList.toggle("selected", p === "porteur");
-    por.setAttribute("aria-checked", p === "porteur");
+  var ROLE_LABELS = { invest: "Investisseur", porteur: "Porteur de projet" };
+
+  window.toggleProfile = function (p) {
+    var active = Object.keys(roles).filter(function (k) { return roles[k]; });
+    // Interdire de tout désactiver : garder au moins un rôle.
+    if (roles[p] && active.length === 1) return;
+    roles[p] = !roles[p];
+
+    var btn = document.getElementById("prof-" + (p === "invest" ? "invest" : "porteur"));
+    if (btn) {
+      btn.classList.toggle("selected", roles[p]);
+      btn.setAttribute("aria-pressed", roles[p]);
+    }
+
     var recap = document.getElementById("recap-profil");
-    if (recap) recap.textContent = p === "invest" ? "Investisseur" : "Porteur de projet";
+    if (recap) {
+      var picked = Object.keys(roles)
+        .filter(function (k) { return roles[k]; })
+        .map(function (k) { return ROLE_LABELS[k]; });
+      recap.textContent = picked.join(" + ");
+    }
   };
 
-  window.selectMomo = function (m) {
-    momo = m;
-    var t = document.getElementById("momo-tmoney");
-    var f = document.getElementById("momo-flooz");
-    t.classList.toggle("selected", m === "tmoney");
-    t.setAttribute("aria-checked", m === "tmoney");
-    f.classList.toggle("selected", m === "flooz");
-    f.setAttribute("aria-checked", m === "flooz");
+  // Adapte les champs d'upload au type de document.
+  // Passeport : une seule page d'identité. CNI / titre de séjour : recto + verso.
+  window.updateDocUpload = function () {
+    var type = document.getElementById("doc-type").value;
+    var single = type === "passeport";
+    var fieldBack = document.getElementById("field-back");
+    var capFront = document.getElementById("cap-front");
+    var txtFront = document.getElementById("txt-front");
+
+    if (fieldBack) fieldBack.hidden = single;
+    if (single) {
+      capFront.innerHTML = 'Page d\'identité du passeport <span class="req">*</span>';
+      txtFront.textContent = "Page photo du passeport";
+    } else {
+      capFront.innerHTML = 'Photo du document (recto) <span class="req">*</span>';
+      txtFront.textContent = "Recto du document";
+    }
   };
 
   window.goStep = function (n) {
-    for (var i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 4; i++) {
       var pane = document.getElementById("pane" + i);
       if (pane) pane.hidden = i !== n;
     }
@@ -327,5 +299,7 @@ pageCss: inscription
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  updateDocUpload();
 })();
 </script>
