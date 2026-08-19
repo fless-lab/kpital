@@ -3,6 +3,7 @@ import { buildApp } from "../../src/app";
 import { loadConfig } from "../../src/config/env";
 import type { Db } from "../../src/db/client";
 import type { Notifier } from "../../src/lib/notifier";
+import type { PaymentProvider } from "../../src/lib/payments";
 import { db, ensureMigrated } from "./db";
 
 const testUrl = process.env.TEST_DATABASE_URL ?? "postgres://kpital:kpital@127.0.0.1:5544/kpital_test";
@@ -25,7 +26,10 @@ function makeCapturingNotifier(): { notifier: Notifier; sentCodes: string[]; sen
   return { notifier, sentCodes, sentLinks };
 }
 
-export async function buildTestApp(): Promise<{
+export async function buildTestApp(opts?: {
+  payments?: PaymentProvider;
+  rateLimitMax?: number;
+}): Promise<{
   app: FastifyInstance;
   db: Db;
   sentCodes: string[];
@@ -37,7 +41,13 @@ export async function buildTestApp(): Promise<{
     CORS_ORIGIN: "http://localhost:8080",
   });
   const { notifier, sentCodes, sentLinks } = makeCapturingNotifier();
-  const app = buildApp({ db, config, notifier });
+  const app = buildApp({
+    db,
+    config,
+    notifier,
+    ...(opts?.payments ? { payments: opts.payments } : {}),
+    ...(opts?.rateLimitMax !== undefined ? { rateLimitMax: opts.rateLimitMax } : {}),
+  });
   return { app, db, sentCodes, sentLinks };
 }
 
