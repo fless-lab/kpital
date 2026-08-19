@@ -2,6 +2,7 @@ services:
   kpital-postgres:
     image: postgres:16-alpine
     container_name: kpital-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: kpital
       POSTGRES_PASSWORD: kpital
