@@ -43,4 +43,18 @@ describe("POST /auth/login", () => {
     expect(res.json().error.code).toBe("invalid_credentials");
     await app.close();
   });
+
+  it("rejects an unknown identifier via the decoy-hash path", async () => {
+    const { app } = await buildTestApp();
+    // No account exists: login must run the DECOY_HASH verify (not throw) and
+    // return the same invalid_credentials envelope as a wrong password.
+    const res = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { identifier: "nobody@a.co", password: "Abcdef12" },
+    });
+    expect(res.statusCode).toBe(401);
+    expect(res.json().error.code).toBe("invalid_credentials");
+    await app.close();
+  });
 });
