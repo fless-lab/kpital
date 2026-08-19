@@ -19,6 +19,15 @@ describe("password reset (email link)", () => {
       payload: { identifier: "k@a.co", channel: "email" },
     });
     const token = sentLinks.at(-1);
+    // Establish a session on the OLD password; it must be killed by the reset.
+    const preLogin = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { identifier: "k@a.co", password: "Abcdef12" },
+    });
+    expect(preLogin.statusCode).toBe(200);
+    const preCookie = preLogin.cookies.find((c) => c.name === "kpital_sess")?.value ?? "";
+
     const rr = await app.inject({
       method: "POST",
       url: "/auth/password/reset",
@@ -31,6 +40,24 @@ describe("password reset (email link)", () => {
       payload: { identifier: "k@a.co", password: "Newpass12" },
     });
     expect(login.statusCode).toBe(200);
+
+    // The reset token is single-use: reusing it returns 400 invalid_token.
+    const reuse = await app.inject({
+      method: "POST",
+      url: "/auth/password/reset",
+      payload: { token, password: "Newpass34" },
+    });
+    expect(reuse.statusCode).toBe(400);
+    expect(reuse.json().error.code).toBe("invalid_token");
+
+    // revokeAllSessions took effect: the pre-reset session no longer authorizes.
+    const meAfter = await app.inject({
+      method: "GET",
+      url: "/me",
+      cookies: { kpital_sess: preCookie },
+    });
+    expect(meAfter.statusCode).toBe(401);
+
     await app.close();
   });
 

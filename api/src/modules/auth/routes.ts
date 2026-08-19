@@ -181,18 +181,19 @@ export default async function authRoutes(app: FastifyInstance) {
 
     if (identifier) {
       const account = await findByIdentifier(identifier);
-      if (account) {
+      // Gate the recipient on the requested channel so the code is only
+      // delivered to that channel's contact, never fanned out to the other.
+      const contact = channel === "sms" ? account?.phone : account?.email;
+      if (account && contact) {
         const { code } = await issueOtp(app.db, {
           accountId: account.id,
           channel,
           purpose: "login",
           ttlMinutes: app.config.otpTtlMinutes,
         });
+        const to = channel === "sms" ? { phone: contact } : { email: contact };
         await app.notifier.send(
-          {
-            ...(account.email ? { email: account.email } : {}),
-            ...(account.phone ? { phone: account.phone } : {}),
-          },
+          to,
           { subject: "Your KPITAL login code", body: `Your login code is ${code}. It expires in ${app.config.otpTtlMinutes} minutes.` },
         );
       }
@@ -245,30 +246,34 @@ export default async function authRoutes(app: FastifyInstance) {
 
     if (identifier) {
       const account = await findByIdentifier(identifier);
-      if (account) {
-        const to = {
-          ...(account.email ? { email: account.email } : {}),
-          ...(account.phone ? { phone: account.phone } : {}),
-        };
-        if (channel === "email") {
-          const { token } = await issueResetToken(app.db, account.id);
-          const link = `${app.config.corsOrigin}/nouveau-mot-de-passe?token=${token}`;
-          await app.notifier.send(to, {
+      // Gate the recipient on the requested channel: a reset link (email) or code
+      // (phone) is a bearer credential and must never fan out to the other
+      // channel. A missing contact for the requested channel means nothing to
+      // send, but we still return the same anti-enumeration response below.
+      if (account && channel === "email" && account.email) {
+        const { token } = await issueResetToken(app.db, account.id);
+        const link = `${app.config.corsOrigin}/nouveau-mot-de-passe?token=${token}`;
+        await app.notifier.send(
+          { email: account.email },
+          {
             subject: "Reset your KPITAL password",
             body: `Reset your password with this link: ${link} It expires in 30 minutes.`,
-          });
-        } else {
-          const { code } = await issueOtp(app.db, {
-            accountId: account.id,
-            channel: "sms",
-            purpose: "password_reset",
-            ttlMinutes: app.config.otpTtlMinutes,
-          });
-          await app.notifier.send(to, {
+          },
+        );
+      } else if (account && channel === "phone" && account.phone) {
+        const { code } = await issueOtp(app.db, {
+          accountId: account.id,
+          channel: "sms",
+          purpose: "password_reset",
+          ttlMinutes: app.config.otpTtlMinutes,
+        });
+        await app.notifier.send(
+          { phone: account.phone },
+          {
             subject: "Your KPITAL password reset code",
             body: `Your password reset code is ${code}. It expires in ${app.config.otpTtlMinutes} minutes.`,
-          });
-        }
+          },
+        );
       }
     }
 
