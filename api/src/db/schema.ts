@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer } from "drizzle-orm/pg-core";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
 export const acctStatus = pgEnum("acct_status", ["active", "suspended", "closed"]);
@@ -45,5 +45,19 @@ export const walletEntries = pgTable("wallet_entry", {
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
   reference: text("reference"),
   metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const otpChannel = pgEnum("otp_channel", ["email", "sms"]);
+export const otpPurpose = pgEnum("otp_purpose", ["login", "password_reset", "verify_contact"]);
+export const otpCodes = pgTable("otp_code", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").references(() => accounts.id),
+  channel: otpChannel("channel").notNull(),
+  purpose: otpPurpose("purpose").notNull(),
+  codeHash: text("code_hash").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumedAt: timestamp("consumed_at"),
+  attempts: integer("attempts").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
