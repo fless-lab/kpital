@@ -48,6 +48,15 @@ export const walletEntries = pgTable("wallet_entry", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const passwordResets = pgTable("password_reset", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumedAt: timestamp("consumed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const otpChannel = pgEnum("otp_channel", ["email", "sms"]);
 export const otpPurpose = pgEnum("otp_purpose", ["login", "password_reset", "verify_contact"]);
 export const otpCodes = pgTable("otp_code", {

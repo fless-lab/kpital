@@ -1,15 +1,19 @@
 import type { FastifyInstance } from "fastify";
 import { eq, or } from "drizzle-orm";
 import { accounts } from "../../db/schema";
-import { verifyPassword } from "./password";
+import { hashPassword, isStrongPassword, verifyPassword } from "./password";
 import { createSession, revokeSession, revokeAllSessions } from "./session";
 import { registerAccount, WeakPasswordError } from "../accounts/register";
 import { issueOtp, verifyOtp } from "./otp";
+import { issueResetToken, consumeResetToken } from "./reset";
 
 type LoginBody = { identifier?: string; password?: string };
 
 type OtpRequestBody = { identifier?: unknown; channel?: unknown };
 type OtpVerifyBody = { identifier?: unknown; code?: unknown };
+
+type ForgotBody = { identifier?: unknown; channel?: unknown };
+type ResetBody = { token?: unknown; identifier?: unknown; code?: unknown; password?: unknown };
 
 type RegisterBody = {
   email?: unknown;
@@ -227,6 +231,86 @@ export default async function authRoutes(app: FastifyInstance) {
       path: "/",
       maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
     });
+
+    return reply.code(200).send({ ok: true });
+  });
+
+  // POST /auth/password/forgot — anti-enumeration: ALWAYS replies { sent: true }.
+  // email channel -> reset link with a hashed, single-use, 30-min token.
+  // phone channel -> OTP with purpose=password_reset.
+  app.post("/auth/password/forgot", async (req, reply) => {
+    const body = (req.body ?? {}) as ForgotBody;
+    const identifier = typeof body.identifier === "string" ? body.identifier : "";
+    const channel = body.channel === "phone" ? "phone" : "email";
+
+    if (identifier) {
+      const account = await findByIdentifier(identifier);
+      if (account) {
+        const to = {
+          ...(account.email ? { email: account.email } : {}),
+          ...(account.phone ? { phone: account.phone } : {}),
+        };
+        if (channel === "email") {
+          const { token } = await issueResetToken(app.db, account.id);
+          const link = `${app.config.corsOrigin}/nouveau-mot-de-passe?token=${token}`;
+          await app.notifier.send(to, {
+            subject: "Reset your KPITAL password",
+            body: `Reset your password with this link: ${link} It expires in 30 minutes.`,
+          });
+        } else {
+          const { code } = await issueOtp(app.db, {
+            accountId: account.id,
+            channel: "sms",
+            purpose: "password_reset",
+            ttlMinutes: app.config.otpTtlMinutes,
+          });
+          await app.notifier.send(to, {
+            subject: "Your KPITAL password reset code",
+            body: `Your password reset code is ${code}. It expires in ${app.config.otpTtlMinutes} minutes.`,
+          });
+        }
+      }
+    }
+
+    return reply.code(200).send({ sent: true });
+  });
+
+  // POST /auth/password/reset — accepts { token, password } (email link path) or
+  // { identifier, code, password } (phone OTP path). On a valid token/code the
+  // password is rehashed, the account updated, and ALL sessions revoked.
+  app.post("/auth/password/reset", async (req, reply) => {
+    const body = (req.body ?? {}) as ResetBody;
+    const token = typeof body.token === "string" ? body.token : "";
+    const identifier = typeof body.identifier === "string" ? body.identifier : "";
+    const code = typeof body.code === "string" ? body.code : "";
+    const password = typeof body.password === "string" ? body.password : "";
+
+    // Validate strength first so a weak attempt never burns a single-use token.
+    if (!isStrongPassword(password)) {
+      return reply
+        .code(400)
+        .send({ error: { code: "validation_error", message: "Password does not meet strength requirements" } });
+    }
+
+    const invalidToken = () =>
+      reply.code(400).send({ error: { code: "invalid_token", message: "Invalid or expired reset token" } });
+
+    let accountId: string | null = null;
+    if (token) {
+      accountId = await consumeResetToken(app.db, token);
+    } else if (identifier && code) {
+      const account = await findByIdentifier(identifier);
+      if (account) {
+        const ok = await verifyOtp(app.db, { accountId: account.id, purpose: "password_reset", code });
+        if (ok) accountId = account.id;
+      }
+    }
+
+    if (!accountId) return invalidToken();
+
+    const passwordHash = await hashPassword(password);
+    await app.db.update(accounts).set({ passwordHash, updatedAt: new Date() }).where(eq(accounts.id, accountId));
+    await revokeAllSessions(app.db, accountId);
 
     return reply.code(200).send({ ok: true });
   });
