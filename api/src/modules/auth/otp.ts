@@ -1,5 +1,5 @@
-import { randomInt, createHash } from "node:crypto";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { randomInt, createHash, timingSafeEqual } from "node:crypto";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import { otpCodes } from "../../db/schema";
 
@@ -34,24 +34,33 @@ export async function verifyOtp(
     code: string;
   },
 ): Promise<boolean> {
-  const [row] = await db
-    .select()
-    .from(otpCodes)
-    .where(
-      and(
-        eq(otpCodes.accountId, p.accountId),
-        eq(otpCodes.purpose, p.purpose),
-        isNull(otpCodes.consumedAt),
-        gt(otpCodes.expiresAt, new Date()),
-      ),
-    )
-    .orderBy(desc(otpCodes.createdAt))
-    .limit(1);
-  if (!row || row.attempts >= MAX_ATTEMPTS) return false;
-  if (row.codeHash !== sha(p.code)) {
-    await db.update(otpCodes).set({ attempts: row.attempts + 1 }).where(eq(otpCodes.id, row.id));
-    return false;
-  }
-  await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, row.id));
-  return true;
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select()
+      .from(otpCodes)
+      .where(
+        and(
+          eq(otpCodes.accountId, p.accountId),
+          eq(otpCodes.purpose, p.purpose),
+          isNull(otpCodes.consumedAt),
+          gt(otpCodes.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(otpCodes.createdAt))
+      .limit(1)
+      .for("update");
+    if (!row || row.attempts >= MAX_ATTEMPTS) return false;
+    const expected = Buffer.from(row.codeHash);
+    const actual = Buffer.from(sha(p.code));
+    const matches = expected.length === actual.length && timingSafeEqual(expected, actual);
+    if (!matches) {
+      await tx
+        .update(otpCodes)
+        .set({ attempts: sql`${otpCodes.attempts} + 1` })
+        .where(eq(otpCodes.id, row.id));
+      return false;
+    }
+    await tx.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, row.id));
+    return true;
+  });
 }

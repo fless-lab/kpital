@@ -25,4 +25,15 @@ describe("otp", () => {
       expect(await verifyOtp(db, { accountId: id, purpose: "login", code: "000000" })).toBe(false);
     });
   });
+  it("refuses the correct code once the attempts cap is reached", async () => {
+    await withTestDb(async (db) => {
+      const id = await acct(db);
+      const { code } = await issueOtp(db, { accountId: id, channel: "email", purpose: "login", ttlMinutes: 10 });
+      const wrong = code === "000000" ? "111111" : "000000";
+      for (let i = 0; i < 5; i++) {
+        expect(await verifyOtp(db, { accountId: id, purpose: "login", code: wrong })).toBe(false);
+      }
+      expect(await verifyOtp(db, { accountId: id, purpose: "login", code })).toBe(false); // cap reached
+    });
+  });
 });
