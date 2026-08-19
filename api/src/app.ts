@@ -28,7 +28,11 @@ export function buildApp(opts: {
   // so the error handler's server-side logging of unexpected errors is real.
   logger?: FastifyServerOptions["logger"];
 }): FastifyInstance {
-  const app = Fastify({ logger: opts.logger ?? false });
+  // trustProxy is config-driven (TRUST_PROXY), default false. Behind a reverse
+  // proxy set it to the hop count (e.g. 1) so req.ip reflects X-Forwarded-For
+  // and the per-IP /auth/* rate-limit keys on the real client, without letting a
+  // direct client spoof the whole chain (which trustProxy: true would allow).
+  const app = Fastify({ trustProxy: opts.config.trustProxy, logger: opts.logger ?? false });
   app.decorate("db", opts.db);
   app.decorate("config", opts.config);
   app.decorate("notifier", opts.notifier ?? makeDefaultNotifier(opts.config));

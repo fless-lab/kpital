@@ -53,7 +53,9 @@ export async function listEntries(db: Db, accountId: string): Promise<WalletEntr
     .select()
     .from(walletEntries)
     .where(eq(walletEntries.walletId, wid))
-    .orderBy(desc(walletEntries.createdAt));
+    // Secondary sort on id keeps ordering deterministic when several entries
+    // share a transaction-start now() createdAt.
+    .orderBy(desc(walletEntries.createdAt), desc(walletEntries.id));
 }
 
 // Positive ledger entry. Used to fund a wallet (e.g. a repayment credit).

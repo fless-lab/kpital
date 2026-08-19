@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { accounts, notificationPrefs, payoutMethods } from "../../db/schema";
 
 const VALID_ROLES = new Set(["investor", "porteur"]);
@@ -94,8 +94,10 @@ export default async function accountsRoutes(app: FastifyInstance) {
     }
   });
 
-  // POST /me/roles — cumulative + idempotent. Read current roles, append the
-  // requested one if absent, write back. Returns the updated roles.
+  // POST /me/roles — cumulative + idempotent in a single atomic UPDATE. The
+  // CASE appends the role only when absent, so concurrent adds cannot lose a
+  // write (no read-modify-write race) and re-adding an existing role is a no-op
+  // that preserves the current order. Returns the updated roles.
   app.post("/me/roles", { preHandler: app.requireAuth }, async (req, reply) => {
     const accountId = req.accountId;
     if (!requireAccount(accountId, reply)) return;
@@ -106,22 +108,19 @@ export default async function accountsRoutes(app: FastifyInstance) {
       return validationError(reply, "role must be 'investor' or 'porteur'");
     }
 
-    const [account] = await app.db.select({ roles: accounts.roles }).from(accounts).where(eq(accounts.id, accountId));
-    if (!account) {
-      return reply.code(404).send({ error: { code: "not_found", message: "Account not found" } });
-    }
-
-    if (account.roles.includes(role)) {
-      return reply.send({ roles: account.roles });
-    }
-
-    const nextRoles = [...account.roles, role];
     const [updated] = await app.db
       .update(accounts)
-      .set({ roles: nextRoles, updatedAt: new Date() })
+      .set({
+        roles: sql`case when ${role} = any(${accounts.roles}) then ${accounts.roles} else ${accounts.roles} || array[${role}]::text[] end`,
+        updatedAt: new Date(),
+      })
       .where(eq(accounts.id, accountId))
       .returning({ roles: accounts.roles });
-    return reply.send({ roles: updated?.roles ?? nextRoles });
+
+    if (!updated) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Account not found" } });
+    }
+    return reply.send({ roles: updated.roles });
   });
 
   // GET /me/notification-pref — returns the stored row or sensible defaults.

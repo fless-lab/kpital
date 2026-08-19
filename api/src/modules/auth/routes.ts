@@ -1,6 +1,6 @@
-import type { FastifyInstance } from "fastify";
-import { eq, or } from "drizzle-orm";
-import { accounts } from "../../db/schema";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import { and, eq, isNull, or } from "drizzle-orm";
+import { accounts, otpCodes, passwordResets } from "../../db/schema";
 import { hashPassword, isStrongPassword, verifyPassword } from "./password";
 import { createSession, revokeSession, revokeAllSessions } from "./session";
 import { registerAccount, WeakPasswordError } from "../accounts/register";
@@ -27,6 +27,23 @@ type RegisterBody = {
 
 const VALID_ROLES = new Set(["investor", "porteur"]);
 
+// Single source of truth for the session-cookie policy. Every login/session
+// establishment (login, register, otp/verify) sets it via this helper so the
+// httpOnly/secure/sameSite/path/maxAge options are defined exactly once.
+function setSessionCookie(reply: FastifyReply, app: FastifyInstance, token: string): void {
+  reply.setCookie(app.config.sessionCookieName, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
+  });
+}
+
+function clearSessionCookie(reply: FastifyReply, app: FastifyInstance): void {
+  reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+}
+
 // A duplicate email surfaces as a Postgres unique-violation (code 23505) thrown
 // from inside registerAccount's transaction; the pg error may arrive bare or
 // wrapped by drizzle, so check both the error and its cause.
@@ -42,9 +59,11 @@ function isUniqueViolation(err: unknown): boolean {
 
 // Pre-computed argon2id hash of a throwaway value. Used to equalize work on the
 // no-account path so every login attempt runs exactly one argon2 verify, closing
-// the timing side-channel that would otherwise leak account existence.
+// the timing side-channel that would otherwise leak account existence. Generated
+// with the SAME params as hashPassword (m=65536,t=3,p=1) so decoy verify cost
+// matches a real account's verify cost; regenerate it if those params change.
 const DECOY_HASH =
-  "$argon2id$v=19$m=65536,p=4,t=3$9jpoHiuL86aa/z6hG95rJQ$atl0eoG7Xjq4B/KUdJk3K4x8/ok//948RIpJLUjHgLY";
+  "$argon2id$v=19$m=65536,p=1,t=3$PIFDuyPMxvxYqN3adsVkrw$W/kLUmXnio6UDsqlreTtb7F4brijbj2Dr7ecbvY2W7o";
 
 export default async function authRoutes(app: FastifyInstance) {
   app.post("/auth/login", async (req, reply) => {
@@ -85,13 +104,7 @@ export default async function authRoutes(app: FastifyInstance) {
       ip: req.ip,
     });
 
-    reply.setCookie(app.config.sessionCookieName, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-    });
+    setSessionCookie(reply, app, token);
 
     return reply.code(200).send({ ok: true });
   });
@@ -140,13 +153,7 @@ export default async function authRoutes(app: FastifyInstance) {
         ip: req.ip,
       });
 
-      reply.setCookie(app.config.sessionCookieName, token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-      });
+      setSessionCookie(reply, app, token);
 
       return reply.code(201).send({ id: accountId });
     } catch (err) {
@@ -163,7 +170,7 @@ export default async function authRoutes(app: FastifyInstance) {
   app.post("/auth/logout", async (req, reply) => {
     const token = req.cookies?.[app.config.sessionCookieName];
     if (token) await revokeSession(app.db, token);
-    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    clearSessionCookie(reply, app);
     return reply.code(200).send({ ok: true });
   });
 
@@ -173,7 +180,7 @@ export default async function authRoutes(app: FastifyInstance) {
       return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
     }
     await revokeAllSessions(app.db, accountId);
-    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    clearSessionCookie(reply, app);
     return reply.code(200).send({ ok: true });
   });
 
@@ -244,13 +251,7 @@ export default async function authRoutes(app: FastifyInstance) {
       ip: req.ip,
     });
 
-    reply.setCookie(app.config.sessionCookieName, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-    });
+    setSessionCookie(reply, app, token);
 
     return reply.code(200).send({ ok: true });
   });
@@ -335,6 +336,24 @@ export default async function authRoutes(app: FastifyInstance) {
     const passwordHash = await hashPassword(password);
     await app.db.update(accounts).set({ passwordHash, updatedAt: new Date() }).where(eq(accounts.id, accountId));
     await revokeAllSessions(app.db, accountId);
+
+    // Invalidate every OTHER outstanding reset credential for this account so a
+    // previously-captured link or code cannot be used after the reset lands.
+    const now = new Date();
+    await app.db
+      .update(passwordResets)
+      .set({ consumedAt: now })
+      .where(and(eq(passwordResets.accountId, accountId), isNull(passwordResets.consumedAt)));
+    await app.db
+      .update(otpCodes)
+      .set({ consumedAt: now })
+      .where(
+        and(
+          eq(otpCodes.accountId, accountId),
+          eq(otpCodes.purpose, "password_reset"),
+          isNull(otpCodes.consumedAt),
+        ),
+      );
 
     return reply.code(200).send({ ok: true });
   });

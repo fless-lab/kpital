@@ -41,6 +41,7 @@ Create `api/.env` or export these before running:
 | `SESSION_COOKIE_NAME` | no       | `kpital_sess`  | Session cookie name                                          |
 | `SESSION_TTL_DAYS`    | no       | `30`           | Session lifetime                                             |
 | `OTP_TTL_MINUTES`     | no       | `10`           | OTP / reset-code lifetime                                    |
+| `TRUST_PROXY`         | no       | `false`        | Off by default; behind a reverse proxy set `TRUST_PROXY=1` (trust one hop) so `/auth` rate-limiting keys on the real client IP |
 
 CORS is restricted to `CORS_ORIGIN` with credentials enabled (the app is cookie-auth).
 The `/auth/*` routes are rate limited per IP.
