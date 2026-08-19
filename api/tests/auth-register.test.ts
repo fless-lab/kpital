@@ -47,6 +47,25 @@ describe("register + me", () => {
     await app.close();
   });
 
+  it("rejects a malformed email with validation_error", async () => {
+    const { app } = await buildTestApp();
+    const res = await app.inject({
+      method: "POST",
+      url: "/auth/register",
+      payload: {
+        email: "22890000000",
+        password: "Abcdef12",
+        firstName: "P",
+        lastName: "H",
+        country: "Togo",
+        roles: ["investor"],
+      },
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe("validation_error");
+    await app.close();
+  });
+
   it("rejects a duplicate email with email_taken (409)", async () => {
     const { app } = await buildTestApp();
     const payload = {

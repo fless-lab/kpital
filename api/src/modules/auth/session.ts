@@ -1,7 +1,7 @@
 import { randomBytes, createHash } from "node:crypto";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import type { Db } from "../../db/client";
-import { sessions } from "../../db/schema";
+import { accounts, sessions } from "../../db/schema";
 
 const sha = (t: string) => createHash("sha256").update(t).digest("hex");
 
@@ -25,11 +25,14 @@ export async function createSession(db: Db, accountId: string, meta: SessionMeta
 }
 
 export async function resolveSession(db: Db, token: string): Promise<{ accountId: string } | null> {
+  // Join the account so a session belonging to a suspended/closed account is
+  // rejected even if it was established while the account was still active.
   const [row] = await db
-    .select()
+    .select({ accountId: sessions.accountId, status: accounts.status })
     .from(sessions)
+    .innerJoin(accounts, eq(accounts.id, sessions.accountId))
     .where(and(eq(sessions.tokenHash, sha(token)), isNull(sessions.revokedAt), gt(sessions.expiresAt, new Date())));
-  return row ? { accountId: row.accountId } : null;
+  return row && row.status === "active" ? { accountId: row.accountId } : null;
 }
 
 export const revokeSession = (db: Db, token: string) =>

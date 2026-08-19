@@ -15,15 +15,15 @@ export const accounts = pgTable("account", {
   kycStatus: kycStatus("kyc_status").notNull().default("pending"),
   status: acctStatus("status").notNull().default("active"),
   isAdmin: boolean("is_admin").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const wallets = pgTable("wallet", {
   id: uuid("id").defaultRandom().primaryKey(),
   accountId: uuid("account_id").notNull().references(() => accounts.id).unique(),
   currency: text("currency").notNull().default("XOF"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const sessions = pgTable("session", {
@@ -32,9 +32,9 @@ export const sessions = pgTable("session", {
   tokenHash: text("token_hash").notNull().unique(),
   userAgent: text("user_agent"),
   ip: text("ip"),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  revokedAt: timestamp("revoked_at"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
 });
 
 export const entryType = pgEnum("entry_type", ["repayment", "withdrawal", "reinvestment", "adjustment"]);
@@ -45,16 +45,16 @@ export const walletEntries = pgTable("wallet_entry", {
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
   reference: text("reference"),
   metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const passwordResets = pgTable("password_reset", {
   id: uuid("id").defaultRandom().primaryKey(),
   accountId: uuid("account_id").notNull().references(() => accounts.id),
   tokenHash: text("token_hash").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
-  consumedAt: timestamp("consumed_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const payoutType = pgEnum("payout_type", ["tmoney", "flooz", "bank"]);
@@ -64,7 +64,7 @@ export const payoutMethods = pgTable("payout_method", {
   type: payoutType("type").notNull(),
   details: jsonb("details").notNull(),
   verified: boolean("verified").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const notificationPrefs = pgTable("notification_pref", {
@@ -81,8 +81,8 @@ export const otpCodes = pgTable("otp_code", {
   channel: otpChannel("channel").notNull(),
   purpose: otpPurpose("purpose").notNull(),
   codeHash: text("code_hash").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  consumedAt: timestamp("consumed_at"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
   attempts: integer("attempts").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

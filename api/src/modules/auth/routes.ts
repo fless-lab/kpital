@@ -60,7 +60,8 @@ export default async function authRoutes(app: FastifyInstance) {
     const [account] = await app.db
       .select()
       .from(accounts)
-      .where(or(eq(accounts.email, identifier), eq(accounts.phone, identifier)));
+      .where(or(eq(accounts.email, identifier), eq(accounts.phone, identifier)))
+      .limit(1);
 
     if (!account || !account.passwordHash) {
       // Run one decoy verify so the no-account path costs the same as a wrong
@@ -71,6 +72,12 @@ export default async function authRoutes(app: FastifyInstance) {
 
     const ok = await verifyPassword(password, account.passwordHash);
     if (!ok) return invalid();
+
+    // Status gate runs only after the password verifies, so it never becomes an
+    // account-enumeration or timing oracle.
+    if (account.status !== "active") {
+      return reply.code(403).send({ error: { code: "account_suspended", message: "Account is not active" } });
+    }
 
     const { token } = await createSession(app.db, account.id, {
       ttlDays: app.config.sessionTtlDays,
@@ -106,6 +113,11 @@ export default async function authRoutes(app: FastifyInstance) {
 
     if (!email || !firstName || !lastName || !country) {
       return validationError("email, firstName, lastName and country are required");
+    }
+    // Reject a malformed email so a phone-shaped string can never land in the
+    // email column and collide with the phone identifier namespace.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return validationError("email must be a valid email address");
     }
     if (!roles.every((r) => typeof r === "string" && VALID_ROLES.has(r))) {
       return validationError("roles must contain only 'investor' or 'porteur'");
@@ -170,6 +182,7 @@ export default async function authRoutes(app: FastifyInstance) {
       .select()
       .from(accounts)
       .where(or(eq(accounts.email, identifier), eq(accounts.phone, identifier)))
+      .limit(1)
       .then((rows) => rows[0]);
 
   // POST /auth/otp/request — anti-enumeration: ALWAYS replies { sent: true }.
@@ -218,6 +231,12 @@ export default async function authRoutes(app: FastifyInstance) {
 
     const ok = await verifyOtp(app.db, { accountId: account.id, purpose: "login", code });
     if (!ok) return invalid();
+
+    // Status gate runs only after the code verifies (same anti-enumeration
+    // discipline as login).
+    if (account.status !== "active") {
+      return reply.code(403).send({ error: { code: "account_suspended", message: "Account is not active" } });
+    }
 
     const { token } = await createSession(app.db, account.id, {
       ttlDays: app.config.sessionTtlDays,
