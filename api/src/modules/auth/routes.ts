@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import { eq, or } from "drizzle-orm";
 import { accounts } from "../../db/schema";
 import { hashPassword, isStrongPassword, verifyPassword } from "./password";
@@ -26,6 +26,23 @@ type RegisterBody = {
 };
 
 const VALID_ROLES = new Set(["investor", "porteur"]);
+
+// Single source of truth for the session-cookie policy. Every login/session
+// establishment (login, register, otp/verify) sets it via this helper so the
+// httpOnly/secure/sameSite/path/maxAge options are defined exactly once.
+function setSessionCookie(reply: FastifyReply, app: FastifyInstance, token: string): void {
+  reply.setCookie(app.config.sessionCookieName, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
+  });
+}
+
+function clearSessionCookie(reply: FastifyReply, app: FastifyInstance): void {
+  reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+}
 
 // A duplicate email surfaces as a Postgres unique-violation (code 23505) thrown
 // from inside registerAccount's transaction; the pg error may arrive bare or
@@ -87,13 +104,7 @@ export default async function authRoutes(app: FastifyInstance) {
       ip: req.ip,
     });
 
-    reply.setCookie(app.config.sessionCookieName, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-    });
+    setSessionCookie(reply, app, token);
 
     return reply.code(200).send({ ok: true });
   });
@@ -142,13 +153,7 @@ export default async function authRoutes(app: FastifyInstance) {
         ip: req.ip,
       });
 
-      reply.setCookie(app.config.sessionCookieName, token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-      });
+      setSessionCookie(reply, app, token);
 
       return reply.code(201).send({ id: accountId });
     } catch (err) {
@@ -165,7 +170,7 @@ export default async function authRoutes(app: FastifyInstance) {
   app.post("/auth/logout", async (req, reply) => {
     const token = req.cookies?.[app.config.sessionCookieName];
     if (token) await revokeSession(app.db, token);
-    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    clearSessionCookie(reply, app);
     return reply.code(200).send({ ok: true });
   });
 
@@ -175,7 +180,7 @@ export default async function authRoutes(app: FastifyInstance) {
       return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
     }
     await revokeAllSessions(app.db, accountId);
-    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    clearSessionCookie(reply, app);
     return reply.code(200).send({ ok: true });
   });
 
@@ -246,13 +251,7 @@ export default async function authRoutes(app: FastifyInstance) {
       ip: req.ip,
     });
 
-    reply.setCookie(app.config.sessionCookieName, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
-    });
+    setSessionCookie(reply, app, token);
 
     return reply.code(200).send({ ok: true });
   });
