@@ -1,0 +1,70 @@
+---
+layout: base.njk
+title: "Notifications | KPITAL"
+description: "Suivez vos remboursements, jalons de projets et alertes de compte KPITAL en un coup d'oeil."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: notifs
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Espace investisseur</p>
+      <h1>Notifications</h1>
+      <p class="dash-phead-sub">Vos remboursements, jalons de projets et alertes de compte.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="#" class="btn btn-ghost">Tout marquer comme lu</a>
+    </div>
+  </div>
+</section>
+
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-body pad0">
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Vérification KYC en cours</strong> : votre dossier est en cours de validation, résultat sous 24h.</span>
+          <span class="notif-time">Il y a <span class="num">2</span> h</span>
+        </div>
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Remboursement reçu</strong> : +230&#8239;000 FCFA crédités sur votre solde (Campagne maïs).</span>
+          <span class="notif-time">Il y a <span class="num">5</span> h</span>
+        </div>
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Nouveau jalon · Villa Tokoin</strong> : rapport trimestriel disponible.</span>
+          <span class="notif-time">Hier</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Nouveau projet suggéré</strong> : Épicerie moderne Adéwi (note A−, <span class="num">16%</span> / an) correspond à votre solde.</span>
+          <span class="notif-time"><span class="num">12</span> juin</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Rappel d'échéance</strong> : Stock tissu wax arrive à échéance en oct. 2026.</span>
+          <span class="notif-time"><span class="num">8</span> juin</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Bienvenue sur KPITAL</strong> : votre compte a été créé.</span>
+          <span class="notif-time"><span class="num">2</span> jan.</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

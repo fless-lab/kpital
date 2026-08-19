@@ -1,0 +1,153 @@
+---
+layout: base.njk
+title: "New password | KPITAL"
+description: "Set a new password for your KPITAL account. Secure single-use link."
+pageCss: connexion
+---
+
+<!-- AUTH · RESET PASSWORD -->
+<section class="auth">
+  <div class="container auth-inner">
+
+    <div class="auth-card form-card">
+
+      <!-- ===== STATE 1 · SET NEW PASSWORD ===== -->
+      <div id="resetPane">
+        <p class="eyebrow">Account security</p>
+        <h1 class="auth-title">New password</h1>
+        <p class="auth-sub">Pick a strong password. You will use it for your next logins.</p>
+
+        <form class="auth-form" id="resetForm" novalidate>
+          <div class="field">
+            <label for="pw1">New password</label>
+            <div class="pw-wrap">
+              <input class="input" id="pw1" name="pw1" type="password" autocomplete="new-password" placeholder="••••••••">
+              <button type="button" class="pw-toggle" data-target="pw1" aria-label="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="pw-strength" id="pwBars"><span></span><span></span><span></span><span></span></div>
+            <p class="pw-strength-lbl" id="pwLbl">At least 8 characters, one uppercase letter and one digit</p>
+          </div>
+
+          <div class="field">
+            <label for="pw2">Confirm password</label>
+            <div class="pw-wrap">
+              <input class="input" id="pw2" name="pw2" type="password" autocomplete="new-password" placeholder="••••••••">
+              <button type="button" class="pw-toggle" data-target="pw2" aria-label="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="auth-field-msg" id="matchMsg" hidden></p>
+          </div>
+
+          <button class="btn btn-primary auth-submit" type="submit">Reset my password →</button>
+          <a class="auth-back" href="/en/connexion">← Back to login</a>
+        </form>
+      </div>
+
+      <!-- ===== STATE 2 · SUCCESS ===== -->
+      <div class="auth-result" id="successPane" hidden>
+        <div class="auth-result-mark">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Password reset</h2>
+        <p>Your password has been updated. You can now log in with your new credentials.</p>
+        <a class="btn btn-primary" href="/en/connexion">Log in →</a>
+      </div>
+
+      <!-- ===== STATE 3 · INVALID / EXPIRED LINK ===== -->
+      <div class="auth-result" id="invalidPane" hidden>
+        <div class="auth-result-mark is-warn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h2>Invalid or expired link</h2>
+        <p>This reset link is no longer valid. Request a new one, it will be valid for <span class="num">30</span> minutes.</p>
+        <a class="btn btn-primary" href="/en/mot-de-passe-oublie">Request a new link →</a>
+      </div>
+
+    </div>
+
+    <p class="auth-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Encrypted connection · your credentials are never shared
+    </p>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var resetPane   = document.getElementById("resetPane");
+  var successPane = document.getElementById("successPane");
+  var invalidPane = document.getElementById("invalidPane");
+  var form  = document.getElementById("resetForm");
+  var pw1   = document.getElementById("pw1");
+  var pw2   = document.getElementById("pw2");
+  var bars  = document.getElementById("pwBars");
+  var lbl   = document.getElementById("pwLbl");
+  var match = document.getElementById("matchMsg");
+
+  // A real backend validates the token here. Without one, show the invalid state.
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get("token");
+  if (!token) {
+    resetPane.hidden = true;
+    invalidPane.hidden = false;
+    return;
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".pw-toggle"), function (btn) {
+    btn.addEventListener("click", function () {
+      var input = document.getElementById(btn.dataset.target);
+      var show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    });
+  });
+
+  function score(v) {
+    var s = 0;
+    if (v.length >= 8) s++;
+    if (/[A-Z]/.test(v)) s++;
+    if (/[0-9]/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v) && v.length >= 10) s++;
+    return s;
+  }
+
+  var LABELS = ["Too short", "Weak", "Fair", "Good", "Excellent"];
+
+  pw1.addEventListener("input", function () {
+    var s = score(pw1.value);
+    bars.className = "pw-strength" + (pw1.value ? " s" + Math.max(1, s) : "");
+    lbl.textContent = pw1.value ? LABELS[s] : "At least 8 characters, one uppercase letter and one digit";
+  });
+
+  function checkMatch() {
+    if (!pw2.value) { match.hidden = true; return true; }
+    var ok = pw1.value === pw2.value;
+    match.hidden = false;
+    match.textContent = ok ? "Passwords match." : "Passwords do not match.";
+    match.className = "auth-field-msg " + (ok ? "is-ok" : "is-error");
+    return ok;
+  }
+  pw2.addEventListener("input", checkMatch);
+
+  function strongEnough(v) { return v.length >= 8 && /[A-Z]/.test(v) && /[0-9]/.test(v); }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!strongEnough(pw1.value)) {
+      lbl.textContent = "Password too weak: at least 8 characters, one uppercase letter and one digit.";
+      lbl.style.color = "#B23B2E";
+      pw1.focus();
+      return;
+    }
+    lbl.style.color = "";
+    if (!checkMatch()) { pw2.focus(); return; }
+    resetPane.hidden = true;
+    successPane.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+</script>

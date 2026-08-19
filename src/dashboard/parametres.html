@@ -1,0 +1,269 @@
+---
+layout: base.njk
+title: "Paramètres | KPITAL"
+description: "Gérez votre profil, votre vérification KYC, vos rôles, la sécurité, vos moyens de retrait et vos préférences de notification sur KPITAL."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: settings
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Compte</p>
+      <h1>Paramètres du compte</h1>
+      <p class="dash-phead-sub">Profil, vérification, sécurité et préférences. Vos rôles sont cumulables : un même compte peut investir et porter des projets.</p>
+    </div>
+  </div>
+</section>
+
+<section class="dash-section dash-section--last">
+  <div class="container">
+
+    <!-- 1 · PROFIL -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Profil</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-form">
+          <div class="dash-form-row">
+            <div class="field">
+              <label for="set-prenom">Prénom</label>
+              <input class="input" id="set-prenom" type="text" value="Kofi">
+            </div>
+            <div class="field">
+              <label for="set-nom">Nom</label>
+              <input class="input" id="set-nom" type="text" value="A.">
+            </div>
+          </div>
+          <div class="dash-form-row">
+            <div class="field">
+              <label for="set-email">Email</label>
+              <input class="input" id="set-email" type="email" value="kofi@email.com">
+            </div>
+            <div class="field">
+              <label for="set-tel">Téléphone</label>
+              <input class="input" id="set-tel" type="tel" value="+228 90 XX XX XX">
+            </div>
+          </div>
+          <div class="field">
+            <label for="set-pays">Pays de résidence</label>
+            <select class="select" id="set-pays">
+              <option selected>Togo</option>
+              <option>France</option>
+              <option>Allemagne</option>
+              <option>Belgique</option>
+              <option>Canada</option>
+              <option>États-Unis</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="dash-form-foot">
+            <button type="button" class="btn btn-primary">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 · VÉRIFICATION KYC -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Vérification KYC</h3>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="dash-kv">
+          <span class="k">Statut</span>
+          <span class="v"><span class="pill is-pending"><i></i>En vérification</span></span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Document fourni</span>
+          <span class="v">Carte Nationale d'Identité (CNI)</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Soumis le</span>
+          <span class="v"><span class="num">2</span> jan. 2026</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Résultat généralement sous <span class="num">24</span>h. Vous serez notifié.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · RÔLES DU COMPTE -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Rôles du compte</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Investisseur</span>
+            <span class="opt-s">Placer dans des projets vérifiés</span>
+          </span>
+          <span class="pill is-ok"><i></i>Actif</span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Porteur de projet</span>
+            <span class="opt-s">Faire financer vos projets</span>
+          </span>
+          <button type="button" class="btn btn-ghost">Activer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · SÉCURITÉ -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Sécurité</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-form">
+          <div class="field">
+            <label for="set-pw-old">Mot de passe actuel</label>
+            <input class="input" id="set-pw-old" type="password" placeholder="Votre mot de passe actuel">
+          </div>
+          <div class="field">
+            <label for="set-pw-new">Nouveau mot de passe</label>
+            <input class="input" id="set-pw-new" type="password" placeholder="Minimum 8 caractères">
+          </div>
+          <div class="field">
+            <label for="set-pw-conf">Confirmer le mot de passe</label>
+            <input class="input" id="set-pw-conf" type="password" placeholder="Répétez le nouveau mot de passe">
+          </div>
+          <div class="dash-form-foot">
+            <button type="button" class="btn btn-primary">Mettre à jour le mot de passe</button>
+          </div>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Double authentification (2FA)</span>
+            <span class="opt-s">Ajoutez un code à usage unique à chaque connexion</span>
+          </span>
+          <span class="switch"><input type="checkbox"><span class="track"></span></span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Sessions actives</span>
+            <span class="opt-s"><span class="num">1</span> appareil connecté</span>
+          </span>
+          <button type="button" class="btn btn-ghost">Se déconnecter partout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 · MOYENS DE RETRAIT -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Moyens de retrait</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">T-Money</span>
+            <span class="opt-s">+228 90 XX XX XX</span>
+          </span>
+          <span class="pill is-ok"><i></i>Vérifié</span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Compte bancaire</span>
+            <span class="opt-s">Togo</span>
+          </span>
+          <button type="button" class="btn btn-ghost">Ajouter</button>
+        </div>
+        <p class="opt-s">Optionnel : votre portefeuille est créé à l'inscription, un moyen de retrait peut être ajouté au moment de retirer.</p>
+      </div>
+    </div>
+
+    <!-- 6 · PRÉFÉRENCES DE NOTIFICATION -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Préférences de notification</h3>
+      </div>
+      <div class="dash-card-body">
+        <p class="eyebrow">Canaux</p>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Email</span>
+            <span class="opt-s">Recevoir les notifications par email</span>
+          </span>
+          <span class="switch"><input type="checkbox" checked><span class="track"></span></span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">SMS</span>
+            <span class="opt-s">Recevoir les notifications par SMS</span>
+          </span>
+          <span class="switch"><input type="checkbox" checked><span class="track"></span></span>
+        </div>
+        <p class="eyebrow">Catégories</p>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Remboursements</span>
+            <span class="opt-s">Capital et ROI crédités sur votre portefeuille</span>
+          </span>
+          <span class="switch"><input type="checkbox" checked><span class="track"></span></span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Jalons de projets</span>
+            <span class="opt-s">Avancement des projets que vous financez</span>
+          </span>
+          <span class="switch"><input type="checkbox" checked><span class="track"></span></span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Nouveaux projets suggérés</span>
+            <span class="opt-s">Opportunités vérifiées qui correspondent à votre profil</span>
+          </span>
+          <span class="switch"><input type="checkbox" checked><span class="track"></span></span>
+        </div>
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Actualités KPITAL</span>
+            <span class="opt-s">Annonces et nouveautés de la plateforme</span>
+          </span>
+          <span class="switch"><input type="checkbox"><span class="track"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 · LANGUE -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Langue</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="field">
+          <label for="set-langue">Langue de l'interface</label>
+          <select class="select" id="set-langue">
+            <option selected>Français</option>
+            <option>English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 · ZONE SENSIBLE -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Zone sensible</h3>
+      </div>
+      <div class="dash-card-body">
+        <div class="opt-row">
+          <span class="opt-txt">
+            <span class="opt-t">Clôture du compte</span>
+            <span class="opt-s">Action irréversible. Vos données seront supprimées et vos rôles désactivés.</span>
+          </span>
+          <button type="button" class="btn btn-ghost">Fermer mon compte</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

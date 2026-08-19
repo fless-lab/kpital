@@ -1,0 +1,159 @@
+---
+layout: base.njk
+title: "Mes projets | KPITAL"
+description: "Suivez les projets que vous avez soumis au financement KPITAL, leur collecte, le décaissement des tranches et les pièces à fournir."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: projects
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Espace porteur</p>
+      <h1>Mes projets</h1>
+      <p class="dash-phead-sub">Ici vous suivez les projets que vous avez soumis au financement : l'avancement de la collecte, le décaissement des fonds par tranches et les pièces justificatives à fournir. Votre compte peut être investisseur et porteur à la fois.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="/soumettre" class="btn btn-primary">Soumettre un projet →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVE PROJECT -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Boutique Adéwi : extension et stock</h3>
+        <span class="pill is-ok"><i></i>En collecte</span>
+      </div>
+      <div class="dash-card-body">
+        <span class="lr-bar"><i style="width:62%"></i></span>
+        <span class="lr-bar-l"><span class="num">62%</span> collecté</span>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="dash-kv">
+          <span class="k">Objectif de collecte</span>
+          <span class="v num">1&#8239;500&#8239;000 FCFA</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Déjà collecté</span>
+          <span class="v num">930&#8239;000 FCFA (62%)</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Investisseurs</span>
+          <span class="v num">47</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">ROI proposé</span>
+          <span class="v num">16% / an</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Durée</span>
+          <span class="v num">6 mois</span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Note KPITAL</span>
+          <span class="v">B+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISBURSEMENT BY TRANCHES -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Décaissement par tranches</h3>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="dash-kv">
+          <span class="k">Tranche 1 · 60% · achat de stock</span>
+          <span class="v"><span class="pill is-ok"><i></i>Décaissée</span></span>
+        </div>
+        <div class="dash-kv">
+          <span class="k">Tranche 2 · 40% · loyer + fonds de roulement</span>
+          <span class="v"><span class="pill is-pending"><i></i>En attente de collecte complète</span></span>
+        </div>
+      </div>
+      <div class="dash-card-body">
+        <p class="dsm-s">Chaque tranche est débloquée après validation, par KPITAL, des pièces justificatives correspondantes (factures, quittances, contrats).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORTING DOCUMENTS -->
+<section class="dash-section">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h3>Pièces à fournir</h3>
+      </div>
+      <div class="dash-card-body pad0">
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">RCCM</span>
+            <span class="doc-s">Registre du commerce et du crédit mobilier</span>
+          </span>
+          <span class="pill is-ok"><i></i>Fourni</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Titre foncier / bail</span>
+            <span class="doc-s">Justificatif d'occupation du local</span>
+          </span>
+          <span class="pill is-ok"><i></i>Fourni</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Relevés bancaires · 6 mois</span>
+            <span class="doc-s">Sur les <span class="num">6</span> derniers mois</span>
+          </span>
+          <span class="pill is-ok"><i></i>Fourni</span>
+        </div>
+        <div class="doc-row">
+          <span class="doc-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </span>
+          <span class="doc-main">
+            <span class="doc-t">Justificatif de caution</span>
+            <span class="doc-s">Garantie ou aval à téléverser</span>
+          </span>
+          <span class="pill is-pending"><i></i>En attente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBMIT ANOTHER PROJECT -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-empty">
+        <div class="dash-empty-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h4>Un autre projet à financer ?</h4>
+        <p>Présentez votre activité, votre besoin et votre plan de remboursement. Notre équipe évalue chaque dossier avant sa mise en collecte.</p>
+        <a href="/soumettre" class="btn btn-ghost">Soumettre un projet →</a>
+      </div>
+    </div>
+  </div>
+</section>

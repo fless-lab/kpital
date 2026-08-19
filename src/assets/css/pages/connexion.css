@@ -96,3 +96,43 @@
 
 .auth-back{display:block;width:100%;text-align:center;margin-top:18px;font-size:13px;color:var(--muted);background:none;cursor:pointer;transition:color .16s}
 .auth-back:hover{color:var(--ink)}
+
+/* ===== Password recovery / reset screens ===== */
+.auth-hint{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.5}
+.auth-field-msg{font-size:12.5px;margin-top:7px;line-height:1.5}
+.auth-field-msg.is-error{color:#B23B2E}
+.auth-field-msg.is-ok{color:var(--green)}
+
+/* password field with show / hide toggle */
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:46px}
+.pw-toggle{
+  position:absolute;right:7px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;color:var(--muted);cursor:pointer;
+  background:none;border-radius:3px;transition:color .16s;
+}
+.pw-toggle:hover{color:var(--ink)}
+
+/* strength meter */
+.pw-strength{display:flex;gap:5px;margin-top:10px}
+.pw-strength span{flex:1;height:4px;border-radius:2px;background:var(--hairline);transition:background .2s}
+.pw-strength.s1 span:nth-child(-n+1){background:#B23B2E}
+.pw-strength.s2 span:nth-child(-n+2){background:var(--gold)}
+.pw-strength.s3 span:nth-child(-n+3){background:var(--gold)}
+.pw-strength.s4 span{background:var(--green)}
+.pw-strength-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+
+/* centered result panel (link sent, success, invalid link) */
+.auth-result{text-align:center;padding:6px 0 2px}
+.auth-result-mark{
+  width:56px;height:56px;border-radius:50%;margin:0 auto 20px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--green-soft);color:var(--green);
+}
+.auth-result-mark.is-warn{background:#F6EEE1;color:var(--gold)}
+.auth-result h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em;color:var(--ink)}
+.auth-result p{font-size:14px;color:var(--muted);line-height:1.55;margin:10px auto 0;max-width:40ch}
+.auth-result p strong{color:var(--ink);font-weight:600}
+.auth-result .btn{width:100%;justify-content:center;padding:14px;margin-top:24px}
+.auth-result .auth-back{margin-top:16px}

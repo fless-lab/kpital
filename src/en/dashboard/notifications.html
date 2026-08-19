@@ -1,0 +1,70 @@
+---
+layout: base.njk
+title: "Notifications | KPITAL"
+description: "Track your repayments, project milestones and KPITAL account alerts at a glance."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: notifs
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Investor space</p>
+      <h1>Notifications</h1>
+      <p class="dash-phead-sub">Your repayments, project milestones and account alerts.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="#" class="btn btn-ghost">Mark all as read</a>
+    </div>
+  </div>
+</section>
+
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-card">
+      <div class="dash-card-body pad0">
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>KYC verification in progress</strong> : your application is being validated, result within 24h.</span>
+          <span class="notif-time"><span class="num">2</span>h ago</span>
+        </div>
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Repayment received</strong> : +230&#8239;000 FCFA credited to your balance (Maize campaign).</span>
+          <span class="notif-time"><span class="num">5</span>h ago</span>
+        </div>
+
+        <div class="notif-item is-unread">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>New milestone · Villa Tokoin</strong> : quarterly report available.</span>
+          <span class="notif-time">Yesterday</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>New suggested project</strong> : Adéwi Modern Grocery (rating A−, <span class="num">16%</span> / year) matches your balance.</span>
+          <span class="notif-time"><span class="num">12</span> Jun</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Maturity reminder</strong> : Wax fabric stock matures in Oct 2026.</span>
+          <span class="notif-time"><span class="num">8</span> Jun</span>
+        </div>
+
+        <div class="notif-item">
+          <span class="notif-dot"></span>
+          <span class="notif-t"><strong>Welcome to KPITAL</strong> : your account has been created.</span>
+          <span class="notif-time"><span class="num">2</span> Jan</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

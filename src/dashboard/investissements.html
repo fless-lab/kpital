@@ -1,0 +1,147 @@
+---
+layout: base.njk
+title: "Mes investissements | KPITAL"
+description: "Suivez vos investissements KPITAL en cours, en collecte et déjà remboursés, avec le capital investi et le ROI attendu."
+pageCss: dashboard
+noindex: true
+hideFooter: true
+dashActive: invest
+---
+
+{% include "dash-nav.njk" %}
+
+<section class="dash-phead">
+  <div class="container dash-phead-inner">
+    <div>
+      <p class="eyebrow">Espace investisseur</p>
+      <h1>Mes investissements</h1>
+      <p class="dash-phead-sub">Le détail de vos positions : projets en cours, projets en collecte et projets déjà remboursés. Chaque ligne mène au suivi complet de l'investissement.</p>
+    </div>
+    <div class="dash-phead-cta">
+      <a href="/projets" class="btn btn-primary">Explorer les projets →</a>
+    </div>
+  </div>
+</section>
+
+<!-- SUMMARY STRIP -->
+<section class="dash-summary-band">
+  <div class="container">
+    <div class="dash-summary">
+      <div class="dsm">
+        <div class="dsm-k">Capital investi</div>
+        <div class="dsm-v num">820&#8239;000<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s">Réparti sur <span class="num">3</span> projets actifs</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">ROI attendu</div>
+        <div class="dsm-v num dsm-pos">+148&#8239;200<span class="dsm-u">FCFA</span></div>
+        <div class="dsm-s">Sur la durée restante des projets</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Projets actifs</div>
+        <div class="dsm-v num">3</div>
+        <div class="dsm-s"><span class="num">2</span> en cours, <span class="num">1</span> en collecte</div>
+      </div>
+      <div class="dsm">
+        <div class="dsm-k">Déjà remboursés</div>
+        <div class="dsm-v num">1</div>
+        <div class="dsm-s"><span class="num">230&#8239;000</span> FCFA reversés au wallet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOLDINGS TABLE -->
+<section class="dash-section dash-section--last">
+  <div class="container">
+    <div class="dash-sec-head">
+      <div>
+        <p class="eyebrow">Portefeuille</p>
+        <h2 class="dash-h2">Toutes mes positions</h2>
+      </div>
+      <a href="/dashboard/portefeuille" class="dash-sec-link">Voir mes remboursements →</a>
+    </div>
+
+    <div class="ledger" role="table" aria-label="Tous mes investissements">
+      <div class="ledger-scroll">
+        <div class="ledger-head" role="row">
+          <span class="lc lc-name" role="columnheader">Projet</span>
+          <span class="lc lc-sector" role="columnheader">Secteur</span>
+          <span class="lc lc-amt" role="columnheader">Montant</span>
+          <span class="lc lc-roi" role="columnheader">ROI attendu</span>
+          <span class="lc lc-prog" role="columnheader">Avancement</span>
+          <span class="lc lc-due" role="columnheader">Échéance</span>
+          <span class="lc lc-status" role="columnheader">Statut</span>
+        </div>
+
+        <!-- Villa Tokoin -->
+        <a class="ledger-row" href="/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Villa Tokoin : location longue durée</span>
+            <span class="lr-place">Tokoin, Lomé · <span class="num">24</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag tag-green">Immobilier · A</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">300&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+66&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:73%"></i></span>
+            <span class="lr-bar-l"><span class="num">73%</span> collecté</span>
+          </span>
+          <span class="lc lc-due num" role="cell">juil. 2028</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">En cours</span></span>
+        </a>
+
+        <!-- Stock tissu wax -->
+        <a class="ledger-row" href="/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Stock tissu wax : Grand Marché</span>
+            <span class="lr-place">Grand Marché, Lomé · <span class="num">4</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Commerce · B</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">200&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+30&#8239;000</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:40%"></i></span>
+            <span class="lr-bar-l"><span class="num">40%</span> durée écoulée</span>
+          </span>
+          <span class="lc lc-due num" role="cell">oct. 2026</span>
+          <span class="lc lc-status" role="cell"><span class="st st-on">En cours</span></span>
+        </a>
+
+        <!-- Campagne maïs -->
+        <a class="ledger-row" href="/dashboard/investissement" role="row">
+          <span class="lc lc-name" role="cell">
+            <span class="lr-title">Campagne maïs : Région des Plateaux</span>
+            <span class="lr-place">Kpalimé, Plateaux · <span class="num">6</span> mois</span>
+          </span>
+          <span class="lc lc-sector" role="cell">
+            <span class="tag">Agriculture · B+</span>
+          </span>
+          <span class="lc lc-amt num" role="cell">320&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+52&#8239;200</span>
+          <span class="lc lc-prog" role="cell">
+            <span class="lr-bar"><i style="width:88%"></i></span>
+            <span class="lr-bar-l"><span class="num">88%</span> collecté</span>
+          </span>
+          <span class="lc lc-due num" role="cell">jan. 2027</span>
+          <span class="lc lc-status" role="cell"><span class="st st-open">Collecte</span></span>
+        </a>
+
+        <!-- TOTALS -->
+        <div class="ledger-total" role="row">
+          <span class="lc lc-name" role="cell">Total · <span class="num">3</span> investissements actifs</span>
+          <span class="lc lc-sector" role="cell"></span>
+          <span class="lc lc-amt num" role="cell">820&#8239;000</span>
+          <span class="lc lc-roi num dsm-pos" role="cell">+148&#8239;200</span>
+          <span class="lc lc-prog" role="cell"></span>
+          <span class="lc lc-due" role="cell"></span>
+          <span class="lc lc-status" role="cell"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
