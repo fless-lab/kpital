@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { getBalance, listEntries, withdraw, InsufficientFundsError, WalletNotFoundError } from "./service";
+import { listEntries, withdraw, InsufficientFundsError, WalletNotFoundError } from "./service";
 
 type WithdrawBody = {
   amountMinor?: unknown;
@@ -12,10 +12,12 @@ export default async function walletRoutes(app: FastifyInstance) {
     if (!accountId) {
       return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
     }
-    const [balance, entries] = await Promise.all([
-      getBalance(app.db, accountId),
-      listEntries(app.db, accountId),
-    ]);
+    // Derive the balance from the same fetched entries in one pass so balance
+    // and entries can never momentarily disagree (two independent unlocked
+    // reads could). This equals the SUM query only while listEntries returns
+    // the full entry set — revisit if listEntries ever gains a LIMIT/paging.
+    const entries = await listEntries(app.db, accountId);
+    const balance = entries.reduce((sum, e) => sum + e.amountMinor, 0);
     return reply.send({ balance, entries });
   });
 
