@@ -1,0 +1,15 @@
+{
+  // Type-checks the test suite, which the base config never sees (it excludes
+  // src/**/*.test.ts and does not include tests/**). Reuses the base compiler
+  // options; only relaxes rootDir to the package root so cross-dir test imports
+  // (tests/** -> src/**) resolve, and turns emit off (this config is check-only).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": []
+}

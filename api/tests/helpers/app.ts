@@ -18,9 +18,9 @@ function makeCapturingNotifier(): { notifier: Notifier; sentCodes: string[]; sen
   const notifier: Notifier = {
     async send(_to, m) {
       const code = m.body.match(/\b(\d{6})\b/);
-      if (code) sentCodes.push(code[1]);
+      if (code?.[1]) sentCodes.push(code[1]);
       const token = m.body.match(/token=([A-Za-z0-9_-]+)/);
-      if (token) sentLinks.push(token[1]);
+      if (token?.[1]) sentLinks.push(token[1]);
     },
   };
   return { notifier, sentCodes, sentLinks };

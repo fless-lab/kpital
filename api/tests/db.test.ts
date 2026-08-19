@@ -9,8 +9,9 @@ describe("accounts table", () => {
         email: "a@b.co", passwordHash: "x", firstName: "K", lastName: "A",
         country: "Togo", roles: ["investor"],
       }).returning();
-      expect(row.kycStatus).toBe("pending");
-      expect(row.roles).toEqual(["investor"]);
+      expect(row).toBeDefined();
+      expect(row?.kycStatus).toBe("pending");
+      expect(row?.roles).toEqual(["investor"]);
     });
   });
 });
