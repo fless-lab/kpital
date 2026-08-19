@@ -2,9 +2,35 @@ import type { FastifyInstance } from "fastify";
 import { eq, or } from "drizzle-orm";
 import { accounts } from "../../db/schema";
 import { verifyPassword } from "./password";
-import { createSession } from "./session";
+import { createSession, revokeSession, revokeAllSessions } from "./session";
+import { registerAccount, WeakPasswordError } from "../accounts/register";
 
 type LoginBody = { identifier?: string; password?: string };
+
+type RegisterBody = {
+  email?: unknown;
+  phone?: unknown;
+  password?: unknown;
+  firstName?: unknown;
+  lastName?: unknown;
+  country?: unknown;
+  roles?: unknown;
+};
+
+const VALID_ROLES = new Set(["investor", "porteur"]);
+
+// A duplicate email surfaces as a Postgres unique-violation (code 23505) thrown
+// from inside registerAccount's transaction; the pg error may arrive bare or
+// wrapped by drizzle, so check both the error and its cause.
+function isUniqueViolation(err: unknown): boolean {
+  const code = (e: unknown): string | undefined =>
+    typeof e === "object" && e !== null && "code" in e
+      ? (e as { code?: unknown }).code as string | undefined
+      : undefined;
+  if (code(err) === "23505") return true;
+  const cause = typeof err === "object" && err !== null && "cause" in err ? (err as { cause?: unknown }).cause : undefined;
+  return code(cause) === "23505";
+}
 
 // Pre-computed argon2id hash of a throwaway value. Used to equalize work on the
 // no-account path so every login attempt runs exactly one argon2 verify, closing
@@ -52,6 +78,82 @@ export default async function authRoutes(app: FastifyInstance) {
       maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
     });
 
+    return reply.code(200).send({ ok: true });
+  });
+
+  app.post("/auth/register", async (req, reply) => {
+    const body = (req.body ?? {}) as RegisterBody;
+    const str = (v: unknown): string => (typeof v === "string" ? v : "");
+
+    const email = str(body.email).trim();
+    const password = typeof body.password === "string" ? body.password : "";
+    const firstName = str(body.firstName).trim();
+    const lastName = str(body.lastName).trim();
+    const country = str(body.country).trim();
+    const phone = typeof body.phone === "string" ? body.phone.trim() : undefined;
+    const roles = Array.isArray(body.roles) ? body.roles : [];
+
+    const validationError = (message: string) =>
+      reply.code(400).send({ error: { code: "validation_error", message } });
+
+    if (!email || !firstName || !lastName || !country) {
+      return validationError("email, firstName, lastName and country are required");
+    }
+    if (!roles.every((r) => typeof r === "string" && VALID_ROLES.has(r))) {
+      return validationError("roles must contain only 'investor' or 'porteur'");
+    }
+
+    try {
+      const { accountId } = await registerAccount(app.db, {
+        email,
+        ...(phone ? { phone } : {}),
+        password,
+        firstName,
+        lastName,
+        country,
+        roles: roles as ("investor" | "porteur")[],
+      });
+
+      const { token } = await createSession(app.db, accountId, {
+        ttlDays: app.config.sessionTtlDays,
+        userAgent: req.headers["user-agent"],
+        ip: req.ip,
+      });
+
+      reply.setCookie(app.config.sessionCookieName, token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
+      });
+
+      return reply.code(201).send({ id: accountId });
+    } catch (err) {
+      if (err instanceof WeakPasswordError) {
+        return validationError("Password does not meet strength requirements");
+      }
+      if (isUniqueViolation(err)) {
+        return reply.code(409).send({ error: { code: "email_taken", message: "Email already registered" } });
+      }
+      throw err;
+    }
+  });
+
+  app.post("/auth/logout", async (req, reply) => {
+    const token = req.cookies?.[app.config.sessionCookieName];
+    if (token) await revokeSession(app.db, token);
+    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    return reply.code(200).send({ ok: true });
+  });
+
+  app.post("/auth/logout-all", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!accountId) {
+      return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
+    }
+    await revokeAllSessions(app.db, accountId);
+    reply.clearCookie(app.config.sessionCookieName, { path: "/" });
     return reply.code(200).send({ ok: true });
   });
 }

@@ -4,6 +4,7 @@ import type { Db } from "./db/client";
 import type { Config } from "./config/env";
 import authPlugin from "./lib/http/auth";
 import authRoutes from "./modules/auth/routes";
+import accountsRoutes from "./modules/accounts/routes";
 
 export function buildApp(opts: { db: Db; config: Config }): FastifyInstance {
   const app = Fastify({ logger: false });
@@ -12,6 +13,7 @@ export function buildApp(opts: { db: Db; config: Config }): FastifyInstance {
   app.register(cookie);
   app.register(authPlugin);
   app.register(authRoutes);
+  app.register(accountsRoutes);
   app.get("/health", async () => ({ status: "ok" }));
   return app;
 }
