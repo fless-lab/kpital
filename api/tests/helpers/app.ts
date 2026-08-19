@@ -40,3 +40,19 @@ export async function buildTestApp(): Promise<{
   const app = buildApp({ db, config, notifier });
   return { app, db, sentCodes, sentLinks };
 }
+
+// Registers a fresh account with the given email (defaulting to the investor
+// role) and returns the session cookie value, so tests can act as that user.
+export async function loginAs(app: FastifyInstance, email: string): Promise<string> {
+  const res = await app.inject({
+    method: "POST",
+    url: "/auth/register",
+    payload: { email, password: "Abcdef12", firstName: "Test", lastName: "User", country: "Togo" },
+  });
+  if (res.statusCode !== 201) {
+    throw new Error(`loginAs: register failed (${res.statusCode}): ${res.body}`);
+  }
+  const cookie = res.cookies.find((c) => c.name === "kpital_sess");
+  if (!cookie) throw new Error("loginAs: session cookie not set");
+  return cookie.value;
+}

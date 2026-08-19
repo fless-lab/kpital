@@ -36,6 +36,13 @@
       "when": 1787149722717,
       "tag": "0004_nasty_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787178565175,
+      "tag": "0005_lowly_crystal",
+      "breakpoints": true
     }
   ]
 }

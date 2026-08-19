@@ -57,6 +57,22 @@ export const passwordResets = pgTable("password_reset", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const payoutType = pgEnum("payout_type", ["tmoney", "flooz", "bank"]);
+export const payoutMethods = pgTable("payout_method", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  type: payoutType("type").notNull(),
+  details: jsonb("details").notNull(),
+  verified: boolean("verified").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const notificationPrefs = pgTable("notification_pref", {
+  accountId: uuid("account_id").primaryKey().references(() => accounts.id),
+  channels: text("channels").array().notNull().default(["email"]),
+  categories: jsonb("categories").notNull().default({}),
+});
+
 export const otpChannel = pgEnum("otp_channel", ["email", "sms"]);
 export const otpPurpose = pgEnum("otp_purpose", ["login", "password_reset", "verify_contact"]);
 export const otpCodes = pgTable("otp_code", {
