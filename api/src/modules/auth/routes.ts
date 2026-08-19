@@ -4,8 +4,12 @@ import { accounts } from "../../db/schema";
 import { verifyPassword } from "./password";
 import { createSession, revokeSession, revokeAllSessions } from "./session";
 import { registerAccount, WeakPasswordError } from "../accounts/register";
+import { issueOtp, verifyOtp } from "./otp";
 
 type LoginBody = { identifier?: string; password?: string };
+
+type OtpRequestBody = { identifier?: unknown; channel?: unknown };
+type OtpVerifyBody = { identifier?: unknown; code?: unknown };
 
 type RegisterBody = {
   email?: unknown;
@@ -154,6 +158,76 @@ export default async function authRoutes(app: FastifyInstance) {
     }
     await revokeAllSessions(app.db, accountId);
     reply.clearCookie(app.config.sessionCookieName, { path: "/" });
+    return reply.code(200).send({ ok: true });
+  });
+
+  const findByIdentifier = (identifier: string) =>
+    app.db
+      .select()
+      .from(accounts)
+      .where(or(eq(accounts.email, identifier), eq(accounts.phone, identifier)))
+      .then((rows) => rows[0]);
+
+  // POST /auth/otp/request — anti-enumeration: ALWAYS replies { sent: true }.
+  // Only when the account exists do we issue a code and send it via the notifier.
+  app.post("/auth/otp/request", async (req, reply) => {
+    const body = (req.body ?? {}) as OtpRequestBody;
+    const identifier = typeof body.identifier === "string" ? body.identifier : "";
+    const channel = body.channel === "sms" ? "sms" : "email";
+
+    if (identifier) {
+      const account = await findByIdentifier(identifier);
+      if (account) {
+        const { code } = await issueOtp(app.db, {
+          accountId: account.id,
+          channel,
+          purpose: "login",
+          ttlMinutes: app.config.otpTtlMinutes,
+        });
+        await app.notifier.send(
+          {
+            ...(account.email ? { email: account.email } : {}),
+            ...(account.phone ? { phone: account.phone } : {}),
+          },
+          { subject: "Your KPITAL login code", body: `Your login code is ${code}. It expires in ${app.config.otpTtlMinutes} minutes.` },
+        );
+      }
+    }
+
+    return reply.code(200).send({ sent: true });
+  });
+
+  // POST /auth/otp/verify — on success create a session cookie; else 401 otp_invalid.
+  app.post("/auth/otp/verify", async (req, reply) => {
+    const body = (req.body ?? {}) as OtpVerifyBody;
+    const identifier = typeof body.identifier === "string" ? body.identifier : "";
+    const code = typeof body.code === "string" ? body.code : "";
+
+    const invalid = () =>
+      reply.code(401).send({ error: { code: "otp_invalid", message: "Invalid or expired code" } });
+
+    if (!identifier || !code) return invalid();
+
+    const account = await findByIdentifier(identifier);
+    if (!account) return invalid();
+
+    const ok = await verifyOtp(app.db, { accountId: account.id, purpose: "login", code });
+    if (!ok) return invalid();
+
+    const { token } = await createSession(app.db, account.id, {
+      ttlDays: app.config.sessionTtlDays,
+      userAgent: req.headers["user-agent"],
+      ip: req.ip,
+    });
+
+    reply.setCookie(app.config.sessionCookieName, token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: app.config.sessionTtlDays * 24 * 60 * 60,
+    });
+
     return reply.code(200).send({ ok: true });
   });
 }
