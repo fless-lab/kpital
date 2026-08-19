@@ -7,14 +7,14 @@ import type { Db } from "../../src/db/client";
 
 const testUrl = process.env.TEST_DATABASE_URL ?? "postgres://kpital:kpital@127.0.0.1:5544/kpital_test";
 
-const pool = new pg.Pool({ connectionString: testUrl });
-const db = drizzle(pool, { schema });
+export const pool = new pg.Pool({ connectionString: testUrl });
+export const db = drizzle(pool, { schema });
 
 const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 
 let migratedOnce: Promise<void> | undefined;
 
-function ensureMigrated(): Promise<void> {
+export function ensureMigrated(): Promise<void> {
   migratedOnce ??= migrate(db, { migrationsFolder });
   return migratedOnce;
 }

@@ -26,6 +26,17 @@ export const wallets = pgTable("wallet", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const sessions = pgTable("session", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  userAgent: text("user_agent"),
+  ip: text("ip"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  revokedAt: timestamp("revoked_at"),
+});
+
 export const entryType = pgEnum("entry_type", ["repayment", "withdrawal", "reinvestment", "adjustment"]);
 export const walletEntries = pgTable("wallet_entry", {
   id: uuid("id").defaultRandom().primaryKey(),
