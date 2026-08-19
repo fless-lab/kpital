@@ -46,7 +46,10 @@ export async function verifyOtp(
           gt(otpCodes.expiresAt, new Date()),
         ),
       )
-      .orderBy(desc(otpCodes.createdAt))
+      // Secondary sort on id makes selection deterministic when several codes
+      // share a transaction-start now() createdAt (id is random, so this is a
+      // stable-but-arbitrary tiebreak, not a newest-first guarantee).
+      .orderBy(desc(otpCodes.createdAt), desc(otpCodes.id))
       .limit(1)
       .for("update");
     if (!row || row.attempts >= MAX_ATTEMPTS) return false;
