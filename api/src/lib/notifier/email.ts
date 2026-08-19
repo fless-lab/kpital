@@ -8,6 +8,8 @@ export const EmailProvider: Provider = {
   channel: "email",
   async send(to: Recipient, m: NotificationMessage): Promise<void> {
     if (!to.email) return;
-    console.log(`[email] to=${to.email} subject=${m.subject} body=${m.body}`);
+    // Log only non-secret metadata. The body carries OTP codes and reset links,
+    // so it must never be written to logs.
+    console.log(`[email] sent '${m.subject}' to ${to.email}`);
   },
 };
