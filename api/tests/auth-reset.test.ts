@@ -61,6 +61,48 @@ describe("password reset (email link)", () => {
     await app.close();
   });
 
+  it("invalidates sibling reset tokens when one is used", async () => {
+    const { app, sentLinks } = await buildTestApp();
+    const { registerAccount } = await import("../src/modules/accounts/register");
+    await registerAccount((app as any).db, {
+      email: "s@a.co",
+      password: "Abcdef12",
+      firstName: "S",
+      lastName: "A",
+      country: "Togo",
+      roles: ["investor"],
+    });
+
+    // Request TWO reset tokens for the same account.
+    await app.inject({ method: "POST", url: "/auth/password/forgot", payload: { identifier: "s@a.co", channel: "email" } });
+    await app.inject({ method: "POST", url: "/auth/password/forgot", payload: { identifier: "s@a.co", channel: "email" } });
+    const firstToken = sentLinks.at(-2);
+    const secondToken = sentLinks.at(-1);
+    expect(firstToken).toBeDefined();
+    expect(secondToken).toBeDefined();
+    expect(firstToken).not.toBe(secondToken);
+
+    // Reset with the SECOND token succeeds.
+    const reset = await app.inject({
+      method: "POST",
+      url: "/auth/password/reset",
+      payload: { token: secondToken, password: "Newpass12" },
+    });
+    expect(reset.statusCode).toBe(200);
+
+    // The FIRST token — never used — is now invalidated by the reset. Use a
+    // strong password so a 400 can only mean invalid_token, not weak-password.
+    const stale = await app.inject({
+      method: "POST",
+      url: "/auth/password/reset",
+      payload: { token: firstToken, password: "Newpass34" },
+    });
+    expect(stale.statusCode).toBe(400);
+    expect(stale.json().error.code).toBe("invalid_token");
+
+    await app.close();
+  });
+
   it("forgot for unknown identifier still returns sent:true", async () => {
     const { app } = await buildTestApp();
     const r = await app.inject({

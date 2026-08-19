@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
-import { eq, or } from "drizzle-orm";
-import { accounts } from "../../db/schema";
+import { and, eq, isNull, or } from "drizzle-orm";
+import { accounts, otpCodes, passwordResets } from "../../db/schema";
 import { hashPassword, isStrongPassword, verifyPassword } from "./password";
 import { createSession, revokeSession, revokeAllSessions } from "./session";
 import { registerAccount, WeakPasswordError } from "../accounts/register";
@@ -336,6 +336,24 @@ export default async function authRoutes(app: FastifyInstance) {
     const passwordHash = await hashPassword(password);
     await app.db.update(accounts).set({ passwordHash, updatedAt: new Date() }).where(eq(accounts.id, accountId));
     await revokeAllSessions(app.db, accountId);
+
+    // Invalidate every OTHER outstanding reset credential for this account so a
+    // previously-captured link or code cannot be used after the reset lands.
+    const now = new Date();
+    await app.db
+      .update(passwordResets)
+      .set({ consumedAt: now })
+      .where(and(eq(passwordResets.accountId, accountId), isNull(passwordResets.consumedAt)));
+    await app.db
+      .update(otpCodes)
+      .set({ consumedAt: now })
+      .where(
+        and(
+          eq(otpCodes.accountId, accountId),
+          eq(otpCodes.purpose, "password_reset"),
+          isNull(otpCodes.consumedAt),
+        ),
+      );
 
     return reply.code(200).send({ ok: true });
   });
