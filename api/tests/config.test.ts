@@ -14,4 +14,10 @@ describe("loadConfig", () => {
   it("defaults NOTIFY_CHANNELS to [email]", () => {
     expect(loadConfig(base).notifyChannels).toEqual(["email"]);
   });
+  it("parses TRUST_PROXY (unset -> false, '1' -> 1, 'true' -> true)", () => {
+    expect(loadConfig(base).trustProxy).toBe(false);
+    expect(loadConfig({ ...base, TRUST_PROXY: "false" }).trustProxy).toBe(false);
+    expect(loadConfig({ ...base, TRUST_PROXY: "1" }).trustProxy).toBe(1);
+    expect(loadConfig({ ...base, TRUST_PROXY: "true" }).trustProxy).toBe(true);
+  });
 });

@@ -7,6 +7,7 @@ const schema = z.object({
   OTP_TTL_MINUTES: z.coerce.number().int().positive().default(10),
   NOTIFY_CHANNELS: z.string().default("email"),
   CORS_ORIGIN: z.string().min(1),
+  TRUST_PROXY: z.string().optional(),
 });
 
 export type Config = {
@@ -16,7 +17,21 @@ export type Config = {
   otpTtlMinutes: number;
   notifyChannels: ("email" | "sms")[];
   corsOrigin: string;
+  // Fastify trustProxy: false (default, safe when reachable directly), true, or
+  // a hop count. Behind a reverse proxy set TRUST_PROXY=1 so req.ip is the real
+  // client and /auth/* rate-limiting keys on it instead of the proxy.
+  trustProxy: boolean | number;
 };
+
+// Parse TRUST_PROXY: unset/""/"false" -> false; "true" -> true; digits -> hop
+// count (number); anything else -> false. Off by default because trustProxy:true
+// trusts the whole X-Forwarded-For chain and lets a direct client spoof its IP.
+function parseTrustProxy(v: string | undefined): boolean | number {
+  if (v === undefined || v === "" || v === "false") return false;
+  if (v === "true") return true;
+  if (/^\d+$/.test(v)) return Number(v);
+  return false;
+}
 
 export function loadConfig(source: Record<string, string | undefined> = process.env): Config {
   const e = schema.parse(source);
@@ -29,5 +44,6 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     otpTtlMinutes: e.OTP_TTL_MINUTES,
     notifyChannels: channels as ("email" | "sms")[],
     corsOrigin: e.CORS_ORIGIN,
+    trustProxy: parseTrustProxy(e.TRUST_PROXY),
   };
 }

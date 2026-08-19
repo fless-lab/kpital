@@ -42,9 +42,11 @@ function isUniqueViolation(err: unknown): boolean {
 
 // Pre-computed argon2id hash of a throwaway value. Used to equalize work on the
 // no-account path so every login attempt runs exactly one argon2 verify, closing
-// the timing side-channel that would otherwise leak account existence.
+// the timing side-channel that would otherwise leak account existence. Generated
+// with the SAME params as hashPassword (m=65536,t=3,p=1) so decoy verify cost
+// matches a real account's verify cost; regenerate it if those params change.
 const DECOY_HASH =
-  "$argon2id$v=19$m=65536,p=4,t=3$9jpoHiuL86aa/z6hG95rJQ$atl0eoG7Xjq4B/KUdJk3K4x8/ok//948RIpJLUjHgLY";
+  "$argon2id$v=19$m=65536,p=1,t=3$PIFDuyPMxvxYqN3adsVkrw$W/kLUmXnio6UDsqlreTtb7F4brijbj2Dr7ecbvY2W7o";
 
 export default async function authRoutes(app: FastifyInstance) {
   app.post("/auth/login", async (req, reply) => {
