@@ -7,9 +7,11 @@ import { makeDefaultNotifier } from "./lib/notifier";
 import type { PaymentProvider } from "./lib/payments";
 import { MockPaymentProvider } from "./lib/payments";
 import authPlugin from "./lib/http/auth";
+import requireAdminPlugin from "./lib/http/require-admin";
 import authRoutes from "./modules/auth/routes";
 import accountsRoutes from "./modules/accounts/routes";
 import walletRoutes from "./modules/wallet/routes";
+import adminRoutes from "./modules/admin/routes";
 
 export function buildApp(opts: { db: Db; config: Config; notifier?: Notifier; payments?: PaymentProvider }): FastifyInstance {
   const app = Fastify({ logger: false });
@@ -19,9 +21,11 @@ export function buildApp(opts: { db: Db; config: Config; notifier?: Notifier; pa
   app.decorate("payments", opts.payments ?? new MockPaymentProvider());
   app.register(cookie);
   app.register(authPlugin);
+  app.register(requireAdminPlugin);
   app.register(authRoutes);
   app.register(accountsRoutes);
   app.register(walletRoutes);
+  app.register(adminRoutes);
   app.get("/health", async () => ({ status: "ok" }));
   return app;
 }

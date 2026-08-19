@@ -11,6 +11,7 @@ declare module "fastify" {
     notifier: Notifier;
     payments: PaymentProvider;
     requireAuth: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    requireAdmin: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
   interface FastifyRequest {
     accountId: string | null;
