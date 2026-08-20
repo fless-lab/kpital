@@ -62,6 +62,34 @@ describe("kyc routes", () => {
     expect(res.json().error.code).toBe("validation_error");
   });
 
+  it("isolates submissions across accounts (B cannot see A's KYC)", async () => {
+    const { app } = await buildTestApp();
+    const cookieA = await loginAs(app, "a@iso.co");
+    const cookieB = await loginAs(app, "b@iso.co");
+
+    const form = buildMultipart({
+      fields: { doc_type: "cni", doc_number: "TG-A", dob: "1990-01-01", nationality: "Togolaise" },
+      files: [
+        { name: "front", filename: "f.png", contentType: "image/png", data: png },
+        { name: "back", filename: "b.png", contentType: "image/png", data: png },
+      ],
+    });
+    const submit = await app.inject({
+      method: "POST",
+      url: "/kyc/submission",
+      cookies: { [COOKIE]: cookieA },
+      headers: form.headers,
+      payload: form.body,
+    });
+    expect(submit.statusCode).toBe(201);
+
+    // B, a different authenticated account, must not see A's submission or docs.
+    const meB = await app.inject({ method: "GET", url: "/kyc/me", cookies: { [COOKIE]: cookieB } });
+    expect(meB.statusCode).toBe(200);
+    expect(meB.json().submission).toBeNull();
+    expect(meB.json().documents).toEqual([]);
+  });
+
   it("requires auth", async () => {
     const { app } = await buildTestApp();
     const res = await app.inject({ method: "GET", url: "/kyc/me" });

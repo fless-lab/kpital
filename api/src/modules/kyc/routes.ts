@@ -31,6 +31,10 @@ export default async function kycRoutes(app: FastifyInstance) {
     for await (const part of req.parts()) {
       if (part.type === "file") {
         if (!DOC_KINDS.includes(part.fieldname)) {
+          // Drain the un-consumed file stream before returning: @fastify/multipart
+          // marks req._consuming, so Node won't auto-drain the body and a paused
+          // stream can hang the socket until requestTimeout.
+          part.file.resume();
           return validationError(reply, "unknown_file_field");
         }
         const buffer = await part.toBuffer();
