@@ -50,6 +50,13 @@
       "when": 1787180696069,
       "tag": "0006_fat_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787186083930,
+      "tag": "0007_white_sue_storm",
+      "breakpoints": true
     }
   ]
 }

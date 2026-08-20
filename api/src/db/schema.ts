@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date } from "drizzle-orm/pg-core";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
 export const acctStatus = pgEnum("acct_status", ["active", "suspended", "closed"]);
@@ -71,6 +71,33 @@ export const notificationPrefs = pgTable("notification_pref", {
   accountId: uuid("account_id").primaryKey().references(() => accounts.id),
   channels: text("channels").array().notNull().default(["email"]),
   categories: jsonb("categories").notNull().default({}),
+});
+
+export const kycDocType = pgEnum("kyc_doc_type", ["cni", "passeport", "sejour"]);
+export const kycSubStatus = pgEnum("kyc_sub_status", ["pending", "verified", "rejected"]);
+export const kycDocKind = pgEnum("kyc_doc_kind", ["front", "back", "passport_page"]);
+export const kycSubmissions = pgTable("kyc_submission", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  docType: kycDocType("doc_type").notNull(),
+  docNumber: text("doc_number").notNull(),
+  dob: date("dob").notNull(),
+  nationality: text("nationality").notNull(),
+  status: kycSubStatus("status").notNull().default("pending"),
+  rejectReason: text("reject_reason"),
+  reviewedBy: uuid("reviewed_by").references(() => accounts.id),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  superseded: boolean("superseded").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const kycDocuments = pgTable("kyc_document", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  submissionId: uuid("submission_id").notNull().references(() => kycSubmissions.id, { onDelete: "cascade" }),
+  kind: kycDocKind("kind").notNull(),
+  storageKey: text("storage_key").notNull(),
+  mime: text("mime").notNull(),
+  sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const otpChannel = pgEnum("otp_channel", ["email", "sms"]);

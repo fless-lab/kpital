@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { loadConfig } from "../src/config/env";
 
-const base = { DATABASE_URL: "postgres://x", CORS_ORIGIN: "http://localhost:8080" };
+const base = {
+  DATABASE_URL: "postgres://x",
+  CORS_ORIGIN: "http://localhost:8080",
+  MINIO_ENDPOINT: "http://127.0.0.1:9100",
+  MINIO_ACCESS_KEY: "kpital",
+  MINIO_SECRET_KEY: "kpital-secret",
+  MINIO_BUCKET: "kpital-kyc",
+};
 
 describe("loadConfig", () => {
   it("parses NOTIFY_CHANNELS into an array", () => {
@@ -19,5 +26,13 @@ describe("loadConfig", () => {
     expect(loadConfig({ ...base, TRUST_PROXY: "false" }).trustProxy).toBe(false);
     expect(loadConfig({ ...base, TRUST_PROXY: "1" }).trustProxy).toBe(1);
     expect(loadConfig({ ...base, TRUST_PROXY: "true" }).trustProxy).toBe(true);
+  });
+  it("parses MinIO + KYC config with defaults", () => {
+    const c = loadConfig({ DATABASE_URL: "postgres://x", CORS_ORIGIN: "http://localhost:8080",
+      MINIO_ENDPOINT: "http://127.0.0.1:9100", MINIO_ACCESS_KEY: "kpital",
+      MINIO_SECRET_KEY: "kpital-secret", MINIO_BUCKET: "kpital-kyc" });
+    expect(c.minioBucket).toBe("kpital-kyc");
+    expect(c.kycUrlTtlSeconds).toBe(120);
+    expect(c.kycMaxFileMb).toBe(10);
   });
 });
