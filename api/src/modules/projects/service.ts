@@ -1,6 +1,6 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type { Db } from "../../db/client";
-import { projectDocuments, projects } from "../../db/schema";
+import { projectDocuments, projectFollows, projectUpvotes, projects } from "../../db/schema";
 
 // Owner mismatch — the caller is not the project's owner. Routes map this to 403.
 export class NotOwnerError extends Error {
@@ -263,4 +263,119 @@ export async function getPublicProject(
     .orderBy(asc(projectDocuments.createdAt), asc(projectDocuments.id));
 
   return { project, documents };
+}
+
+// ---------------------------------------------------------------------------
+// Engagement (follow, upvote, my-state)
+// ---------------------------------------------------------------------------
+
+// Follow a project ("notify me when it opens"). Allowed only while the project
+// is publicly visible. The membership row and the counter move together in ONE
+// transaction: insert-on-conflict-do-nothing, and increment followCount with a
+// SQL expression ONLY when a row was actually inserted — so a repeated follow is
+// idempotent and never double-counts. The status is read WITHOUT a row lock: the
+// counter UPDATE takes its own lock and the composite PK is what makes the count
+// exact, so locking the status read would needlessly serialize concurrent
+// followers of the same project.
+export async function followProject(db: Db, accountId: string, projectId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [project] = await tx
+      .select({ status: projects.status })
+      .from(projects)
+      .where(eq(projects.id, projectId));
+    if (!project) throw new ProjectNotFoundError();
+    if (!PUBLIC_STATUS_SET.has(project.status)) throw new InvalidStateError();
+
+    const inserted = await tx
+      .insert(projectFollows)
+      .values({ accountId, projectId })
+      .onConflictDoNothing()
+      .returning();
+    if (inserted.length > 0) {
+      await tx
+        .update(projects)
+        .set({ followCount: sql`${projects.followCount} + 1` })
+        .where(eq(projects.id, projectId));
+    }
+  });
+}
+
+// Unfollow. Symmetric to follow and always idempotent: no status guard and no
+// existence check — removing your own follow must succeed even after the project
+// has left the publicly-visible states. Decrement ONLY when a row was actually
+// removed.
+export async function unfollowProject(db: Db, accountId: string, projectId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const removed = await tx
+      .delete(projectFollows)
+      .where(and(eq(projectFollows.accountId, accountId), eq(projectFollows.projectId, projectId)))
+      .returning();
+    if (removed.length > 0) {
+      await tx
+        .update(projects)
+        .set({ followCount: sql`${projects.followCount} - 1` })
+        .where(eq(projects.id, projectId));
+    }
+  });
+}
+
+// Upvote a project. Allowed ONLY while status=showcase (regulatory guardrail);
+// any other status → InvalidStateError (409). Same atomic, idempotent counter
+// mechanism as followProject.
+export async function upvoteProject(db: Db, accountId: string, projectId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [project] = await tx
+      .select({ status: projects.status })
+      .from(projects)
+      .where(eq(projects.id, projectId));
+    if (!project) throw new ProjectNotFoundError();
+    if (project.status !== "showcase") throw new InvalidStateError();
+
+    const inserted = await tx
+      .insert(projectUpvotes)
+      .values({ accountId, projectId })
+      .onConflictDoNothing()
+      .returning();
+    if (inserted.length > 0) {
+      await tx
+        .update(projects)
+        .set({ upvoteCount: sql`${projects.upvoteCount} + 1` })
+        .where(eq(projects.id, projectId));
+    }
+  });
+}
+
+// Remove an upvote. Symmetric to upvote: no status guard, no existence check,
+// always idempotent. Decrement ONLY when a row was actually removed.
+export async function removeUpvote(db: Db, accountId: string, projectId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const removed = await tx
+      .delete(projectUpvotes)
+      .where(and(eq(projectUpvotes.accountId, accountId), eq(projectUpvotes.projectId, projectId)))
+      .returning();
+    if (removed.length > 0) {
+      await tx
+        .update(projects)
+        .set({ upvoteCount: sql`${projects.upvoteCount} - 1` })
+        .where(eq(projects.id, projectId));
+    }
+  });
+}
+
+// The caller's engagement state for one project: whether they follow it and
+// whether they have upvoted it.
+export async function getEngagement(
+  db: Db,
+  accountId: string,
+  projectId: string,
+): Promise<{ following: boolean; upvoted: boolean }> {
+  const [follow] = await db
+    .select({ projectId: projectFollows.projectId })
+    .from(projectFollows)
+    .where(and(eq(projectFollows.accountId, accountId), eq(projectFollows.projectId, projectId)));
+  const [upvote] = await db
+    .select({ projectId: projectUpvotes.projectId })
+    .from(projectUpvotes)
+    .where(and(eq(projectUpvotes.accountId, accountId), eq(projectUpvotes.projectId, projectId)));
+  return { following: follow !== undefined, upvoted: upvote !== undefined };
 }

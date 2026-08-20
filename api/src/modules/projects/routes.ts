@@ -8,6 +8,11 @@ import {
   listMine,
   listPublicProjects,
   getPublicProject,
+  followProject,
+  unfollowProject,
+  upvoteProject,
+  removeUpvote,
+  getEngagement,
   NotOwnerError,
   InvalidStateError,
   ProjectNotFoundError,
@@ -347,5 +352,87 @@ export default async function projectRoutes(app: FastifyInstance) {
       })),
     );
     return reply.send({ project: result.project, documents });
+  });
+
+  // POST /projects/:id/follow — "notify me when it opens". Authenticated,
+  // idempotent, unique per (account, project); increments followCount atomically
+  // only on a genuinely new follow. Allowed while the project is publicly visible.
+  app.post("/projects/:id/follow", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    try {
+      await followProject(app.db, accountId, id);
+      return reply.code(200).send({ following: true });
+    } catch (err) {
+      return mapProjectError(err, reply);
+    }
+  });
+
+  // DELETE /projects/:id/follow — unfollow. Idempotent; decrements followCount
+  // atomically only when a follow was actually removed. No status guard.
+  app.delete("/projects/:id/follow", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    try {
+      await unfollowProject(app.db, accountId, id);
+      return reply.code(200).send({ following: false });
+    } catch (err) {
+      return mapProjectError(err, reply);
+    }
+  });
+
+  // POST /projects/:id/upvote — authenticated, idempotent, unique per account.
+  // Increments upvoteCount atomically only on a new upvote. 409 invalid_state
+  // unless status=showcase.
+  app.post("/projects/:id/upvote", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    try {
+      await upvoteProject(app.db, accountId, id);
+      return reply.code(200).send({ upvoted: true });
+    } catch (err) {
+      return mapProjectError(err, reply);
+    }
+  });
+
+  // DELETE /projects/:id/upvote — remove an upvote. Idempotent; decrements
+  // atomically only when a row was actually removed. No status guard.
+  app.delete("/projects/:id/upvote", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    try {
+      await removeUpvote(app.db, accountId, id);
+      return reply.code(200).send({ upvoted: false });
+    } catch (err) {
+      return mapProjectError(err, reply);
+    }
+  });
+
+  // GET /projects/:id/me — the caller's own engagement state for a project.
+  app.get("/projects/:id/me", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    const state = await getEngagement(app.db, accountId, id);
+    return reply.send(state);
   });
 }
