@@ -56,7 +56,9 @@ export function buildApp(opts: {
   app.register(cors, { origin: opts.config.corsOrigin, credentials: true });
   app.register(cookie);
   app.register(multipart, {
-    limits: { fileSize: opts.config.kycMaxFileMb * 1024 * 1024, files: 2 },
+    // Bound non-file input too: fields/parts caps stop a malicious body from
+    // flooding the parts loop (the KYC form is 4 fields + 2 files = 6 parts).
+    limits: { fileSize: opts.config.kycMaxFileMb * 1024 * 1024, files: 2, fields: 10, parts: 12 },
   });
   app.register(authPlugin);
   app.register(requireAdminPlugin);

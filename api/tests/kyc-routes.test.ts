@@ -38,6 +38,10 @@ describe("kyc routes", () => {
     expect(me.statusCode).toBe(200);
     const body = me.json();
     expect(body.submission.status).toBe("pending");
+    // Internal review fields must never leak to the KYC subject.
+    expect(body.submission).not.toHaveProperty("reviewedBy");
+    expect(body.submission).not.toHaveProperty("superseded");
+    expect(body.submission).not.toHaveProperty("reviewedAt");
     expect(body.documents).toHaveLength(2);
     for (const d of body.documents) {
       expect(typeof d.url).toBe("string");
@@ -58,6 +62,53 @@ describe("kyc routes", () => {
       headers: form.headers,
       payload: form.body,
     });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe("validation_error");
+  });
+
+  it("rejects a shape-valid but impossible dob (2026-99-99) with 400, not 500", async () => {
+    const { app } = await buildTestApp();
+    const cookie = await loginAs(app, "kdob@a.co");
+    const form = buildMultipart({
+      fields: { doc_type: "cni", doc_number: "TG-D", dob: "2026-99-99", nationality: "Togolaise" },
+      files: [
+        { name: "front", filename: "f.png", contentType: "image/png", data: png },
+        { name: "back", filename: "b.png", contentType: "image/png", data: png },
+      ],
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/kyc/submission",
+      cookies: { [COOKIE]: cookie },
+      headers: form.headers,
+      payload: form.body,
+    });
+    // Passes the /^\d{4}-\d{2}-\d{2}$/ regex but is not a real calendar date:
+    // must be caught as a 400 validation_error, never reach the date column (500).
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe("validation_error");
+  });
+
+  it("rejects an unknown file field even when a valid file part trails it (400, no hang)", async () => {
+    const { app } = await buildTestApp();
+    const cookie = await loginAs(app, "kbad@a.co");
+    // Unknown file field FIRST, then a valid one: the parts loop must drain every
+    // part (no early return leaving the trailing file unconsumed) and still 400.
+    const form = buildMultipart({
+      fields: { doc_type: "cni", doc_number: "TG-X", dob: "1990-01-01", nationality: "Togolaise" },
+      files: [
+        { name: "selfie", filename: "s.png", contentType: "image/png", data: png },
+        { name: "front", filename: "f.png", contentType: "image/png", data: png },
+      ],
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/kyc/submission",
+      cookies: { [COOKIE]: cookie },
+      headers: form.headers,
+      payload: form.body,
+    });
+    // The request completes (does not hang) and returns the validation 400.
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe("validation_error");
   });

@@ -230,6 +230,42 @@ describe("kyc admin", () => {
     expect(rows.some((r) => r.id === firstId)).toBe(false);
   });
 
+  it("decision on a superseded submission id → 404 and leaves account + row untouched", async () => {
+    const { app, db } = await buildTestApp();
+    const userCookie = await loginAs(app, "u@kycadm.co");
+    const firstId = await submitKyc(app, userCookie); // becomes superseded on resubmit
+    await submitKyc(app, userCookie); // the current, non-superseded submission
+
+    const adminCookie = await promoteAdmin(app, "admin@kycadm.co");
+    await db.update(accounts).set({ isAdmin: true }).where(eq(accounts.email, "admin@kycadm.co"));
+
+    // Deciding the STALE (superseded) id must not clobber the account's kyc_status
+    // while the current submission is still unreviewed: the UPDATE matches zero
+    // rows (superseded excluded), throws the sentinel, rolls back → 404.
+    const dec = await app.inject({
+      method: "POST",
+      url: `/admin/kyc/${firstId}/decision`,
+      cookies: { [COOKIE]: adminCookie },
+      payload: { decision: "verified" },
+    });
+    expect(dec.statusCode).toBe(404);
+
+    // Account kyc_status unchanged (still pending from the second submission).
+    const [acct] = await db
+      .select({ kycStatus: accounts.kycStatus })
+      .from(accounts)
+      .where(eq(accounts.email, "u@kycadm.co"));
+    expect(acct!.kycStatus).toBe("pending");
+
+    // The superseded row itself is untouched: never marked verified, no reviewer.
+    const [sub] = await db
+      .select({ status: kycSubmissions.status, reviewedBy: kycSubmissions.reviewedBy })
+      .from(kycSubmissions)
+      .where(eq(kycSubmissions.id, firstId));
+    expect(sub!.status).toBe("pending");
+    expect(sub!.reviewedBy).toBeNull();
+  });
+
   it("rejects an invalid ?status enum with 400", async () => {
     const { app, db } = await buildTestApp();
     const adminCookie = await promoteAdmin(app, "admin@kycadm.co");

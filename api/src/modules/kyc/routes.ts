@@ -16,6 +16,17 @@ function validationError(reply: FastifyReply, message: string) {
   return reply.code(400).send({ error: { code: "validation_error", message } });
 }
 
+// True only if `YYYY-MM-DD` names an existing calendar day. Date.UTC rolls an
+// out-of-range month/day into a neighbouring date, so an impossible value fails
+// the part-by-part round-trip comparison instead of silently normalising.
+function isRealDate(dob: string): boolean {
+  const y = Number(dob.slice(0, 4));
+  const m = Number(dob.slice(5, 7));
+  const d = Number(dob.slice(8, 10));
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
 export default async function kycRoutes(app: FastifyInstance) {
   app.post("/kyc/submission", { preHandler: app.requireAuth }, async (req, reply) => {
     const accountId = req.accountId;
@@ -25,23 +36,29 @@ export default async function kycRoutes(app: FastifyInstance) {
 
     const fields: Record<string, string> = {};
     const files: KycFileInput[] = [];
+    // Record the first validation problem but KEEP iterating: an early return
+    // would leave later file parts unconsumed, and @fastify/multipart marks
+    // req._consuming so Node won't auto-drain them — a paused stream can stall
+    // body parsing until requestTimeout. Every part is consumed exactly once
+    // (toBuffer for accepted files, resume() to drain rejected ones).
+    let earlyError: string | null = null;
 
-    // Consume each part's stream inside the loop (toBuffer before advancing the
-    // async iterator), or later parts hang / yield empty buffers.
     for await (const part of req.parts()) {
       if (part.type === "file") {
         if (!DOC_KINDS.includes(part.fieldname)) {
-          // Drain the un-consumed file stream before returning: @fastify/multipart
-          // marks req._consuming, so Node won't auto-drain the body and a paused
-          // stream can hang the socket until requestTimeout.
+          if (earlyError === null) earlyError = "unknown_file_field";
           part.file.resume();
-          return validationError(reply, "unknown_file_field");
+          continue;
         }
         const buffer = await part.toBuffer();
         files.push({ kind: part.fieldname as KycDocKind, buffer, clientMime: part.mimetype });
       } else {
         fields[part.fieldname] = String(part.value);
       }
+    }
+
+    if (earlyError !== null) {
+      return validationError(reply, earlyError);
     }
 
     const docType = fields.doc_type;
@@ -56,8 +73,11 @@ export default async function kycRoutes(app: FastifyInstance) {
       return validationError(reply, "invalid_doc_number");
     }
     // dob feeds a Postgres `date` column: reject anything not YYYY-MM-DD so a bad
-    // value surfaces as our 400 envelope, not a driver 500.
-    if (typeof dob !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+    // value surfaces as our 400 envelope, not a driver 500. The shape regex alone
+    // lets impossible dates (e.g. 2026-99-99) through, so also confirm it is a
+    // real calendar date by round-tripping through Date.UTC (which rolls invalid
+    // months/days over instead of matching the input parts).
+    if (typeof dob !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(dob) || !isRealDate(dob)) {
       return validationError(reply, "invalid_dob");
     }
     if (typeof nationality !== "string" || nationality.trim() === "") {
@@ -115,6 +135,19 @@ export default async function kycRoutes(app: FastifyInstance) {
       })),
     );
 
-    return reply.send({ submission, documents });
+    // Project only user-facing columns: reviewedBy (an admin UUID), superseded,
+    // and reviewedAt are internal review state and must not leak to the subject.
+    const publicSubmission = {
+      id: submission.id,
+      docType: submission.docType,
+      docNumber: submission.docNumber,
+      dob: submission.dob,
+      nationality: submission.nationality,
+      status: submission.status,
+      rejectReason: submission.rejectReason,
+      createdAt: submission.createdAt,
+    };
+
+    return reply.send({ submission: publicSubmission, documents });
   });
 }

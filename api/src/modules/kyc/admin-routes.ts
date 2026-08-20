@@ -133,7 +133,11 @@ export default async function kycAdminRoutes(app: FastifyInstance) {
             reviewedAt: new Date(),
             rejectReason: decision === "rejected" ? reason : null,
           })
-          .where(eq(kycSubmissions.id, id))
+          // Exclude superseded rows: an admin holding a stale id (or reading one
+          // from the unfiltered detail GET) must not decide an old submission and
+          // clobber the account's kyc_status while the current one is unreviewed.
+          // No row matches → SubmissionNotFoundError → txn rollback → 404.
+          .where(and(eq(kycSubmissions.id, id), eq(kycSubmissions.superseded, false)))
           .returning({ accountId: kycSubmissions.accountId });
 
         if (!updated) {
