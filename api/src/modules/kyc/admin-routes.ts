@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { accounts, kycDocuments, kycSubmissions, kycSubStatus } from "../../db/schema";
 
 const SUB_STATUSES = kycSubStatus.enumValues as readonly string[];
@@ -53,7 +53,10 @@ export default async function kycAdminRoutes(app: FastifyInstance) {
     const submissions = await app.db
       .select(submissionColumns)
       .from(kycSubmissions)
-      .where(eq(kycSubmissions.status, status as Decision | "pending"))
+      // Superseded submissions keep their old `status` (e.g. pending) after a
+      // resubmit; exclude them so a stale row can never surface in the queue or
+      // be decided (which would clobber the account's current kyc_status).
+      .where(and(eq(kycSubmissions.status, status as Decision | "pending"), eq(kycSubmissions.superseded, false)))
       // Deterministic order: newest first, id as tiebreak (no arbitrary row order).
       .orderBy(desc(kycSubmissions.createdAt), desc(kycSubmissions.id))
       .limit(limit);

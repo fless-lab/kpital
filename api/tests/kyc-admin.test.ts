@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
 import { buildMultipart } from "./helpers/multipart";
-import { accounts } from "../src/db/schema";
+import { accounts, kycSubmissions } from "../src/db/schema";
 
 const COOKIE = "kpital_sess";
 
@@ -53,6 +53,7 @@ describe("kyc admin", () => {
 
     const adminCookie = await promoteAdmin(app, "admin@kycadm.co");
     await db.update(accounts).set({ isAdmin: true }).where(eq(accounts.email, "admin@kycadm.co"));
+    const [admin] = await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.email, "admin@kycadm.co"));
 
     // Queue: filtered by status, metadata only (no documents, no password_hash).
     const list = await app.inject({
@@ -99,6 +100,21 @@ describe("kyc admin", () => {
       .from(accounts)
       .where(eq(accounts.email, "u@kycadm.co"));
     expect(acct!.kycStatus).toBe("verified");
+
+    // The submission row itself is updated (status + review audit fields).
+    const [sub] = await db
+      .select({
+        status: kycSubmissions.status,
+        reviewedBy: kycSubmissions.reviewedBy,
+        reviewedAt: kycSubmissions.reviewedAt,
+        rejectReason: kycSubmissions.rejectReason,
+      })
+      .from(kycSubmissions)
+      .where(eq(kycSubmissions.id, submissionId));
+    expect(sub!.status).toBe("verified");
+    expect(sub!.reviewedBy).toBe(admin!.id);
+    expect(sub!.reviewedAt).not.toBeNull();
+    expect(sub!.rejectReason).toBeNull();
   });
 
   it("reject requires a non-empty reason (400)", async () => {
@@ -127,11 +143,12 @@ describe("kyc admin", () => {
     const adminCookie = await promoteAdmin(app, "admin@kycadm.co");
     await db.update(accounts).set({ isAdmin: true }).where(eq(accounts.email, "admin@kycadm.co"));
 
+    const reason = "blurry document";
     const dec = await app.inject({
       method: "POST",
       url: `/admin/kyc/${submissionId}/decision`,
       cookies: { [COOKIE]: adminCookie },
-      payload: { decision: "rejected", reason: "blurry document" },
+      payload: { decision: "rejected", reason },
     });
     expect(dec.statusCode).toBe(200);
 
@@ -140,6 +157,14 @@ describe("kyc admin", () => {
       .from(accounts)
       .where(eq(accounts.email, "u@kycadm.co"));
     expect(acct!.kycStatus).toBe("rejected");
+
+    // The submission row records the rejection + reason.
+    const [sub] = await db
+      .select({ status: kycSubmissions.status, rejectReason: kycSubmissions.rejectReason })
+      .from(kycSubmissions)
+      .where(eq(kycSubmissions.id, submissionId));
+    expect(sub!.status).toBe("rejected");
+    expect(sub!.rejectReason).toBe(reason);
   });
 
   it("returns 404 for an unknown submission id (valid uuid, absent)", async () => {
@@ -153,6 +178,56 @@ describe("kyc admin", () => {
       cookies: { [COOKIE]: adminCookie },
     });
     expect(res.statusCode).toBe(404);
+  });
+
+  it("decision on an unknown submission id → 404 and rolls back (no account changes)", async () => {
+    const { app, db } = await buildTestApp();
+    const userCookie = await loginAs(app, "u@kycadm.co");
+    await submitKyc(app, userCookie); // an unrelated submission → account is "pending"
+
+    const adminCookie = await promoteAdmin(app, "admin@kycadm.co");
+    await db.update(accounts).set({ isAdmin: true }).where(eq(accounts.email, "admin@kycadm.co"));
+
+    // A well-formed but nonexistent uuid: the txn updates zero rows, throws the
+    // sentinel, rolls back, and maps to 404 — no account's kyc_status flips.
+    const missing = "11111111-2222-4333-8444-555555555555";
+    const dec = await app.inject({
+      method: "POST",
+      url: `/admin/kyc/${missing}/decision`,
+      cookies: { [COOKIE]: adminCookie },
+      payload: { decision: "verified" },
+    });
+    expect(dec.statusCode).toBe(404);
+
+    const [acct] = await db
+      .select({ kycStatus: accounts.kycStatus })
+      .from(accounts)
+      .where(eq(accounts.email, "u@kycadm.co"));
+    expect(acct!.kycStatus).toBe("pending");
+  });
+
+  it("queue excludes superseded submissions (only the latest shows)", async () => {
+    const { app, db } = await buildTestApp();
+    const userCookie = await loginAs(app, "u@kycadm.co");
+    const firstId = await submitKyc(app, userCookie); // becomes superseded on resubmit
+    const secondId = await submitKyc(app, userCookie); // the current, non-superseded one
+
+    const adminCookie = await promoteAdmin(app, "admin@kycadm.co");
+    await db.update(accounts).set({ isAdmin: true }).where(eq(accounts.email, "admin@kycadm.co"));
+
+    const list = await app.inject({
+      method: "GET",
+      url: "/admin/kyc?status=pending",
+      cookies: { [COOKIE]: adminCookie },
+    });
+    expect(list.statusCode).toBe(200);
+    const rows = list.json().submissions as Array<{ id: string; accountId: string }>;
+    // Exactly one row for this account: the latest, non-superseded submission.
+    const [me] = await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.email, "u@kycadm.co"));
+    const mine = rows.filter((r) => r.accountId === me!.id);
+    expect(mine).toHaveLength(1);
+    expect(mine[0]!.id).toBe(secondId);
+    expect(rows.some((r) => r.id === firstId)).toBe(false);
   });
 
   it("rejects an invalid ?status enum with 400", async () => {
