@@ -39,6 +39,10 @@ export async function buildTestApp(opts?: {
   const config = loadConfig({
     DATABASE_URL: testUrl,
     CORS_ORIGIN: "http://localhost:8080",
+    MINIO_ENDPOINT: "http://127.0.0.1:9100",
+    MINIO_ACCESS_KEY: "kpital",
+    MINIO_SECRET_KEY: "kpital-secret",
+    MINIO_BUCKET: "kpital-kyc",
   });
   const { notifier, sentCodes, sentLinks } = makeCapturingNotifier();
   const app = buildApp({

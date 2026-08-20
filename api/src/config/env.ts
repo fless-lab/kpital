@@ -8,6 +8,13 @@ const schema = z.object({
   NOTIFY_CHANNELS: z.string().default("email"),
   CORS_ORIGIN: z.string().min(1),
   TRUST_PROXY: z.string().optional(),
+  MINIO_ENDPOINT: z.string().min(1),
+  MINIO_ACCESS_KEY: z.string().min(1),
+  MINIO_SECRET_KEY: z.string().min(1),
+  MINIO_BUCKET: z.string().min(1),
+  MINIO_REGION: z.string().default("us-east-1"),
+  KYC_URL_TTL_SECONDS: z.coerce.number().int().positive().default(120),
+  KYC_MAX_FILE_MB: z.coerce.number().int().positive().default(10),
 });
 
 export type Config = {
@@ -21,6 +28,13 @@ export type Config = {
   // a hop count. Behind a reverse proxy set TRUST_PROXY=1 so req.ip is the real
   // client and /auth/* rate-limiting keys on it instead of the proxy.
   trustProxy: boolean | number;
+  minioEndpoint: string;
+  minioAccessKey: string;
+  minioSecretKey: string;
+  minioBucket: string;
+  minioRegion: string;
+  kycUrlTtlSeconds: number;
+  kycMaxFileMb: number;
 };
 
 // Parse TRUST_PROXY: unset/""/"false" -> false; "true" -> true; digits -> hop
@@ -45,5 +59,12 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     notifyChannels: channels as ("email" | "sms")[],
     corsOrigin: e.CORS_ORIGIN,
     trustProxy: parseTrustProxy(e.TRUST_PROXY),
+    minioEndpoint: e.MINIO_ENDPOINT,
+    minioAccessKey: e.MINIO_ACCESS_KEY,
+    minioSecretKey: e.MINIO_SECRET_KEY,
+    minioBucket: e.MINIO_BUCKET,
+    minioRegion: e.MINIO_REGION,
+    kycUrlTtlSeconds: e.KYC_URL_TTL_SECONDS,
+    kycMaxFileMb: e.KYC_MAX_FILE_MB,
   };
 }

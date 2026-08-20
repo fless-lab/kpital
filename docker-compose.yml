@@ -18,5 +18,22 @@ services:
       timeout: 3s
       retries: 10
 
+  kpital-minio:
+    image: minio/minio
+    container_name: kpital-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: kpital
+      MINIO_ROOT_PASSWORD: kpital-secret
+    ports: ["9100:9000", "9101:9001"]
+    volumes: ["kpital_miniodata:/data"]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   kpital_pgdata:
+  kpital_miniodata:
