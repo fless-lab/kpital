@@ -4,6 +4,7 @@ import { loadConfig } from "../../src/config/env";
 import type { Db } from "../../src/db/client";
 import type { Notifier } from "../../src/lib/notifier";
 import type { PaymentProvider } from "../../src/lib/payments";
+import { MemoryStorage } from "../../src/lib/storage/memory";
 import { db, ensureMigrated } from "./db";
 
 const testUrl = process.env.TEST_DATABASE_URL ?? "postgres://kpital:kpital@127.0.0.1:5544/kpital_test";
@@ -34,6 +35,7 @@ export async function buildTestApp(opts?: {
   db: Db;
   sentCodes: string[];
   sentLinks: string[];
+  storage: MemoryStorage;
 }> {
   await ensureMigrated();
   const config = loadConfig({
@@ -45,14 +47,16 @@ export async function buildTestApp(opts?: {
     MINIO_BUCKET: "kpital-kyc",
   });
   const { notifier, sentCodes, sentLinks } = makeCapturingNotifier();
+  const storage = new MemoryStorage();
   const app = buildApp({
     db,
     config,
     notifier,
+    storage,
     ...(opts?.payments ? { payments: opts.payments } : {}),
     ...(opts?.rateLimitMax !== undefined ? { rateLimitMax: opts.rateLimitMax } : {}),
   });
-  return { app, db, sentCodes, sentLinks };
+  return { app, db, sentCodes, sentLinks, storage };
 }
 
 // Registers a fresh account with the given email (defaulting to the investor
