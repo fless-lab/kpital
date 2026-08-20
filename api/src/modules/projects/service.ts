@@ -194,6 +194,30 @@ export type PublicProject = {
   [K in keyof typeof PUBLIC_PROJECT_COLUMNS]: Project[K];
 };
 
+// The funding surface (status=collecting) deliberately DROPS upvoteCount and
+// followCount: votes/follows are a Showcase-only social signal and must not
+// appear on the funding catalog cards (a regulatory guardrail). Everything else
+// the card needs is kept. Showcase and the detail route keep the full projection.
+export const FUNDING_PROJECT_COLUMNS = {
+  id: projects.id,
+  category: projects.category,
+  title: projects.title,
+  city: projects.city,
+  quartier: projects.quartier,
+  description: projects.description,
+  targetMinor: projects.targetMinor,
+  durationMonths: projects.durationMonths,
+  roiPct: projects.roiPct,
+  status: projects.status,
+  score: projects.score,
+  publishedAt: projects.publishedAt,
+  createdAt: projects.createdAt,
+} as const;
+
+export type FundingProject = {
+  [K in keyof typeof FUNDING_PROJECT_COLUMNS]: Project[K];
+};
+
 // Only the fields the detail route needs to build a public document entry.
 // storageKey is fetched so the route can mint a signed URL, then dropped — it is
 // NEVER returned to the client.
@@ -218,19 +242,36 @@ export interface PublicListFilters {
 // catalog): newest-published first, then createdAt, with an id tiebreak for a
 // total order (rows seeded directly have publishedAt = null → DESC floats them
 // first, which is acceptable for a not-yet-published collecting row).
+function publicListConds(status: PublicStatus, filters: PublicListFilters) {
+  const conds = [eq(projects.status, status)];
+  if (filters.category !== undefined) conds.push(eq(projects.category, filters.category));
+  if (filters.score !== undefined) conds.push(eq(projects.score, filters.score));
+  return conds;
+}
+
 export async function listPublicProjects(
   db: Db,
   status: PublicStatus,
   filters: PublicListFilters,
 ): Promise<PublicProject[]> {
-  const conds = [eq(projects.status, status)];
-  if (filters.category !== undefined) conds.push(eq(projects.category, filters.category));
-  if (filters.score !== undefined) conds.push(eq(projects.score, filters.score));
-
   return db
     .select(PUBLIC_PROJECT_COLUMNS)
     .from(projects)
-    .where(and(...conds))
+    .where(and(...publicListConds(status, filters)))
+    .orderBy(desc(projects.publishedAt), desc(projects.createdAt), asc(projects.id))
+    .limit(filters.limit);
+}
+
+// The funding catalog (status=collecting) with the FUNDING projection — same
+// factual ordering, minus the Showcase-only vote/follow counts.
+export async function listFundingProjects(
+  db: Db,
+  filters: PublicListFilters,
+): Promise<FundingProject[]> {
+  return db
+    .select(FUNDING_PROJECT_COLUMNS)
+    .from(projects)
+    .where(and(...publicListConds("collecting", filters)))
     .orderBy(desc(projects.publishedAt), desc(projects.createdAt), asc(projects.id))
     .limit(filters.limit);
 }

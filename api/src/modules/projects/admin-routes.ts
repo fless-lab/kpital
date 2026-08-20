@@ -1,7 +1,8 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { accounts, projectDocuments, projectFollows, projectScore, projectStatus, projects } from "../../db/schema";
+import { accounts, notificationPrefs, projectDocuments, projectFollows, projectScore, projectStatus, projects } from "../../db/schema";
 import { InvalidStateError } from "./service";
+import { resolveEffectiveChannels } from "../../lib/notifier";
 
 const STATUSES = projectStatus.enumValues as readonly string[];
 const SCORES = projectScore.enumValues as readonly string[];
@@ -182,10 +183,14 @@ export default async function projectAdminRoutes(app: FastifyInstance) {
     // Fetch followers' contact details and notify each that collection is open.
     // Runs after commit and never fails the request (the transition is durable).
     try {
+      // LEFT JOIN the pref so a follower with no pref row still surfaces (channels
+      // = null → default to ["email"]). An explicit empty array means the follower
+      // opted out of everything and gets nothing.
       const followers = await app.db
-        .select({ email: accounts.email, phone: accounts.phone })
+        .select({ email: accounts.email, phone: accounts.phone, channels: notificationPrefs.channels })
         .from(projectFollows)
         .innerJoin(accounts, eq(projectFollows.accountId, accounts.id))
+        .leftJoin(notificationPrefs, eq(notificationPrefs.accountId, accounts.id))
         .where(eq(projectFollows.projectId, id));
 
       const message = {
@@ -194,9 +199,11 @@ export default async function projectAdminRoutes(app: FastifyInstance) {
       };
       await Promise.all(
         followers.map((f) => {
+          const followerChannels = f.channels ?? ["email"];
+          const effective = resolveEffectiveChannels(followerChannels, app.config.notifyChannels);
           const to = {
-            ...(f.email ? { email: f.email } : {}),
-            ...(f.phone ? { phone: f.phone } : {}),
+            ...(effective.includes("email") && f.email ? { email: f.email } : {}),
+            ...(effective.includes("sms") && f.phone ? { phone: f.phone } : {}),
           };
           if (!to.email && !to.phone) return Promise.resolve();
           return app.notifier.send(to, message);
