@@ -127,6 +127,35 @@ describe("project engagement", () => {
     expect(det.json().project.followCount).toBe(1);
   });
 
+  it("unfollowing moves followCount back to 0 and stays idempotent", async () => {
+    const { app, db } = await buildTestApp();
+    const owner = await seedOwner(db, "eng-owner7@a.co");
+    const pid = await seedProject(db, owner, "showcase");
+    const cookie = await loginAs(app, "eng-a7@a.co");
+
+    const follow = await app.inject({ method: "POST", url: `/projects/${pid}/follow`, cookies: { kpital_sess: cookie } });
+    expect(follow.statusCode).toBe(200);
+
+    const det1 = await app.inject({ method: "GET", url: `/projects/${pid}` });
+    expect(det1.json().project.followCount).toBe(1);
+    const me1 = await app.inject({ method: "GET", url: `/projects/${pid}/me`, cookies: { kpital_sess: cookie } });
+    expect(me1.json().following).toBe(true);
+
+    const del = await app.inject({ method: "DELETE", url: `/projects/${pid}/follow`, cookies: { kpital_sess: cookie } });
+    expect(del.statusCode).toBe(200);
+
+    const det2 = await app.inject({ method: "GET", url: `/projects/${pid}` });
+    expect(det2.json().project.followCount).toBe(0);
+    const me2 = await app.inject({ method: "GET", url: `/projects/${pid}/me`, cookies: { kpital_sess: cookie } });
+    expect(me2.json().following).toBe(false);
+
+    // Idempotent: a second unfollow is still 200 and does not go below zero.
+    const del2 = await app.inject({ method: "DELETE", url: `/projects/${pid}/follow`, cookies: { kpital_sess: cookie } });
+    expect(del2.statusCode).toBe(200);
+    const det3 = await app.inject({ method: "GET", url: `/projects/${pid}` });
+    expect(det3.json().project.followCount).toBe(0);
+  });
+
   it("requires authentication", async () => {
     const { app, db } = await buildTestApp();
     const owner = await seedOwner(db, "eng-owner6@a.co");
