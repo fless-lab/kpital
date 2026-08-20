@@ -30,6 +30,9 @@ function makeCapturingNotifier(): { notifier: Notifier; sentCodes: string[]; sen
 export async function buildTestApp(opts?: {
   payments?: PaymentProvider;
   rateLimitMax?: number;
+  // Override the capturing notifier (e.g. to assert on arbitrary messages, not
+  // just OTP codes/reset links). Additive: existing callers are unaffected.
+  notifier?: Notifier;
 }): Promise<{
   app: FastifyInstance;
   db: Db;
@@ -46,7 +49,8 @@ export async function buildTestApp(opts?: {
     MINIO_SECRET_KEY: "kpital-secret",
     MINIO_BUCKET: "kpital-kyc",
   });
-  const { notifier, sentCodes, sentLinks } = makeCapturingNotifier();
+  const { notifier: capturing, sentCodes, sentLinks } = makeCapturingNotifier();
+  const notifier = opts?.notifier ?? capturing;
   const storage = new MemoryStorage();
   const app = buildApp({
     db,

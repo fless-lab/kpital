@@ -57,6 +57,13 @@
       "when": 1787186083930,
       "tag": "0007_white_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787242489771,
+      "tag": "0008_secret_kulan_gath",
+      "breakpoints": true
     }
   ]
 }

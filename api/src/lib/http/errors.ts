@@ -22,6 +22,7 @@ const CODE_STATUS: Record<string, number> = {
   forbidden: 403,
   not_found: 404,
   wallet_not_found: 404,
+  invalid_state: 409,
   email_taken: 409,
   phone_taken: 409,
   rate_limited: 429,
