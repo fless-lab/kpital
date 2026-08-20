@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey } from "drizzle-orm/pg-core";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
 export const acctStatus = pgEnum("acct_status", ["active", "suspended", "closed"]);
@@ -113,3 +113,51 @@ export const otpCodes = pgTable("otp_code", {
   attempts: integer("attempts").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const projectCategory = pgEnum("project_category", ["immobilier","commerce","agriculture"]);
+export const projectStatus = pgEnum("project_status", ["draft","submitted","in_review","rejected","showcase","collecting","funded","repaying","closed"]);
+export const projectScore = pgEnum("project_score", ["A","B","C","D"]);
+export const projectDocKind = pgEnum("project_doc_kind", ["rccm","foncier","releves","photo"]);
+export const projectDocVisibility = pgEnum("project_doc_visibility", ["public","private"]);
+export const projects = pgTable("project", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerAccountId: uuid("owner_account_id").notNull().references(() => accounts.id),
+  category: projectCategory("category").notNull(),
+  title: text("title").notNull(), city: text("city").notNull(), quartier: text("quartier"),
+  description: text("description").notNull(),
+  targetMinor: bigint("target_minor", { mode: "number" }).notNull(),
+  durationMonths: integer("duration_months").notNull(),
+  roiPct: numeric("roi_pct").notNull(),
+  fundsUsage: text("funds_usage").notNull(),
+  cautionType: text("caution_type").notNull(),
+  status: projectStatus("status").notNull().default("draft"),
+  score: projectScore("score"),
+  rejectReason: text("reject_reason"),
+  reviewedBy: uuid("reviewed_by").references(() => accounts.id),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  collectingOpenedAt: timestamp("collecting_opened_at", { withTimezone: true }),
+  upvoteCount: integer("upvote_count").notNull().default(0),
+  followCount: integer("follow_count").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const projectDocuments = pgTable("project_document", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  kind: projectDocKind("kind").notNull(),
+  visibility: projectDocVisibility("visibility").notNull(),
+  storageKey: text("storage_key").notNull(), mime: text("mime").notNull(),
+  sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const projectFollows = pgTable("project_follow", {
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ pk: primaryKey({ columns: [t.accountId, t.projectId] }) }));
+export const projectUpvotes = pgTable("project_upvote", {
+  accountId: uuid("account_id").notNull().references(() => accounts.id),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ pk: primaryKey({ columns: [t.accountId, t.projectId] }) }));
