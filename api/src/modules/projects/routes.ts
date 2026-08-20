@@ -13,6 +13,7 @@ import {
   type ProjectCategory,
   type ProjectPatch,
 } from "./service";
+import { addProjectDocument, DocValidationError } from "./documents";
 
 const CATEGORIES = projectCategory.enumValues as readonly string[];
 // Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw
@@ -205,6 +206,56 @@ export default async function projectRoutes(app: FastifyInstance) {
       const project = await submitProject(app.db, accountId, id);
       return reply.code(200).send({ project });
     } catch (err) {
+      return mapProjectError(err, reply);
+    }
+  });
+
+  // POST /projects/:id/documents — attach one file (multipart) to the caller's
+  // own draft|rejected project. Photos are public; legal docs (rccm/foncier/
+  // releves) are private.
+  app.post("/projects/:id/documents", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!requireAccount(accountId, reply)) return;
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) return validationError(reply, "invalid project id");
+
+    // Consume EVERY multipart part before doing anything else. An early return
+    // inside this loop would leave a later part's stream paused, and
+    // @fastify/multipart's _consuming flag stops Node from auto-draining it —
+    // the request would then stall until requestTimeout. So: buffer the first
+    // file, drain any extra file parts, read the `kind` field, and only run the
+    // owner/state/validation checks AFTER the loop (this ordering still satisfies
+    // "verify owner + state first" — that governs error precedence, not I/O).
+    let kind: string | undefined;
+    let fileBuffer: Buffer | null = null;
+    for await (const part of req.parts()) {
+      if (part.type === "file") {
+        if (fileBuffer !== null) {
+          part.file.resume();
+          continue;
+        }
+        fileBuffer = await part.toBuffer();
+      } else if (part.fieldname === "kind") {
+        kind = String(part.value);
+      }
+    }
+
+    // The service runs the checks in the mandated order: owner + state (403 /
+    // 409 / 404) first, then the `kind` enum and the file's magic bytes + size
+    // (all DocValidationError → 400). So the possibly-invalid kind and a missing
+    // file are handed straight to it rather than pre-checked here.
+    try {
+      const stored = await addProjectDocument(app.db, app.storage, {
+        accountId,
+        projectId: id,
+        kind,
+        buffer: fileBuffer,
+        maxBytes: app.config.kycMaxFileMb * 1024 * 1024,
+      });
+      return reply.code(201).send(stored);
+    } catch (err) {
+      if (err instanceof DocValidationError) return validationError(reply, err.message);
       return mapProjectError(err, reply);
     }
   });
