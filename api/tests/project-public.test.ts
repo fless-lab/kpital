@@ -59,6 +59,39 @@ describe("project public surfaces", () => {
     expect(fu.json().projects.map((p: { id: string }) => p.id)).toEqual([fundP!.id]);
   });
 
+  it("funding cards hide vote/follow counts; showcase cards keep them", async () => {
+    const { app, db } = await buildTestApp();
+    const owner = await seedOwner(db, "counts@a.co");
+    const [showP] = await db.insert(projects).values(projectValues(owner, "showcase")).returning();
+    const [fundP] = await db
+      .insert(projects)
+      .values(projectValues(owner, "collecting", { category: "immobilier" }))
+      .returning();
+
+    const fu = await app.inject({ method: "GET", url: "/projects/funding?limit=100" });
+    expect(fu.statusCode).toBe(200);
+    const fundRow = (fu.json().projects as Array<Record<string, unknown>>).find((p) => p.id === fundP!.id);
+    expect(fundRow).toBeDefined();
+    // Votes are a Showcase-only signal: the funding surface must not carry them.
+    expect(fundRow).not.toHaveProperty("upvoteCount");
+    expect(fundRow).not.toHaveProperty("followCount");
+    // Everything else the card needs is still present.
+    expect(fundRow).toHaveProperty("id", fundP!.id);
+    expect(fundRow).toHaveProperty("status", "collecting");
+    expect(fundRow).toHaveProperty("targetMinor", 1_000_000);
+    expect(fundRow).toHaveProperty("roiPct");
+    expect(fundRow).toHaveProperty("score");
+    expect(fundRow).toHaveProperty("durationMonths", 6);
+
+    const sc = await app.inject({ method: "GET", url: "/projects/showcase?limit=100" });
+    expect(sc.statusCode).toBe(200);
+    const showRow = (sc.json().projects as Array<Record<string, unknown>>).find((p) => p.id === showP!.id);
+    expect(showRow).toBeDefined();
+    // Showcase still exposes the engagement counts.
+    expect(showRow).toHaveProperty("upvoteCount", 0);
+    expect(showRow).toHaveProperty("followCount", 0);
+  });
+
   it("detail of a public project never exposes owner PII", async () => {
     const { app, db } = await buildTestApp();
     const owner = await seedOwner(db, "o2@a.co");

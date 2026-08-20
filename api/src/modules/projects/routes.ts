@@ -7,6 +7,7 @@ import {
   submitProject,
   listMine,
   listPublicProjects,
+  listFundingProjects,
   getPublicProject,
   followProject,
   unfollowProject,
@@ -324,7 +325,7 @@ export default async function projectRoutes(app: FastifyInstance) {
   app.get("/projects/funding", async (req, reply) => {
     const parsed = parsePublicFilters((req.query ?? {}) as Record<string, unknown>);
     if (!parsed.ok) return validationError(reply, parsed.message);
-    const list = await listPublicProjects(app.db, "collecting", parsed.value);
+    const list = await listFundingProjects(app.db, parsed.value);
     return reply.send({ projects: list });
   });
 
