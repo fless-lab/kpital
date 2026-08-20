@@ -23,6 +23,7 @@ import adminRoutes from "./modules/admin/routes";
 import kycRoutes from "./modules/kyc/routes";
 import kycAdminRoutes from "./modules/kyc/admin-routes";
 import projectRoutes from "./modules/projects/routes";
+import projectAdminRoutes from "./modules/projects/admin-routes";
 
 export function buildApp(opts: {
   db: Db;
@@ -84,6 +85,7 @@ export function buildApp(opts: {
   app.register(kycRoutes);
   app.register(kycAdminRoutes);
   app.register(projectRoutes);
+  app.register(projectAdminRoutes);
   app.get("/health", async () => ({ status: "ok" }));
   return app;
 }
