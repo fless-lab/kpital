@@ -1,6 +1,6 @@
-import { desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import type { Db } from "../../db/client";
-import { projects } from "../../db/schema";
+import { projectDocuments, projects } from "../../db/schema";
 
 // Owner mismatch — the caller is not the project's owner. Routes map this to 403.
 export class NotOwnerError extends Error {
@@ -155,4 +155,112 @@ export async function listMine(db: Db, ownerId: string): Promise<Project[]> {
     .from(projects)
     .where(eq(projects.ownerAccountId, ownerId))
     .orderBy(desc(projects.createdAt));
+}
+
+// ---------------------------------------------------------------------------
+// Public surfaces (showcase, funding, detail)
+// ---------------------------------------------------------------------------
+
+// A project is publicly visible only in these states. draft/submitted/in_review/
+// rejected are internal and must never surface on a public route.
+export const PUBLIC_STATUSES = ["showcase", "collecting", "funded", "repaying", "closed"] as const;
+export type PublicStatus = (typeof PUBLIC_STATUSES)[number];
+const PUBLIC_STATUS_SET = new Set<Project["status"]>(PUBLIC_STATUSES);
+
+// The single source of truth for what the public may see of a project. It
+// deliberately OMITS ownerAccountId, reviewedBy, reviewedAt and rejectReason
+// (porteur PII / internal review data) and the internal-only fields
+// (fundsUsage, cautionType, collectingOpenedAt, updatedAt). Every public route
+// selects exactly these columns so the public field set is defined once.
+export const PUBLIC_PROJECT_COLUMNS = {
+  id: projects.id,
+  category: projects.category,
+  title: projects.title,
+  city: projects.city,
+  quartier: projects.quartier,
+  description: projects.description,
+  targetMinor: projects.targetMinor,
+  durationMonths: projects.durationMonths,
+  roiPct: projects.roiPct,
+  status: projects.status,
+  score: projects.score,
+  upvoteCount: projects.upvoteCount,
+  followCount: projects.followCount,
+  publishedAt: projects.publishedAt,
+  createdAt: projects.createdAt,
+} as const;
+
+export type PublicProject = {
+  [K in keyof typeof PUBLIC_PROJECT_COLUMNS]: Project[K];
+};
+
+// Only the fields the detail route needs to build a public document entry.
+// storageKey is fetched so the route can mint a signed URL, then dropped — it is
+// NEVER returned to the client.
+export interface PublicDocumentRow {
+  id: string;
+  kind: (typeof projectDocuments.$inferSelect)["kind"];
+  mime: string;
+  sizeBytes: number;
+  createdAt: Date;
+  storageKey: string;
+}
+
+export interface PublicListFilters {
+  category?: ProjectCategory;
+  score?: NonNullable<Project["score"]>;
+  limit: number;
+}
+
+// List public projects at exactly one status. The caller passes a single status
+// so /showcase and /funding stay mutually exclusive. The sort is deterministic
+// and FACTUAL — never by upvoteCount (a regulatory guardrail for the funding
+// catalog): newest-published first, then createdAt, with an id tiebreak for a
+// total order (rows seeded directly have publishedAt = null → DESC floats them
+// first, which is acceptable for a not-yet-published collecting row).
+export async function listPublicProjects(
+  db: Db,
+  status: PublicStatus,
+  filters: PublicListFilters,
+): Promise<PublicProject[]> {
+  const conds = [eq(projects.status, status)];
+  if (filters.category !== undefined) conds.push(eq(projects.category, filters.category));
+  if (filters.score !== undefined) conds.push(eq(projects.score, filters.score));
+
+  return db
+    .select(PUBLIC_PROJECT_COLUMNS)
+    .from(projects)
+    .where(and(...conds))
+    .orderBy(desc(projects.publishedAt), desc(projects.createdAt), asc(projects.id))
+    .limit(filters.limit);
+}
+
+// Fetch one project for the public detail route. Returns null when the id is
+// unknown OR its status is not publicly visible (both map to 404). Documents are
+// filtered to visibility="public" here so a private legal doc can never be
+// selected in the first place.
+export async function getPublicProject(
+  db: Db,
+  id: string,
+): Promise<{ project: PublicProject; documents: PublicDocumentRow[] } | null> {
+  const [project] = await db
+    .select(PUBLIC_PROJECT_COLUMNS)
+    .from(projects)
+    .where(eq(projects.id, id));
+  if (!project || !PUBLIC_STATUS_SET.has(project.status)) return null;
+
+  const documents = await db
+    .select({
+      id: projectDocuments.id,
+      kind: projectDocuments.kind,
+      mime: projectDocuments.mime,
+      sizeBytes: projectDocuments.sizeBytes,
+      createdAt: projectDocuments.createdAt,
+      storageKey: projectDocuments.storageKey,
+    })
+    .from(projectDocuments)
+    .where(and(eq(projectDocuments.projectId, id), eq(projectDocuments.visibility, "public")))
+    .orderBy(asc(projectDocuments.createdAt), asc(projectDocuments.id));
+
+  return { project, documents };
 }

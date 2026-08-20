@@ -6,16 +6,50 @@ import {
   updateProject,
   submitProject,
   listMine,
+  listPublicProjects,
+  getPublicProject,
   NotOwnerError,
   InvalidStateError,
   ProjectNotFoundError,
   type CreateProjectInput,
   type ProjectCategory,
   type ProjectPatch,
+  type PublicListFilters,
 } from "./service";
+import { projectScore } from "../../db/schema";
 import { addProjectDocument, DocValidationError } from "./documents";
 
 const CATEGORIES = projectCategory.enumValues as readonly string[];
+const SCORES = projectScore.enumValues as readonly string[];
+const DEFAULT_LIMIT = 50;
+const MAX_LIMIT = 100;
+
+// Parse the optional public list query params. Unknown enum values are rejected
+// (a raw ?score=Z would otherwise reach pg as an invalid enum literal → 22P02 →
+// 500). limit is clamped; a non-numeric limit falls back to the default.
+function parsePublicFilters(query: Record<string, unknown>): Parsed<PublicListFilters> {
+  const filters: PublicListFilters = { limit: DEFAULT_LIMIT };
+
+  if (query.category !== undefined) {
+    if (typeof query.category !== "string" || !CATEGORIES.includes(query.category)) {
+      return { ok: false, message: "category must be one of immobilier, commerce, agriculture" };
+    }
+    filters.category = query.category as ProjectCategory;
+  }
+  if (query.score !== undefined) {
+    if (typeof query.score !== "string" || !SCORES.includes(query.score)) {
+      return { ok: false, message: "score must be one of A, B, C, D" };
+    }
+    filters.score = query.score as NonNullable<PublicListFilters["score"]>;
+  }
+  if (query.limit !== undefined) {
+    const n = Number(query.limit);
+    if (Number.isFinite(n) && Number.isInteger(n) && n > 0) {
+      filters.limit = Math.min(n, MAX_LIMIT);
+    }
+  }
+  return { ok: true, value: filters };
+}
 // Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw
 // 22P02, which the central handler turns into a 500 — reject it as a 400 first.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -267,5 +301,51 @@ export default async function projectRoutes(app: FastifyInstance) {
 
     const mine = await listMine(app.db, accountId);
     return reply.send({ projects: mine });
+  });
+
+  // GET /projects/showcase — PUBLIC (no auth). The Showcase list: ONLY projects
+  // in status=showcase, with the public projection (never owner PII). Mutually
+  // exclusive with /funding.
+  app.get("/projects/showcase", async (req, reply) => {
+    const parsed = parsePublicFilters((req.query ?? {}) as Record<string, unknown>);
+    if (!parsed.ok) return validationError(reply, parsed.message);
+    const list = await listPublicProjects(app.db, "showcase", parsed.value);
+    return reply.send({ projects: list });
+  });
+
+  // GET /projects/funding — PUBLIC (no auth). The Funding catalog: ONLY projects
+  // in status=collecting. NEVER ordered by upvoteCount (regulatory guardrail);
+  // the service sorts by publishedAt/createdAt. Mutually exclusive with /showcase.
+  app.get("/projects/funding", async (req, reply) => {
+    const parsed = parsePublicFilters((req.query ?? {}) as Record<string, unknown>);
+    if (!parsed.ok) return validationError(reply, parsed.message);
+    const list = await listPublicProjects(app.db, "collecting", parsed.value);
+    return reply.send({ projects: list });
+  });
+
+  // GET /projects/:id — PUBLIC (no auth). Detail of a publicly-visible project.
+  // 404 unless the project exists AND its status is public. Returns the public
+  // projection plus ONLY public (photo) documents, each with a short-lived signed
+  // URL — never the raw storage key, never a private legal doc. A malformed id
+  // is a 404 (a public route doesn't distinguish malformed from unknown).
+  app.get("/projects/:id", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const notFound = () => reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+    if (!UUID_RE.test(id)) return notFound();
+
+    const result = await getPublicProject(app.db, id);
+    if (!result) return notFound();
+
+    const documents = await Promise.all(
+      result.documents.map(async (d) => ({
+        id: d.id,
+        kind: d.kind,
+        mime: d.mime,
+        sizeBytes: d.sizeBytes,
+        createdAt: d.createdAt,
+        url: await app.storage.getSignedUrl(d.storageKey, app.config.kycUrlTtlSeconds),
+      })),
+    );
+    return reply.send({ project: result.project, documents });
   });
 }
