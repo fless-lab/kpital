@@ -1,4 +1,5 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
 export const acctStatus = pgEnum("acct_status", ["active", "suspended", "closed"]);
@@ -142,7 +143,15 @@ export const projects = pgTable("project", {
   raisedMinor: bigint("raised_minor", { mode: "number" }).notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  // DB-level backstop for the no-overfunding invariant: raised is always within
+  // [0, target], even if a future writer forgets the FOR UPDATE lock. The invest
+  // path enforces this in app logic; this constraint is defense in depth.
+  raisedWithinTarget: check(
+    "project_raised_within_target",
+    sql`${t.raisedMinor} >= 0 AND ${t.raisedMinor} <= ${t.targetMinor}`,
+  ),
+}));
 export const projectDocuments = pgTable("project_document", {
   id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),

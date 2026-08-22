@@ -71,6 +71,13 @@
       "when": 1787392829827,
       "tag": "0009_nosy_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787397027965,
+      "tag": "0010_material_vermin",
+      "breakpoints": true
     }
   ]
 }

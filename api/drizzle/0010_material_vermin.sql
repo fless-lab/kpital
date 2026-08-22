@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD CONSTRAINT "project_raised_within_target" CHECK ("project"."raised_minor" >= 0 AND "project"."raised_minor" <= "project"."target_minor");
