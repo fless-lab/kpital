@@ -25,6 +25,9 @@ describe("error normalization", () => {
       async payout() {
         return { ok: false, ref: "x" };
       },
+      async collectFunds() {
+        return { ok: false, ref: "x" };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const { accountId, cookie } = await registerAndLogin(app, "err-payout@a.co");
