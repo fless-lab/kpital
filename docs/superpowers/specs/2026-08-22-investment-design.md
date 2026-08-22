@@ -102,6 +102,7 @@ Enveloppe d'erreur uniforme `{ error: { code, message, details? } }`.
 - **Anti-surfinancement** garanti par le verrou `FOR UPDATE` sur la ligne projet + relecture du reste au débit ; le plafonnage n'a lieu que sur `confirmCapToRemaining` explicite (pas de prélèvement surprise).
 - **Wallet** : solde vérifié sous verrou (`FOR UPDATE`), entrée `reinvestment` négative dans la même transaction — pas de découvert, pas de double-dépense (patron du retrait).
 - **Atomicité** : collecte des fonds (mock) + insertion investment + incrément `raised_minor` + éventuel passage `funded`, tout dans une seule transaction ; un échec annule tout (aucun investment sans fonds, aucun fonds sans investment).
+- **Filet DB (défense en profondeur)** : contrainte `CHECK (raised_minor >= 0 AND raised_minor <= target_minor)` sur `project` (migration 0010). L'invariant anti-surfinancement vit dans la logique applicative (verrou `FOR UPDATE`) ; cette contrainte garantit qu'un futur écrivain qui oublierait le verrou (ajustement admin, remboursement, backfill) est refusé par la base plutôt que de corrompre silencieusement l'état de collecte.
 - Montants entiers ; validations strictes ; `source`/`method` validés ; aucune PII/champ interne fuité.
 
 ---
