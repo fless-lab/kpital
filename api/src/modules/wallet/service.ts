@@ -32,7 +32,7 @@ async function walletIdFor(db: Db, accountId: string): Promise<string> {
 
 // Balance is always the ledger sum — there is no mutable balance column.
 // pg returns sum(bigint) as numeric (a string), so coerce with Number().
-async function balanceForWallet(db: Db, walletId: string): Promise<number> {
+export async function balanceForWallet(db: Db, walletId: string): Promise<number> {
   const [r] = await db
     .select({ bal: sql<string>`coalesce(sum(${walletEntries.amountMinor}), 0)` })
     .from(walletEntries)
