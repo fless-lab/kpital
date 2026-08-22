@@ -139,6 +139,7 @@ export const projects = pgTable("project", {
   collectingOpenedAt: timestamp("collecting_opened_at", { withTimezone: true }),
   upvoteCount: integer("upvote_count").notNull().default(0),
   followCount: integer("follow_count").notNull().default(0),
+  raisedMinor: bigint("raised_minor", { mode: "number" }).notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -161,3 +162,16 @@ export const projectUpvotes = pgTable("project_upvote", {
   projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({ pk: primaryKey({ columns: [t.accountId, t.projectId] }) }));
+
+export const investmentSource = pgEnum("investment_source", ["payment", "wallet"]);
+export const investmentStatus = pgEnum("investment_status", ["confirmed"]);
+export const investments = pgTable("investment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id),
+  investorAccountId: uuid("investor_account_id").notNull().references(() => accounts.id),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  source: investmentSource("source").notNull(),
+  paymentRef: text("payment_ref"),
+  status: investmentStatus("status").notNull().default("confirmed"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
