@@ -87,7 +87,7 @@ Le verrou `FOR UPDATE` sur la ligne projet sérialise les investissements concur
 
 ## 5. Endpoints
 
-- `POST /projects/:id/invest` (auth ; KYC `verified`) : body `{ amountMinor (int > 0), source: "payment"|"wallet", method? (pour payment), confirmCapToRemaining? (bool) }`. Comportement §3. Réponses : `201 { investmentId, amountMinor, raisedMinor, projectStatus }` ; `403 kyc_required` ; `409 invalid_state` (projet non `collecting`) ; `400 below_min_ticket` ; `409 exceeds_remaining` (+ `details.remainingMinor`) ; `400 insufficient_funds` (wallet) ; `402 payment_failed` (mock échec).
+- `POST /projects/:id/invest` (auth ; KYC `verified`) : body `{ amountMinor (int > 0), source: "payment"|"wallet", method? (pour payment), confirmCapToRemaining? (bool) }`. Comportement §3. Réponses : `201 { investmentId, amountMinor, raisedMinor, projectStatus, paymentRef }` (`paymentRef` : la référence de collecte pour `source="payment"` que le front peut afficher à la confirmation ; `null` pour `source="wallet"`) ; `403 kyc_required` ; `409 invalid_state` (projet non `collecting`) ; `400 below_min_ticket` ; `409 exceeds_remaining` (+ `details.remainingMinor`) ; `400 insufficient_funds` (wallet) ; `402 payment_failed` (mock échec).
 - `GET /me/investments` (auth) : la liste des investissements du caller, avec un résumé projet (titre, catégorie, statut, roi_pct) + `amountMinor`, `source`, `createdAt`. Alimente le dashboard.
 - **Progression publique** : ajouter `raisedMinor` (et donc la progression = `raised/target`) à la projection **financement** (`FUNDING_PROJECT_COLUMNS`) et à la **fiche** (`GET /projects/:id`) pour les projets `collecting`/`funded`. (Toujours pas d'`upvoteCount`/`followCount` sur le financement.)
 

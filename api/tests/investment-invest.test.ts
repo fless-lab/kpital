@@ -58,7 +58,9 @@ describe("POST /projects/:id/invest", () => {
     expect(body.amountMinor).toBe(50000);
     expect(body.projectStatus).toBe("collecting");
     expect(typeof body.investmentId).toBe("string");
-    expect(body.paymentRef ?? "").not.toBe(undefined);
+    // payment source returns the mock collection reference for the front to show
+    expect(typeof body.paymentRef).toBe("string");
+    expect(body.paymentRef.length).toBeGreaterThan(0);
 
     await app.close();
   });
