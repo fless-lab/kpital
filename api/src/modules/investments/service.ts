@@ -84,7 +84,7 @@ export interface CreateInvestmentResult {
 
 // The whole invest flow is ONE transaction. The project row is locked FOR
 // UPDATE first, so the remaining-capacity check and the raised_minor increment
-// are atomic across concurrent investments — no overfunding is possible. When
+// are atomic across concurrent investments, so no overfunding is possible. When
 // funding from the wallet, the wallet row is locked FOR UPDATE (mirroring the
 // overdraw-safe withdraw pattern) before the balance is summed.
 export async function createInvestment(
@@ -95,7 +95,7 @@ export async function createInvestment(
   return db.transaction(async (tx) => {
     const txDb = tx as unknown as Db;
 
-    // 1. KYC gate — read the caller's status.
+    // 1. KYC gate: read the caller's status.
     const [acct] = await tx
       .select({ kycStatus: accounts.kycStatus })
       .from(accounts)

@@ -13,7 +13,7 @@ import {
 } from "./service";
 
 // Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw 22P02,
-// which the central handler turns into a 500 — reject it as a 404 (unknown
+// which the central handler turns into a 500, so reject it as a 404 (unknown
 // project) first, matching the other project routes' guard rationale.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -30,7 +30,7 @@ export default async function investmentRoutes(app: FastifyInstance) {
   const validationError = (reply: FastifyReply, message: string) =>
     reply.code(400).send({ error: { code: "validation_error", message } });
 
-  // POST /projects/:id/invest — invest in a collecting project. The whole
+  // POST /projects/:id/invest: invest in a collecting project. The whole
   // money path lives in createInvestment's single locked transaction.
   app.post("/projects/:id/invest", { preHandler: app.requireAuth }, async (req, reply) => {
     const accountId = req.accountId;
