@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import {
   createInvestment,
+  listMyInvestments,
   KycRequiredError,
   NotCollectingError,
   BelowMinTicketError,
@@ -67,6 +68,18 @@ export default async function investmentRoutes(app: FastifyInstance) {
     } catch (err) {
       return mapInvestError(err, reply);
     }
+  });
+
+  // GET /me/investments. The caller's own investments, newest first, each with
+  // a projected project summary. accountId ALWAYS comes from the session, never
+  // from the request.
+  app.get("/me/investments", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!accountId) {
+      return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
+    }
+    const list = await listMyInvestments(app.db, accountId);
+    return reply.send({ investments: list });
   });
 }
 

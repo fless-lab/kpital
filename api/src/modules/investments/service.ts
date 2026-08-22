@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import { accounts, projects, wallets, walletEntries, investments } from "../../db/schema";
 import type { PaymentProvider, PayoutMethod } from "../../lib/payments";
@@ -166,4 +166,51 @@ export async function createInvestment(
     // 7.
     return { investmentId, amountMinor, raisedMinor: newRaised, projectStatus, paymentRef };
   });
+}
+
+// The ONLY project fields an investor sees on their own investment list. It
+// deliberately omits ownerAccountId (porteur PII), every internal review field,
+// and raisedMinor/targetMinor (funding-surface concerns). This is the single
+// source of truth for the joined project summary, mirroring the
+// PUBLIC_PROJECT_COLUMNS idiom in the projects module.
+export const MY_INVESTMENT_PROJECT_COLUMNS = {
+  id: projects.id,
+  title: projects.title,
+  category: projects.category,
+  status: projects.status,
+  roiPct: projects.roiPct,
+} as const;
+
+export interface MyInvestment {
+  id: string;
+  amountMinor: number;
+  source: InvestmentSource;
+  createdAt: Date;
+  project: {
+    id: string;
+    title: string;
+    category: (typeof projects.$inferSelect)["category"];
+    status: (typeof projects.$inferSelect)["status"];
+    roiPct: string;
+  };
+}
+
+// The caller's own investments, newest first, each with a projected project
+// summary. The join is INNER because investments.projectId is NOT NULL and
+// references a real project. No status filter: every investment status is
+// returned (today only "confirmed" exists). Ordering is deterministic:
+// createdAt desc with an id tiebreak for a total order.
+export async function listMyInvestments(db: Db, accountId: string): Promise<MyInvestment[]> {
+  return db
+    .select({
+      id: investments.id,
+      amountMinor: investments.amountMinor,
+      source: investments.source,
+      createdAt: investments.createdAt,
+      project: MY_INVESTMENT_PROJECT_COLUMNS,
+    })
+    .from(investments)
+    .innerJoin(projects, eq(investments.projectId, projects.id))
+    .where(eq(investments.investorAccountId, accountId))
+    .orderBy(desc(investments.createdAt), asc(investments.id));
 }
