@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
-import { accounts, projects } from "../src/db/schema";
+import { accounts, projects, investments } from "../src/db/schema";
+import type { PaymentProvider } from "../src/lib/payments";
 
 const COOKIE = "kpital_sess";
 
@@ -205,6 +206,43 @@ describe("POST /projects/:id/invest", () => {
     });
     expect(r2.statusCode).toBe(400);
     expect(r2.json().error.code).toBe("insufficient_funds");
+
+    await app.close();
+  });
+
+  it("returns 402 payment_failed and rolls back when the provider declines", async () => {
+    // Inject a payments provider whose collectFunds always fails. The invest
+    // transaction must roll back entirely: no investment row, no raised_minor
+    // change.
+    const failingPayments: PaymentProvider = {
+      async payout() {
+        return { ok: false, ref: "" };
+      },
+      async collectFunds() {
+        return { ok: false, ref: "" };
+      },
+    };
+    const { app, db } = await buildTestApp({ payments: failingPayments });
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    const pid = await seedProject(db);
+
+    const r = await app.inject({
+      method: "POST",
+      url: `/projects/${pid}/invest`,
+      cookies: { [COOKIE]: cookie },
+      payload: { amountMinor: 50000, source: "payment" },
+    });
+    expect(r.statusCode).toBe(402);
+    expect(r.json().error.code).toBe("payment_failed");
+
+    // Transaction rolled back: no investment row exists for this project, and
+    // raised_minor is untouched.
+    const rows = await db.select().from(investments).where(eq(investments.projectId, pid));
+    expect(rows).toHaveLength(0);
+    const [p] = await db.select().from(projects).where(eq(projects.id, pid));
+    expect(p!.raisedMinor).toBe(0);
+    expect(p!.status).toBe("collecting");
 
     await app.close();
   });
