@@ -12,7 +12,7 @@ describe("investment", () => {
       expect(p!.raisedMinor).toBe(0);
       const [inv] = await db.insert(investments).values({ projectId: p!.id, investorAccountId: a!.id,
         amountMinor: 50000, source:"payment", paymentRef:"mock-1" }).returning();
-      expect(inv!.status).toBe("confirmed");
+      expect(inv!.status).toBe("pending");
     });
   });
 });

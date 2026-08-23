@@ -25,7 +25,13 @@ describe("error normalization", () => {
       async payout() {
         return { ok: false, ref: "x" };
       },
-      async collectFunds() {
+      async initiateDeposit() {
+        return { ok: false, ref: "x", status: "settled" as const };
+      },
+      async releaseEscrow() {
+        return { ok: false, ref: "x" };
+      },
+      async refundEscrow() {
         return { ok: false, ref: "x" };
       },
     };

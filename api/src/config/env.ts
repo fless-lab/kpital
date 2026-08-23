@@ -15,6 +15,7 @@ const schema = z.object({
   MINIO_REGION: z.string().default("us-east-1"),
   KYC_URL_TTL_SECONDS: z.coerce.number().int().positive().default(120),
   KYC_MAX_FILE_MB: z.coerce.number().int().positive().default(10),
+  ESCROW_WEBHOOK_SECRET: z.string().default(""),
 });
 
 export type Config = {
@@ -35,6 +36,9 @@ export type Config = {
   minioRegion: string;
   kycUrlTtlSeconds: number;
   kycMaxFileMb: number;
+  // Empty by default: an unset secret means the escrow webhook rejects all
+  // callers, which is the safe prod default until a real secret is configured.
+  escrowWebhookSecret: string;
 };
 
 // Parse TRUST_PROXY: unset/""/"false" -> false; "true" -> true; digits -> hop
@@ -66,5 +70,6 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     minioRegion: e.MINIO_REGION,
     kycUrlTtlSeconds: e.KYC_URL_TTL_SECONDS,
     kycMaxFileMb: e.KYC_MAX_FILE_MB,
+    escrowWebhookSecret: e.ESCROW_WEBHOOK_SECRET,
   };
 }

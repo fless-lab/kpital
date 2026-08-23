@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey, check, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
@@ -38,7 +38,7 @@ export const sessions = pgTable("session", {
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
 });
 
-export const entryType = pgEnum("entry_type", ["repayment", "withdrawal", "reinvestment", "adjustment"]);
+export const entryType = pgEnum("entry_type", ["repayment", "withdrawal", "reinvestment", "adjustment", "disbursement", "refund"]);
 export const walletEntries = pgTable("wallet_entry", {
   id: uuid("id").defaultRandom().primaryKey(),
   walletId: uuid("wallet_id").notNull().references(() => wallets.id),
@@ -116,7 +116,7 @@ export const otpCodes = pgTable("otp_code", {
 });
 
 export const projectCategory = pgEnum("project_category", ["immobilier","commerce","agriculture"]);
-export const projectStatus = pgEnum("project_status", ["draft","submitted","in_review","rejected","showcase","collecting","funded","repaying","closed"]);
+export const projectStatus = pgEnum("project_status", ["draft","submitted","in_review","rejected","showcase","collecting","funded","repaying","closed","cancelled"]);
 export const projectScore = pgEnum("project_score", ["A","B","C","D"]);
 export const projectDocKind = pgEnum("project_doc_kind", ["rccm","foncier","releves","photo"]);
 export const projectDocVisibility = pgEnum("project_doc_visibility", ["public","private"]);
@@ -173,7 +173,7 @@ export const projectUpvotes = pgTable("project_upvote", {
 }, (t) => ({ pk: primaryKey({ columns: [t.accountId, t.projectId] }) }));
 
 export const investmentSource = pgEnum("investment_source", ["payment", "wallet"]);
-export const investmentStatus = pgEnum("investment_status", ["confirmed"]);
+export const investmentStatus = pgEnum("investment_status", ["pending","escrowed","released","refunded","failed"]);
 export const investments = pgTable("investment", {
   id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id").notNull().references(() => projects.id),
@@ -181,6 +181,16 @@ export const investments = pgTable("investment", {
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
   source: investmentSource("source").notNull(),
   paymentRef: text("payment_ref"),
-  status: investmentStatus("status").notNull().default("confirmed"),
+  resolutionRef: text("resolution_ref"),
+  settledAt: timestamp("settled_at", { withTimezone: true }),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  status: investmentStatus("status").notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  // The escrow webhook resolves a settlement/failure by payment_ref, so a
+  // deposit ref must map to at most one investment. Enforce it at the DB layer
+  // (partial: wallet-source rows carry a null payment_ref and are exempt).
+  depositRefUnique: uniqueIndex("investment_payment_ref_unique")
+    .on(t.paymentRef)
+    .where(sql`${t.paymentRef} IS NOT NULL`),
+}));

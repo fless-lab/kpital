@@ -61,6 +61,7 @@ export async function buildTestApp(opts?: {
     MINIO_ACCESS_KEY: "kpital",
     MINIO_SECRET_KEY: "kpital-secret",
     MINIO_BUCKET: "kpital-kyc",
+    ESCROW_WEBHOOK_SECRET: "test-secret",
     ...opts?.env,
   });
   const { notifier: capturing, sentCodes, sentLinks, sentMessages } = makeCapturingNotifier();
