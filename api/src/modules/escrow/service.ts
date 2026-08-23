@@ -77,10 +77,14 @@ export async function settleDeposit(
     return { applied: true as const, projectStatus };
   });
 
-  // AFTER commit: if the project just became funded, release escrow to the
+  // AFTER commit: if the project is in the funded STATE, release escrow to the
   // porteur. This runs outside the settlement transaction so no network I/O is
-  // held under the project lock.
-  if (outcome.applied && outcome.projectStatus === "funded") {
+  // held under the project lock. Gating on the state (not on `applied`) is what
+  // makes release RESUMABLE: if a prior settlement funded the project but its
+  // release crashed partway, a replayed webhook re-enters here even though the
+  // settle itself is now a no-op, and releaseProject's guard skips whatever was
+  // already released (no double-credit).
+  if (outcome.projectStatus === "funded") {
     await releaseProject(db, payments, { projectId });
   }
 
@@ -140,46 +144,58 @@ export async function releaseProject(
     .where(and(eq(investments.projectId, args.projectId), eq(investments.status, "escrowed")));
 
   for (const inv of escrowedInvs) {
-    await db.transaction(async (tx) => {
-      // Only payment-source escrow crosses the provider seam (section 4/7):
-      // wallet-source funds never left the internal ledger, so there is nothing
-      // for the provider to release. Both sources still credit the porteur.
-      let resolutionRef: string | null = null;
-      if (inv.source === "payment") {
-        const release = await payments.releaseEscrow({
-          depositRef: inv.paymentRef ?? "",
-          payeeAccountId: project.ownerAccountId,
+    // Isolate each investment: a real releaseEscrow that TIMES OUT throws rather
+    // than returning ok:false, which would reject this investment's tx AND break
+    // the loop, stranding every later release in this pass. One poison
+    // investment must not block the rest; the state guard keeps a later retry
+    // idempotent, so we log and continue.
+    try {
+      await db.transaction(async (tx) => {
+        // Look up the porteur wallet BEFORE any provider money moves, so a
+        // missing wallet fails ahead of the release call.
+        const [w] = await tx
+          .select({ id: wallets.id })
+          .from(wallets)
+          .where(eq(wallets.accountId, project.ownerAccountId));
+        if (!w) throw new Error("porteur wallet not found for disbursement");
+
+        // Only payment-source escrow crosses the provider seam (section 4/7):
+        // wallet-source funds never left the internal ledger, so there is nothing
+        // for the provider to release. Both sources still credit the porteur.
+        let resolutionRef: string | null = null;
+        if (inv.source === "payment") {
+          const release = await payments.releaseEscrow({
+            depositRef: inv.paymentRef ?? "",
+            payeeAccountId: project.ownerAccountId,
+            amountMinor: inv.amountMinor,
+            idempotencyKey: idemKey("release", inv.id),
+          });
+          // Leave the investment escrowed on a provider decline: a later release
+          // re-run resumes it (guarded, retry-safe), never double-crediting.
+          if (!release.ok) return;
+          resolutionRef = release.ref;
+        }
+
+        // Guarded escrowed -> released. If a concurrent/replayed release already
+        // moved this investment, the guard changes zero rows: skip the credit so
+        // the porteur is never double-credited.
+        const released = await tx
+          .update(investments)
+          .set({ status: "released", resolutionRef, resolvedAt: new Date() })
+          .where(and(eq(investments.id, inv.id), eq(investments.status, "escrowed")))
+          .returning({ id: investments.id });
+        if (released.length === 0) return;
+
+        await tx.insert(walletEntries).values({
+          walletId: w.id,
+          type: "disbursement",
           amountMinor: inv.amountMinor,
-          idempotencyKey: idemKey("release", inv.id),
+          reference: inv.id,
         });
-        // Leave the investment escrowed on a provider failure: a later release
-        // re-run resumes it (guarded, retry-safe), never double-crediting.
-        if (!release.ok) return;
-        resolutionRef = release.ref;
-      }
-
-      const [w] = await tx
-        .select({ id: wallets.id })
-        .from(wallets)
-        .where(eq(wallets.accountId, project.ownerAccountId));
-      if (!w) throw new Error("porteur wallet not found for disbursement");
-
-      // Guarded escrowed -> released. If a concurrent/replayed release already
-      // moved this investment, the guard changes zero rows: skip the credit so
-      // the porteur is never double-credited.
-      const released = await tx
-        .update(investments)
-        .set({ status: "released", resolutionRef, resolvedAt: new Date() })
-        .where(and(eq(investments.id, inv.id), eq(investments.status, "escrowed")))
-        .returning({ id: investments.id });
-      if (released.length === 0) return;
-
-      await tx.insert(walletEntries).values({
-        walletId: w.id,
-        type: "disbursement",
-        amountMinor: inv.amountMinor,
-        reference: inv.id,
       });
-    });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`escrow release failed for investment ${inv.id}, continuing`, err);
+    }
   }
 }
