@@ -67,6 +67,21 @@ describe("POST /escrow/settlement (webhook)", () => {
     expect(res.statusCode).toBe(401);
   });
 
+  it("rejects every caller when the configured secret is empty (safe prod default)", async () => {
+    // With ESCROW_WEBHOOK_SECRET unset/empty the webhook must reject all callers,
+    // even one that presents an empty signature, so a misconfigured deployment
+    // cannot be driven by an unauthenticated request.
+    const { app, db } = await buildTestApp({ env: { ESCROW_WEBHOOK_SECRET: "" } });
+    await seedPending(db);
+    const res = await app.inject({
+      method: "POST",
+      url: "/escrow/settlement",
+      headers: { "x-escrow-signature": "" },
+      payload: { depositRef: "dep-9", status: "settled" },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
   it("returns 404 for an unknown depositRef", async () => {
     const { app } = await buildTestApp({});
     const res = await app.inject({

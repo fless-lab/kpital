@@ -78,7 +78,11 @@ export interface CreateInvestmentInput {
 export interface CreateInvestmentResult {
   investmentId: string;
   amountMinor: number;
-  status: "escrowed" | "pending";
+  // Normally "escrowed" (wallet or settled payment) or "pending" (async deposit).
+  // A concurrent admin cancel landing between phase 1 and settlement can leave a
+  // just-inserted payment deposit "refunded", so the settled read-back reports
+  // the actual investment status rather than assuming "escrowed".
+  status: (typeof investments.$inferSelect)["status"];
   raisedMinor: number;
   projectStatus: string;
   depositRef: string | null;
@@ -102,9 +106,12 @@ export interface CreateInvestmentResult {
 //
 // wallet source settles instantly inside this transaction (internal ledger).
 // payment source inserts a `pending` investment and initiates the provider
-// deposit; if the mock/provider returns `settled`, settlement (escrow + raised++
-// + funded + release) runs in settleDeposit AFTER this transaction commits, under
-// its OWN project lock, so no network I/O is ever held under the invest lock.
+// deposit. That deposit initiation is the one provider call made under the invest
+// lock, which is acceptable for the synchronous mock (a real async provider would
+// move initiation off the lock). If the provider returns `settled`, settlement
+// (escrow + raised++ + funded + release) runs in settleDeposit AFTER this
+// transaction commits under its OWN project lock, so the settlement and release
+// network I/O is never held under the invest lock.
 export async function createInvestment(
   db: Db,
   payments: PaymentProvider,
@@ -130,6 +137,14 @@ export async function createInvestment(
 
     // 3. Remaining is read UNDER the lock and reserves in-flight pending deposits
     // (see the invariant above). Min-ticket is checked BEFORE any cap.
+    //
+    // ISOLATION REQUIREMENT: this pending-sum SELECT must see every deposit
+    // committed by an earlier lock holder, so the capacity invariant relies on
+    // READ COMMITTED (the Postgres default; db/client.ts sets no isolation level).
+    // Under REPEATABLE READ a second invest could acquire the lock yet read a
+    // stale snapshot that misses the earlier pending row and overfund at
+    // settlement. Do NOT raise the transaction isolation level without also
+    // reserving capacity by writing the project row here.
     const [pending] = await tx
       .select({ sum: sql<string>`coalesce(sum(${investments.amountMinor}), 0)` })
       .from(investments)
@@ -142,6 +157,11 @@ export async function createInvestment(
       if (!input.confirmCapToRemaining) throw new ExceedsRemainingError(remaining);
       amountMinor = remaining;
     }
+    // A cap to a fully-reserved project yields 0 (or less): there is no room to
+    // invest right now, so reject rather than record a zero-amount deposit. The
+    // last real ticket always has remaining >= 1, so the min-ticket-then-cap
+    // path that lets a small final ticket fund the project is preserved.
+    if (amountMinor <= 0) throw new ExceedsRemainingError(remaining);
 
     if (input.source === "wallet") {
       // Lock the wallet row before summing the balance so two concurrent
@@ -220,18 +240,25 @@ export async function createInvestment(
 
   if (phase1.depositStatus === "settled") {
     // Settled deposit: apply escrow + raised++ + funded + release under its own
-    // project lock, then reflect the post-settlement project state in the return.
-    const settle = await settleDeposit(db, payments, { depositRef: phase1.depositRef });
+    // project lock, then reflect the post-settlement state in the return. Read the
+    // project and the investment together so raisedMinor and projectStatus are a
+    // coherent snapshot, and report the investment's ACTUAL status (a concurrent
+    // admin cancel between phase 1 and here can leave it "refunded", not escrowed).
+    await settleDeposit(db, payments, { depositRef: phase1.depositRef });
     const [pj] = await db
       .select({ raisedMinor: projects.raisedMinor, status: projects.status })
       .from(projects)
       .where(eq(projects.id, input.projectId));
+    const [inv] = await db
+      .select({ status: investments.status })
+      .from(investments)
+      .where(eq(investments.id, investmentId));
     return {
       investmentId,
       amountMinor: phase1.amountMinor,
-      status: "escrowed",
+      status: inv?.status ?? "escrowed",
       raisedMinor: pj?.raisedMinor ?? phase1.preRaised,
-      projectStatus: settle.projectStatus ?? pj?.status ?? "collecting",
+      projectStatus: pj?.status ?? "collecting",
       depositRef: phase1.depositRef,
     };
   }
