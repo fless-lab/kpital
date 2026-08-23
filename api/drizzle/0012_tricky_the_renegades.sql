@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "investment_payment_ref_unique" ON "investment" USING btree ("payment_ref") WHERE "investment"."payment_ref" IS NOT NULL;

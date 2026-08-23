@@ -149,10 +149,14 @@ export async function releaseProject(
   args: { projectId: string },
 ): Promise<void> {
   const [project] = await db
-    .select({ ownerAccountId: projects.ownerAccountId })
+    .select({ ownerAccountId: projects.ownerAccountId, status: projects.status })
     .from(projects)
     .where(eq(projects.id, args.projectId));
   if (!project) return;
+  // Defensive symmetry with the rest of the file: only a funded project releases
+  // escrow. Both callers already gate on the funded state, so this is latent, but
+  // it stops any future caller from disbursing an unfunded project's escrow.
+  if (project.status !== "funded") return;
 
   const escrowedInvs = await db
     .select({

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, bigint, jsonb, integer, date, numeric, primaryKey, check, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const kycStatus = pgEnum("kyc_status", ["pending", "verified", "rejected"]);
@@ -186,4 +186,11 @@ export const investments = pgTable("investment", {
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   status: investmentStatus("status").notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  // The escrow webhook resolves a settlement/failure by payment_ref, so a
+  // deposit ref must map to at most one investment. Enforce it at the DB layer
+  // (partial: wallet-source rows carry a null payment_ref and are exempt).
+  depositRefUnique: uniqueIndex("investment_payment_ref_unique")
+    .on(t.paymentRef)
+    .where(sql`${t.paymentRef} IS NOT NULL`),
+}));
