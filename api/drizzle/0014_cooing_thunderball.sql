@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "repayment_installment_ref_unique" ON "repayment_installment" USING btree ("repayment_ref") WHERE "repayment_installment"."repayment_ref" IS NOT NULL;

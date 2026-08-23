@@ -206,7 +206,14 @@ export const repaymentInstallments = pgTable("repayment_installment", {
   repaymentRef: text("repayment_ref"),
   settledAt: timestamp("settled_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  // The repayment webhook resolves a settlement by repayment_ref, so a ref must
+  // map to at most one installment. Enforce it at the DB layer (partial: a `due`
+  // installment carries a null ref and is exempt). Mirrors investment.payment_ref.
+  repaymentRefUnique: uniqueIndex("repayment_installment_ref_unique")
+    .on(t.repaymentRef)
+    .where(sql`${t.repaymentRef} IS NOT NULL`),
+}));
 export const repaymentDistributions = pgTable("repayment_distribution", {
   id: uuid("id").defaultRandom().primaryKey(),
   installmentId: uuid("installment_id").notNull().references(() => repaymentInstallments.id),
