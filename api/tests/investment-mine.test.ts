@@ -119,7 +119,7 @@ describe("GET /me/investments", () => {
       investorAccountId: other,
       amountMinor: 70000,
       source: "payment",
-      status: "confirmed",
+      status: "escrowed",
     });
 
     const mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
@@ -157,10 +157,10 @@ describe("GET /me/investments", () => {
     const tieB = "00000000-0000-4000-8000-000000000002";
 
     await db.insert(investments).values([
-      { projectId: pid, investorAccountId: me, amountMinor: 10000, source: "payment", status: "confirmed", createdAt: older },
-      { projectId: pid, investorAccountId: me, amountMinor: 20000, source: "payment", status: "confirmed", createdAt: newer },
-      { id: tieB, projectId: pid, investorAccountId: me, amountMinor: 30000, source: "payment", status: "confirmed", createdAt: newer },
-      { id: tieA, projectId: pid, investorAccountId: me, amountMinor: 40000, source: "payment", status: "confirmed", createdAt: newer },
+      { projectId: pid, investorAccountId: me, amountMinor: 10000, source: "payment", status: "escrowed", createdAt: older },
+      { projectId: pid, investorAccountId: me, amountMinor: 20000, source: "payment", status: "escrowed", createdAt: newer },
+      { id: tieB, projectId: pid, investorAccountId: me, amountMinor: 30000, source: "payment", status: "escrowed", createdAt: newer },
+      { id: tieA, projectId: pid, investorAccountId: me, amountMinor: 40000, source: "payment", status: "escrowed", createdAt: newer },
     ]);
 
     const mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });

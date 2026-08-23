@@ -144,7 +144,7 @@ export async function createInvestment(
       paymentRef = res.ref;
     }
 
-    // 5. Record the confirmed investment.
+    // 5. Record the escrowed investment.
     await tx.insert(investments).values({
       id: investmentId,
       projectId: input.projectId,
@@ -152,7 +152,7 @@ export async function createInvestment(
       amountMinor,
       source: input.source,
       paymentRef,
-      status: "confirmed",
+      status: "escrowed",
     });
 
     // 6. Advance raised_minor; flip to "funded" exactly when the target is hit.
@@ -198,7 +198,7 @@ export interface MyInvestment {
 // The caller's own investments, newest first, each with a projected project
 // summary. The join is INNER because investments.projectId is NOT NULL and
 // references a real project. No status filter: every investment status is
-// returned (today only "confirmed" exists). Ordering is deterministic:
+// returned (pending, escrowed, released, refunded, failed). Ordering is deterministic:
 // createdAt desc with an id tiebreak for a total order.
 export async function listMyInvestments(db: Db, accountId: string): Promise<MyInvestment[]> {
   return db
