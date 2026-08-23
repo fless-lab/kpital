@@ -223,6 +223,15 @@ describe("POST /projects/:id/invest", () => {
       async collectFunds() {
         return { ok: false, ref: "" };
       },
+      async initiateDeposit() {
+        return { ok: false, ref: "", status: "settled" as const };
+      },
+      async releaseEscrow() {
+        return { ok: false, ref: "" };
+      },
+      async refundEscrow() {
+        return { ok: false, ref: "" };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const cookie = await loginAs(app, "i@a.co");

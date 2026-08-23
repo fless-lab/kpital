@@ -28,6 +28,15 @@ describe("error normalization", () => {
       async collectFunds() {
         return { ok: false, ref: "x" };
       },
+      async initiateDeposit() {
+        return { ok: false, ref: "x", status: "settled" as const };
+      },
+      async releaseEscrow() {
+        return { ok: false, ref: "x" };
+      },
+      async refundEscrow() {
+        return { ok: false, ref: "x" };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const { accountId, cookie } = await registerAndLogin(app, "err-payout@a.co");
