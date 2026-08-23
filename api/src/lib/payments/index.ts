@@ -11,18 +11,6 @@ export interface PayoutResult {
   ref: string;
 }
 
-export interface CollectRequest {
-  accountId: string;
-  amountMinor: number;
-  // Optional: an investor paying from a saved instrument may not pass one.
-  method?: PayoutMethod;
-}
-
-export interface CollectResult {
-  ok: boolean;
-  ref: string;
-}
-
 export interface DepositRequest {
   accountId: string;
   amountMinor: number;
@@ -56,7 +44,6 @@ export interface EscrowMoveResult {
 
 export interface PaymentProvider {
   payout(p: PayoutRequest): Promise<PayoutResult>;
-  collectFunds(p: CollectRequest): Promise<CollectResult>; // kept until Task 4
   initiateDeposit(p: DepositRequest): Promise<DepositResult>;
   releaseEscrow(p: ReleaseRequest): Promise<EscrowMoveResult>;
   refundEscrow(p: RefundRequest): Promise<EscrowMoveResult>;
@@ -72,16 +59,6 @@ export class MockPaymentProvider implements PaymentProvider {
     this.seq += 1;
     return { ok: true, ref: `mock-payout-${this.seq}` };
   }
-
-  // Deterministic mock collection: always succeeds. A per-instance counter (not
-  // Date.now/Math.random) keeps refs unique and stable so concurrent
-  // investments in a test never collide on the same reference string.
-  async collectFunds(_p: CollectRequest): Promise<CollectResult> {
-    this.collectSeq += 1;
-    return { ok: true, ref: `mock-collect-${this.collectSeq}` };
-  }
-
-  private collectSeq = 0;
 
   depositMode: "settled" | "pending" = "settled";
   private depositSeq = 0;
