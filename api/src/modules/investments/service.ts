@@ -291,6 +291,9 @@ export interface MyInvestment {
   id: string;
   amountMinor: number;
   source: InvestmentSource;
+  // The INVESTMENT's own lifecycle status (pending|escrowed|released|refunded|
+  // failed), distinct from the nested project.status.
+  status: (typeof investments.$inferSelect)["status"];
   createdAt: Date;
   project: {
     id: string;
@@ -312,6 +315,7 @@ export async function listMyInvestments(db: Db, accountId: string): Promise<MyIn
       id: investments.id,
       amountMinor: investments.amountMinor,
       source: investments.source,
+      status: investments.status,
       createdAt: investments.createdAt,
       project: MY_INVESTMENT_PROJECT_COLUMNS,
     })

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
+import { MockPaymentProvider } from "../src/lib/payments";
 import { accounts, projects, investments } from "../src/db/schema";
 
 const COOKIE = "kpital_sess";
@@ -76,6 +77,9 @@ describe("GET /me/investments", () => {
     expect(row.source).toBe("payment");
     expect(typeof row.id).toBe("string");
     expect(typeof row.createdAt).toBe("string");
+    // Top-level status is the INVESTMENT status. The default mock settles the
+    // deposit synchronously, so a fresh payment invest is "escrowed".
+    expect(row.status).toBe("escrowed");
     // Internal provider ref must never surface on the investor list.
     expect(row).not.toHaveProperty("paymentRef");
 
@@ -91,6 +95,34 @@ describe("GET /me/investments", () => {
     expect(project).not.toHaveProperty("fundsUsage");
     expect(project).not.toHaveProperty("city");
     expect(project).not.toHaveProperty("raisedMinor");
+
+    await app.close();
+  });
+
+  it("reports a pending-mode invest with a top-level status of pending", async () => {
+    const payments = new MockPaymentProvider();
+    payments.depositMode = "pending";
+    const { app, db } = await buildTestApp({ payments });
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    const pid = await seedProject(db);
+
+    const invest = await app.inject({
+      method: "POST",
+      url: `/projects/${pid}/invest`,
+      cookies: { [COOKIE]: cookie },
+      payload: { amountMinor: 50000, source: "payment" },
+    });
+    expect(invest.statusCode).toBe(201);
+
+    const mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
+    expect(mine.statusCode).toBe(200);
+    const list = mine.json().investments as Array<Record<string, unknown>>;
+    expect(list).toHaveLength(1);
+    // The deposit never settled, so the investment stays "pending".
+    expect(list[0]!.status).toBe("pending");
+    // The nested project status is distinct: it is still collecting.
+    expect((list[0]!.project as Record<string, unknown>).status).toBe("collecting");
 
     await app.close();
   });
