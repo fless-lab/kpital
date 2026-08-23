@@ -1,7 +1,28 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import { projects, wallets, walletEntries, investments } from "../../db/schema";
 import type { PaymentProvider } from "../../lib/payments";
+
+// The target project is not in the "collecting" state (includes an already
+// cancelled project on a re-cancel). Route maps this to 409 invalid_state.
+// Defined LOCALLY here (not imported from investments/service) on purpose:
+// investments/service already imports from this module, so importing back would
+// create a module cycle and make the route's instanceof check order-dependent.
+export class InvalidStateError extends Error {
+  constructor() {
+    super("invalid_state");
+    this.name = "InvalidStateError";
+  }
+}
+
+// The target project row does not exist (well-formed but absent id). Route maps
+// this to 404, mirroring the other project routes' absent-id convention.
+export class ProjectNotFoundError extends Error {
+  constructor() {
+    super("project_not_found");
+    this.name = "ProjectNotFoundError";
+  }
+}
 
 // Deterministic idempotency key for a provider escrow operation. A replayed
 // settle/release/refund carries the SAME key so the provider dedupes rather
@@ -196,6 +217,125 @@ export async function releaseProject(
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(`escrow release failed for investment ${inv.id}, continuing`, err);
+    }
+  }
+}
+
+// Admin cancel: guarded collecting -> cancelled, then refund every pending or
+// escrowed investment to its source. The state flip runs in ONE transaction
+// holding the project row FOR UPDATE; a project that is not collecting (already
+// cancelled included) throws InvalidStateError (-> 409) and nothing is refunded.
+// The per-investment refunds run AFTER that commit, each in its OWN short
+// transaction OUTSIDE the cancel lock, mirroring releaseProject: no provider
+// network I/O is ever held under a project row lock, and one poison investment
+// cannot strand the rest.
+export async function cancelAndRefund(
+  db: Db,
+  payments: PaymentProvider,
+  args: { projectId: string },
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [project] = await tx
+      .select({ status: projects.status })
+      .from(projects)
+      .where(eq(projects.id, args.projectId))
+      .for("update");
+    if (!project) throw new ProjectNotFoundError();
+    if (project.status !== "collecting") throw new InvalidStateError();
+
+    // Guarded collecting -> cancelled. FOR UPDATE already serialises this, but
+    // the guard keeps the transition consistent with every other escrow move.
+    const cancelled = await tx
+      .update(projects)
+      .set({ status: "cancelled", updatedAt: new Date() })
+      .where(and(eq(projects.id, args.projectId), eq(projects.status, "collecting")))
+      .returning({ id: projects.id });
+    if (cancelled.length === 0) throw new InvalidStateError();
+  });
+
+  // Snapshot the investments to refund AFTER the cancel commits. The project is
+  // now `cancelled`, so settleDeposit (which requires `collecting` under the
+  // project lock) can no longer advance any pending investment to escrowed: this
+  // pending/escrowed snapshot is stable, which is what makes the per-investment
+  // `inv.status === "escrowed"` decision below load-bearing-correct.
+  const invs = await db
+    .select({
+      id: investments.id,
+      amountMinor: investments.amountMinor,
+      source: investments.source,
+      paymentRef: investments.paymentRef,
+      status: investments.status,
+      investorAccountId: investments.investorAccountId,
+    })
+    .from(investments)
+    .where(and(eq(investments.projectId, args.projectId), inArray(investments.status, ["pending", "escrowed"])));
+
+  for (const inv of invs) {
+    // Isolate each investment (like releaseProject): a refundEscrow that throws
+    // must not reject the whole pass and strand later refunds. The guarded
+    // transition keeps a later retry idempotent, so we log and continue.
+    try {
+      await db.transaction(async (tx) => {
+        // payment-source crosses the provider seam. Call it BEFORE acquiring the
+        // project lock so no network I/O is held under the row lock; the
+        // deterministic refund:<id> key makes a replay a provider no-op.
+        let resolutionRef: string | null = null;
+        if (inv.source === "payment") {
+          const refund = await payments.refundEscrow({
+            depositRef: inv.paymentRef ?? "",
+            amountMinor: inv.amountMinor,
+            idempotencyKey: idemKey("refund", inv.id),
+          });
+          // Leave the investment refundable on a provider decline (guarded, so a
+          // retry never double-refunds), exactly as releaseProject does.
+          if (!refund.ok) return;
+          resolutionRef = refund.ref;
+        }
+
+        // Lock the project row: the raised_minor decrement below moves money and
+        // must run under the project FOR UPDATE lock (global concurrency rule).
+        const [project] = await tx
+          .select({ raisedMinor: projects.raisedMinor })
+          .from(projects)
+          .where(eq(projects.id, args.projectId))
+          .for("update");
+        if (!project) return;
+
+        // Guarded pending|escrowed -> refunded. This GATES every non-idempotent
+        // money move below (wallet credit, raised decrement): a re-run finds the
+        // row already refunded, changes zero rows, and does nothing.
+        const refunded = await tx
+          .update(investments)
+          .set({ status: "refunded", resolutionRef, resolvedAt: new Date() })
+          .where(and(eq(investments.id, inv.id), inArray(investments.status, ["pending", "escrowed"])))
+          .returning({ id: investments.id });
+        if (refunded.length === 0) return;
+
+        // wallet-source funds never left the internal ledger: credit them back
+        // with a positive refund entry to the investor wallet.
+        if (inv.source === "wallet") {
+          const [w] = await tx.select({ id: wallets.id }).from(wallets).where(eq(wallets.accountId, inv.investorAccountId));
+          if (!w) throw new Error("investor wallet not found for refund");
+          await tx.insert(walletEntries).values({
+            walletId: w.id,
+            type: "refund",
+            amountMinor: inv.amountMinor,
+            reference: inv.id,
+          });
+        }
+
+        // Only escrowed funds ever advanced raised_minor; a pending deposit held
+        // reserved capacity but never moved raised, so it is NOT decremented.
+        if (inv.status === "escrowed") {
+          await tx
+            .update(projects)
+            .set({ raisedMinor: project.raisedMinor - inv.amountMinor, updatedAt: new Date() })
+            .where(eq(projects.id, args.projectId));
+        }
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`escrow refund failed for investment ${inv.id}, continuing`, err);
     }
   }
 }

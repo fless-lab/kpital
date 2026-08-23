@@ -1,5 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { settleDeposit, failDeposit } from "./service";
+import { settleDeposit, failDeposit, cancelAndRefund, InvalidStateError, ProjectNotFoundError } from "./service";
+
+// Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw 22P02
+// (-> 500), so reject it as a 404 (unknown project) first, mirroring
+// investments/routes.ts.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type SettlementBody = {
   depositRef?: unknown;
@@ -43,5 +48,31 @@ export default async function escrowRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: { code: "not_found", message: "Deposit not found" } });
     }
     return reply.send({ ok: true, applied: res.applied, projectStatus: res.projectStatus });
+  });
+
+  // POST /admin/projects/:id/cancel — cancel a collecting project and refund
+  // every pending/escrowed investment to its source. requireAdmin runs after
+  // requireAuth (which populates req.accountId), matching kyc/admin-routes.ts.
+  app.post("/admin/projects/:id/cancel", { preHandler: [app.requireAuth, app.requireAdmin] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+    }
+
+    try {
+      await cancelAndRefund(app.db, app.payments, { projectId: id });
+      return reply.code(200).send({ ok: true });
+    } catch (err) {
+      // Errors thrown inside db.transaction may be wrapped by the ROLLBACK path,
+      // so match on both the class and the message code (mirrors investments/routes).
+      const code = (err as Error)?.message;
+      if (err instanceof ProjectNotFoundError || code === "project_not_found") {
+        return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+      }
+      if (err instanceof InvalidStateError || code === "invalid_state") {
+        return reply.code(409).send({ error: { code: "invalid_state", message: "project is not collecting" } });
+      }
+      throw err;
+    }
   });
 }
