@@ -257,7 +257,12 @@ export async function cancelAndRefund(
   // now `cancelled`, so settleDeposit (which requires `collecting` under the
   // project lock) can no longer advance any pending investment to escrowed: this
   // pending/escrowed snapshot is stable, which is what makes the per-investment
-  // `inv.status === "escrowed"` decision below load-bearing-correct.
+  // `inv.status === "escrowed"` decision below load-bearing-correct. The other
+  // half also holds: no NEW pending/escrowed row can appear after this unlocked
+  // read, because createInvestment takes the same project FOR UPDATE lock and
+  // throws NotCollectingError unless the project is `collecting`, so any invest
+  // either committed before the cancel took the lock (visible here) or blocks
+  // then 409s. The refundable set is closed at cancel-commit.
   const invs = await db
     .select({
       id: investments.id,

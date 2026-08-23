@@ -50,7 +50,7 @@ export default async function escrowRoutes(app: FastifyInstance) {
     return reply.send({ ok: true, applied: res.applied, projectStatus: res.projectStatus });
   });
 
-  // POST /admin/projects/:id/cancel — cancel a collecting project and refund
+  // POST /admin/projects/:id/cancel: cancel a collecting project and refund
   // every pending/escrowed investment to its source. requireAdmin runs after
   // requireAuth (which populates req.accountId), matching kyc/admin-routes.ts.
   app.post("/admin/projects/:id/cancel", { preHandler: [app.requireAuth, app.requireAdmin] }, async (req, reply) => {
