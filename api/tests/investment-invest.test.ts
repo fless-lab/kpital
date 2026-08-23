@@ -279,6 +279,9 @@ describe("POST /projects/:id/invest", () => {
       async refundEscrow() {
         return { ok: false, ref: "" };
       },
+      async initiateRepayment() {
+        return { ok: false, ref: "", status: "settled" as const };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const cookie = await loginAs(app, "i@a.co");
