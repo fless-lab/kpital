@@ -194,3 +194,26 @@ export const investments = pgTable("investment", {
     .on(t.paymentRef)
     .where(sql`${t.paymentRef} IS NOT NULL`),
 }));
+
+export const repaymentInstallmentStatus = pgEnum("repayment_installment_status", ["due", "pending", "paid"]);
+export const repaymentInstallments = pgTable("repayment_installment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id),
+  seq: integer("seq").notNull(),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+  status: repaymentInstallmentStatus("status").notNull().default("due"),
+  repaymentRef: text("repayment_ref"),
+  settledAt: timestamp("settled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const repaymentDistributions = pgTable("repayment_distribution", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  installmentId: uuid("installment_id").notNull().references(() => repaymentInstallments.id),
+  investmentId: uuid("investment_id").notNull().references(() => investments.id),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  perInvestmentUnique: uniqueIndex("repayment_distribution_installment_investment_unique")
+    .on(t.installmentId, t.investmentId),
+}));
