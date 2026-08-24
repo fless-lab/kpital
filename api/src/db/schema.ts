@@ -116,7 +116,7 @@ export const otpCodes = pgTable("otp_code", {
 });
 
 export const projectCategory = pgEnum("project_category", ["immobilier","commerce","agriculture"]);
-export const projectStatus = pgEnum("project_status", ["draft","submitted","in_review","rejected","showcase","collecting","funded","repaying","closed","cancelled"]);
+export const projectStatus = pgEnum("project_status", ["draft","submitted","in_review","rejected","showcase","collecting","funded","repaying","closed","cancelled","defaulted"]);
 export const projectScore = pgEnum("project_score", ["A","B","C","D"]);
 export const projectDocKind = pgEnum("project_doc_kind", ["rccm","foncier","releves","photo"]);
 export const projectDocVisibility = pgEnum("project_doc_visibility", ["public","private"]);
@@ -138,6 +138,7 @@ export const projects = pgTable("project", {
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   publishedAt: timestamp("published_at", { withTimezone: true }),
   collectingOpenedAt: timestamp("collecting_opened_at", { withTimezone: true }),
+  defaultedAt: timestamp("defaulted_at", { withTimezone: true }),
   upvoteCount: integer("upvote_count").notNull().default(0),
   followCount: integer("follow_count").notNull().default(0),
   raisedMinor: bigint("raised_minor", { mode: "number" }).notNull().default(0),
@@ -205,6 +206,7 @@ export const repaymentInstallments = pgTable("repayment_installment", {
   status: repaymentInstallmentStatus("status").notNull().default("due"),
   repaymentRef: text("repayment_ref"),
   settledAt: timestamp("settled_at", { withTimezone: true }),
+  remindedAt: timestamp("reminded_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   // The repayment webhook resolves a settlement by repayment_ref, so a ref must
