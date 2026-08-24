@@ -1,6 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import type { Db } from "../../db/client";
-import { projects, investments, repaymentInstallments } from "../../db/schema";
+import {
+  projects,
+  investments,
+  repaymentInstallments,
+  repaymentDistributions,
+  wallets,
+  walletEntries,
+} from "../../db/schema";
 
 // The transaction handle passed to a db.transaction callback. Derived from Db so
 // this module never imports anything runtime from escrow/service (escrow ->
@@ -81,4 +88,159 @@ export async function startRepayment(db: Db, args: { projectId: string }): Promi
 
     await generateSchedule(tx, project);
   });
+}
+
+// Deterministic provider idempotency key for a repayment collection. A replayed
+// /repay carries the SAME key so the provider dedupes rather than collecting
+// twice. Keyed by the installment id, never a timestamp (mirrors escrow idemKey).
+export function repayKey(installmentId: string): string {
+  return `repay:${installmentId}`;
+}
+
+// Distribute a settled installment pro-rata to the project's investors, idempotent
+// and resumable, then mark it `paid` and close the project once every installment
+// is `paid`. The investor set is FROZEN (project funded, all investments released),
+// so the pro-rata base (raised_minor, parts p_i) is stable with no concurrency.
+// Called only after the money has settled (route settled-branch / webhook settled),
+// never for a `pending` collection: distribution never precedes the money.
+export async function settleRepayment(db: Db, args: { installmentId: string }): Promise<void> {
+  const { installmentId } = args;
+
+  const [installment] = await db
+    .select({
+      projectId: repaymentInstallments.projectId,
+      amountMinor: repaymentInstallments.amountMinor,
+      status: repaymentInstallments.status,
+    })
+    .from(repaymentInstallments)
+    .where(eq(repaymentInstallments.id, installmentId));
+  if (!installment) return;
+
+  // NEVER distribute a `due` installment: the money has not been collected. This
+  // enforces spec section 8 ("la distribution n'arrive jamais avant l'argent; seul
+  // settled declenche"). It is reachable: failRepaymentSettlement resets pending ->
+  // due but leaves repayment_ref populated, and the Task 6 webhook resolves by that
+  // ref, so a stray `settled` callback carrying it must NOT credit uncollected money.
+  // `pending` (normal settle) and `paid` (replay / straggler resume) both proceed, so
+  // resumability is untouched.
+  if (installment.status === "due") return;
+
+  const projectId = installment.projectId;
+  const A = installment.amountMinor;
+
+  const [project] = await db
+    .select({ raisedMinor: projects.raisedMinor })
+    .from(projects)
+    .where(eq(projects.id, projectId));
+  if (!project) return;
+  const R = project.raisedMinor;
+
+  // The frozen investor set: only RELEASED investments contributed to raised_minor
+  // (R). A funded project can still carry `failed` deposit rows that never advanced
+  // the raise; including them would make sum(p_i) > R, drive `remainder` negative,
+  // and over-distribute. Filtering to `released` is a tightening of the brief's
+  // "all investments" that reduces to it under the spec's premise (a repaying
+  // project has every investment released), and it keeps sum(p_i) === R exact.
+  const invs = await db
+    .select({ id: investments.id, amountMinor: investments.amountMinor, investorAccountId: investments.investorAccountId })
+    .from(investments)
+    .where(and(eq(investments.projectId, projectId), eq(investments.status, "released")));
+
+  // Unreachable for a legitimate `repaying` project (it has released investments and
+  // raised_minor > 0), but a no-op here beats a BigInt divide-by-zero or an empty-array
+  // remainder walk if either ever holds.
+  if (invs.length === 0 || R <= 0) return;
+
+  // Deterministic pro-rata split. BigInt for the A * p_i product so the floor and
+  // fractional part are exact even past 2^53 (plausible at FCFA magnitudes), which
+  // makes sum(share_i) === A a proven invariant rather than an empirical one.
+  const An = BigInt(A);
+  const Rn = BigInt(R);
+  const shares = invs.map((inv) => {
+    const prod = An * BigInt(inv.amountMinor);
+    return { inv, share: Number(prod / Rn), frac: Number(prod % Rn) };
+  });
+  const floorSum = shares.reduce((s, x) => s + x.share, 0);
+  const remainder = A - floorSum;
+
+  // Largest fractional remainder wins the leftover units; tiebreak investment.id
+  // ASC for a replay-stable order. A zero-floor investor with a large fractional
+  // part can legitimately collect a +1 unit, so this ranks BEFORE the share > 0
+  // filter in the distribution loop.
+  const order = [...shares].sort((a, b) => b.frac - a.frac || (a.inv.id < b.inv.id ? -1 : a.inv.id > b.inv.id ? 1 : 0));
+  for (let k = 0; k < remainder; k += 1) {
+    order[k]!.share += 1;
+  }
+
+  // Per-investment SHORT transactions, OUTSIDE any long lock (mirrors releaseProject:
+  // no I/O held under a row lock). The UNIQUE(installment_id, investment_id) guard
+  // makes each credit exactly-once: a replay/crash re-run inserts only the missing
+  // distribution rows and skips the rest. A share of 0 distributes nothing. Each row
+  // is isolated in try/catch: one poison investment (e.g. a missing wallet) must not
+  // strand the rest, and the guard keeps a later retry idempotent.
+  for (const { inv, share } of shares) {
+    if (share <= 0) continue;
+    try {
+      await db.transaction(async (tx) => {
+        // Insert the distribution and credit the wallet in the SAME transaction so
+        // they commit together. onConflictDoNothing + empty .returning() means the
+        // row already existed (already distributed) -> skip the credit.
+        const [dist] = await tx
+          .insert(repaymentDistributions)
+          .values({ installmentId, investmentId: inv.id, amountMinor: share })
+          .onConflictDoNothing()
+          .returning({ id: repaymentDistributions.id });
+        if (!dist) return;
+
+        const [w] = await tx
+          .select({ id: wallets.id })
+          .from(wallets)
+          .where(eq(wallets.accountId, inv.investorAccountId));
+        if (!w) throw new Error("investor wallet not found for repayment distribution");
+
+        await tx.insert(walletEntries).values({
+          walletId: w.id,
+          type: "repayment",
+          amountMinor: share,
+          reference: dist.id,
+        });
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`repayment distribution failed for investment ${inv.id}, continuing`, err);
+    }
+  }
+
+  // Mark the installment paid ONLY after the distribution loop: a crash mid-loop
+  // leaves it `pending` so a replay re-runs distribution for the stragglers. Guarded
+  // pending -> paid; a replay on an already-paid installment changes zero rows.
+  await db
+    .update(repaymentInstallments)
+    .set({ status: "paid", settledAt: new Date() })
+    .where(and(eq(repaymentInstallments.id, installmentId), eq(repaymentInstallments.status, "pending")));
+
+  // Close the project once EVERY installment is `paid`. Guarded repaying -> closed so
+  // a replay closes exactly once; the length > 0 check stops an empty set (a project
+  // with no schedule) from closing on `[].every`.
+  const all = await db
+    .select({ status: repaymentInstallments.status })
+    .from(repaymentInstallments)
+    .where(eq(repaymentInstallments.projectId, projectId));
+  if (all.length > 0 && all.every((i) => i.status === "paid")) {
+    await db
+      .update(projects)
+      .set({ status: "closed", updatedAt: new Date() })
+      .where(and(eq(projects.id, projectId), eq(projects.status, "repaying")));
+  }
+}
+
+// Mark a failed installment settlement. Guarded pending -> due (retryable by the
+// porteur). Distributes nothing: a failed settlement never moved money. If the
+// installment is not `pending` (already paid, or already due), the guard changes
+// zero rows.
+export async function failRepaymentSettlement(db: Db, args: { installmentId: string }): Promise<void> {
+  await db
+    .update(repaymentInstallments)
+    .set({ status: "due" })
+    .where(and(eq(repaymentInstallments.id, args.installmentId), eq(repaymentInstallments.status, "pending")));
 }
