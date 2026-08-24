@@ -126,6 +126,47 @@ export default async function repaymentRoutes(app: FastifyInstance) {
     });
   });
 
+  // GET /projects/:id/repayment-schedule: the porteur reads their own repayment
+  // plan. Owner-only. Projects ONLY the installment-level fields (seq, amount, due,
+  // status, settled) - never repayment_ref or any investor/distribution PII.
+  app.get("/projects/:id/repayment-schedule", { preHandler: app.requireAuth }, async (req, reply) => {
+    const accountId = req.accountId;
+    if (!accountId) {
+      return reply.code(401).send({ error: { code: "unauthorized", message: "Login required" } });
+    }
+
+    const { id } = req.params as { id: string };
+    if (!UUID_RE.test(id)) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+    }
+
+    const [project] = await app.db.select().from(projects).where(eq(projects.id, id));
+    if (!project) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+    }
+    if (project.ownerAccountId !== accountId) {
+      return reply.code(403).send({ error: { code: "forbidden", message: "Not your project" } });
+    }
+
+    const installments = await app.db
+      .select({
+        seq: repaymentInstallments.seq,
+        amountMinor: repaymentInstallments.amountMinor,
+        dueAt: repaymentInstallments.dueAt,
+        status: repaymentInstallments.status,
+        settledAt: repaymentInstallments.settledAt,
+      })
+      .from(repaymentInstallments)
+      .where(eq(repaymentInstallments.projectId, id))
+      .orderBy(asc(repaymentInstallments.seq));
+
+    const totalOwedMinor = installments.reduce((sum, i) => sum + i.amountMinor, 0);
+    const paidCount = installments.filter((i) => i.status === "paid").length;
+    const totalCount = installments.length;
+
+    return reply.send({ installments, totalOwedMinor, paidCount, totalCount });
+  });
+
   // Escrow repayment settlement webhook. NO session auth: the provider calls this,
   // so it is verified by a shared secret carried in the x-escrow-signature header,
   // compared against config.escrowWebhookSecret. An unset secret (empty) rejects
