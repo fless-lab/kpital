@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { and, asc, eq, ne } from "drizzle-orm";
 import { projects, repaymentInstallments } from "../../db/schema";
-import { settleRepayment, repayKey } from "./service";
+import { settleRepayment, failRepaymentSettlement, repayKey } from "./service";
 
 // Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw 22P02
 // (-> 500), so reject it as a 404 (unknown project) first, mirroring
@@ -124,5 +124,48 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       status: ins!.status,
       projectStatus: proj!.status,
     });
+  });
+
+  // Escrow repayment settlement webhook. NO session auth: the provider calls this,
+  // so it is verified by a shared secret carried in the x-escrow-signature header,
+  // compared against config.escrowWebhookSecret. An unset secret (empty) rejects
+  // every caller, the safe prod default until a real secret is configured. Mirrors
+  // escrow/routes.ts POST /escrow/settlement. Idempotent: the guarded transitions
+  // in settleRepayment/failRepaymentSettlement make a replay a no-op (a second
+  // `settled` re-runs distribution but the UNIQUE(installment, investment) guard
+  // credits each investor exactly once).
+  app.post("/escrow/repayment", async (req, reply) => {
+    // A header sent more than once arrives as an array, which never equals the
+    // string secret, so it is rejected as a bad signature.
+    const sig = req.headers["x-escrow-signature"];
+    if (!app.config.escrowWebhookSecret || sig !== app.config.escrowWebhookSecret) {
+      return reply.code(401).send({ error: { code: "unauthorized", message: "bad signature" } });
+    }
+
+    const body = (req.body ?? {}) as { repaymentRef?: unknown; status?: unknown };
+    const repaymentRef = body.repaymentRef;
+    const status = body.status;
+    if (typeof repaymentRef !== "string" || repaymentRef.length === 0) {
+      return reply.code(400).send({ error: { code: "validation_error", message: "repaymentRef must be a non-empty string" } });
+    }
+    if (status !== "settled" && status !== "failed") {
+      return reply.code(400).send({ error: { code: "validation_error", message: "status must be one of settled, failed" } });
+    }
+
+    const [installment] = await app.db
+      .select({ id: repaymentInstallments.id })
+      .from(repaymentInstallments)
+      .where(eq(repaymentInstallments.repaymentRef, repaymentRef));
+    if (!installment) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Installment not found" } });
+    }
+
+    if (status === "failed") {
+      await failRepaymentSettlement(app.db, { installmentId: installment.id });
+      return reply.send({ ok: true });
+    }
+
+    await settleRepayment(app.db, { installmentId: installment.id });
+    return reply.send({ ok: true });
   });
 }
