@@ -58,7 +58,9 @@ describe("escrow settle/fail/release", () => {
       const { pid, invId, ownerId } = await seedPendingInvestment(db, { targetMinor: 50000, raisedMinor: 0, amount: 50000 });
       await settleDeposit(db, payments, { depositRef: "dep-1" });
       const [p] = await db.select().from(projects).where(eq(projects.id, pid));
-      expect(p!.status).toBe("funded");
+      // Release completed (porteur wallet seeded, sole investment released), so
+      // startRepayment (hooked at release completion) flips funded -> repaying.
+      expect(p!.status).toBe("repaying");
       const [inv] = await db.select().from(investments).where(eq(investments.id, invId));
       expect(inv!.status).toBe("released");
       const [w] = await db.select().from(wallets).where(eq(wallets.accountId, ownerId));

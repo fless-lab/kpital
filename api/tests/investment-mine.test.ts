@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
 import { MockPaymentProvider } from "../src/lib/payments";
-import { accounts, projects, investments } from "../src/db/schema";
+import { accounts, projects, investments, repaymentInstallments, repaymentDistributions } from "../src/db/schema";
 
 const COOKIE = "kpital_sess";
 
@@ -210,6 +210,86 @@ describe("GET /me/investments", () => {
     const { app } = await buildTestApp();
     const mine = await app.inject({ method: "GET", url: "/me/investments" });
     expect(mine.statusCode).toBe(401);
+    await app.close();
+  });
+
+  it("reports repaidMinor: 0 before any repayment and the sum of distributions after", async () => {
+    const { app, db } = await buildTestApp();
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    const me = await accountId(db, "i@a.co");
+    const pid = await seedProject(db, { status: "repaying", raisedMinor: 1000000 });
+
+    // The caller's investment (direct insert; frozen/released).
+    const [inv] = await db
+      .insert(investments)
+      .values({ projectId: pid, investorAccountId: me, amountMinor: 500000, source: "payment", paymentRef: "d0", status: "released" })
+      .returning();
+
+    // Before any repayment: repaidMinor is 0.
+    let mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
+    expect(mine.statusCode).toBe(200);
+    let list = mine.json().investments as Array<Record<string, unknown>>;
+    expect(list).toHaveLength(1);
+    expect(list[0]!.repaidMinor).toBe(0);
+
+    // Distribute two installments to the caller's investment (direct inserts).
+    const [ins1] = await db
+      .insert(repaymentInstallments)
+      .values({ projectId: pid, seq: 1, amountMinor: 96667, dueAt: new Date(), status: "paid", settledAt: new Date() })
+      .returning();
+    const [ins2] = await db
+      .insert(repaymentInstallments)
+      .values({ projectId: pid, seq: 2, amountMinor: 96666, dueAt: new Date(), status: "paid", settledAt: new Date() })
+      .returning();
+    await db.insert(repaymentDistributions).values([
+      { installmentId: ins1!.id, investmentId: inv!.id, amountMinor: 48333 },
+      { installmentId: ins2!.id, investmentId: inv!.id, amountMinor: 48333 },
+    ]);
+
+    // After: repaidMinor is the sum of the caller's distributions.
+    mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
+    expect(mine.statusCode).toBe(200);
+    list = mine.json().investments as Array<Record<string, unknown>>;
+    expect(list).toHaveLength(1);
+    expect(list[0]!.repaidMinor).toBe(96666);
+
+    await app.close();
+  });
+
+  it("keeps each investment's repaidMinor to its own distributions", async () => {
+    const { app, db } = await buildTestApp();
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    const me = await accountId(db, "i@a.co");
+    const other = await makeAccount(db, "other@a.co");
+    const pid = await seedProject(db, { status: "repaying", raisedMinor: 1000000 });
+
+    const [mineInv] = await db
+      .insert(investments)
+      .values({ projectId: pid, investorAccountId: me, amountMinor: 500000, source: "payment", paymentRef: "d0", status: "released" })
+      .returning();
+    const [otherInv] = await db
+      .insert(investments)
+      .values({ projectId: pid, investorAccountId: other, amountMinor: 500000, source: "payment", paymentRef: "d1", status: "released" })
+      .returning();
+
+    const [ins1] = await db
+      .insert(repaymentInstallments)
+      .values({ projectId: pid, seq: 1, amountMinor: 100000, dueAt: new Date(), status: "paid", settledAt: new Date() })
+      .returning();
+    await db.insert(repaymentDistributions).values([
+      { installmentId: ins1!.id, investmentId: mineInv!.id, amountMinor: 50000 },
+      { installmentId: ins1!.id, investmentId: otherInv!.id, amountMinor: 50000 },
+    ]);
+
+    const mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
+    expect(mine.statusCode).toBe(200);
+    const list = mine.json().investments as Array<{ repaidMinor: number }>;
+    // Only the caller's own investment is listed, and it reflects only its share.
+    expect(list).toHaveLength(1);
+    expect(list[0]!.repaidMinor).toBe(50000);
+
     await app.close();
   });
 });

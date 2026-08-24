@@ -92,6 +92,20 @@
       "when": 1787510232525,
       "tag": "0012_tricky_the_renegades",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787527450322,
+      "tag": "0013_sloppy_bishop",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1787528126530,
+      "tag": "0014_cooing_thunderball",
+      "breakpoints": true
     }
   ]
 }

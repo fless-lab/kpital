@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Db } from "../../db/client";
-import { accounts, projects, wallets, walletEntries, investments } from "../../db/schema";
+import { accounts, projects, wallets, walletEntries, investments, repaymentDistributions } from "../../db/schema";
 import type { PaymentProvider, PayoutMethod } from "../../lib/payments";
 import { idemKey, settleDeposit, releaseProject } from "../escrow/service";
 import { balanceForWallet, InsufficientFundsError } from "../wallet/service";
@@ -227,6 +227,26 @@ export async function createInvestment(
     // outside the invest lock, so release never runs network I/O under the lock.
     if (phase1.projectStatus === "funded") {
       await releaseProject(db, payments, { projectId: input.projectId });
+      // releaseProject (and its startRepayment hook) can flip the project to
+      // repaying and this investment to released, so re-read the actual state for
+      // the response instead of the stale phase-1 snapshot (parity with the
+      // settled-payment read-back below).
+      const [pj] = await db
+        .select({ raisedMinor: projects.raisedMinor, status: projects.status })
+        .from(projects)
+        .where(eq(projects.id, input.projectId));
+      const [inv] = await db
+        .select({ status: investments.status })
+        .from(investments)
+        .where(eq(investments.id, investmentId));
+      return {
+        investmentId,
+        amountMinor: phase1.amountMinor,
+        status: inv?.status ?? "escrowed",
+        raisedMinor: pj?.raisedMinor ?? phase1.raisedMinor,
+        projectStatus: pj?.status ?? phase1.projectStatus,
+        depositRef: null,
+      };
     }
     return {
       investmentId,
@@ -294,6 +314,9 @@ export interface MyInvestment {
   // The INVESTMENT's own lifecycle status (pending|escrowed|released|refunded|
   // failed), distinct from the nested project.status.
   status: (typeof investments.$inferSelect)["status"];
+  // Total repayment received on THIS investment so far: the sum of the caller's
+  // repayment_distribution.amount_minor rows. 0 until the porteur repays.
+  repaidMinor: number;
   createdAt: Date;
   project: {
     id: string;
@@ -310,7 +333,7 @@ export interface MyInvestment {
 // returned (pending, escrowed, released, refunded, failed). Ordering is deterministic:
 // createdAt desc with an id tiebreak for a total order.
 export async function listMyInvestments(db: Db, accountId: string): Promise<MyInvestment[]> {
-  return db
+  const rows = await db
     .select({
       id: investments.id,
       amountMinor: investments.amountMinor,
@@ -323,4 +346,24 @@ export async function listMyInvestments(db: Db, accountId: string): Promise<MyIn
     .innerJoin(projects, eq(investments.projectId, projects.id))
     .where(eq(investments.investorAccountId, accountId))
     .orderBy(desc(investments.createdAt), asc(investments.id));
+
+  // Per-investment repayment total: one grouped query over only the caller's
+  // investment ids, mapped on with a 0 default for investments never repaid.
+  const repaidByInvestment = new Map<string, number>();
+  if (rows.length > 0) {
+    const ids = rows.map((r) => r.id);
+    const sums = await db
+      .select({
+        investmentId: repaymentDistributions.investmentId,
+        repaidMinor: sql<string>`coalesce(sum(${repaymentDistributions.amountMinor}), 0)`,
+      })
+      .from(repaymentDistributions)
+      .where(inArray(repaymentDistributions.investmentId, ids))
+      .groupBy(repaymentDistributions.investmentId);
+    for (const s of sums) {
+      repaidByInvestment.set(s.investmentId, Number(s.repaidMinor));
+    }
+  }
+
+  return rows.map((r) => ({ ...r, repaidMinor: repaidByInvestment.get(r.id) ?? 0 }));
 }

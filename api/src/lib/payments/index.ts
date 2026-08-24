@@ -42,11 +42,24 @@ export interface EscrowMoveResult {
   ref: string;
 }
 
+export interface RepaymentRequest {
+  payerAccountId: string;
+  amountMinor: number;
+  idempotencyKey: string;
+}
+
+export interface RepaymentResult {
+  ok: boolean;
+  ref: string;
+  status: "pending" | "settled";
+}
+
 export interface PaymentProvider {
   payout(p: PayoutRequest): Promise<PayoutResult>;
   initiateDeposit(p: DepositRequest): Promise<DepositResult>;
   releaseEscrow(p: ReleaseRequest): Promise<EscrowMoveResult>;
   refundEscrow(p: RefundRequest): Promise<EscrowMoveResult>;
+  initiateRepayment(p: RepaymentRequest): Promise<RepaymentResult>;
 }
 
 // Deterministic mock payout: succeeds and returns a monotonically increasing
@@ -61,9 +74,11 @@ export class MockPaymentProvider implements PaymentProvider {
   }
 
   depositMode: "settled" | "pending" = "settled";
+  repaymentMode: "settled" | "pending" = "settled";
   private depositSeq = 0;
   private releaseSeq = 0;
   private refundSeq = 0;
+  private repaySeq = 0;
   // Deterministic idempotency: a replayed key returns the prior result, never a
   // new ref, mirroring how a real provider dedupes by idempotency key.
   private memo = new Map<string, { ref: string; status?: "pending" | "settled" }>();
@@ -93,5 +108,14 @@ export class MockPaymentProvider implements PaymentProvider {
     const ref = `mock-refund-${this.refundSeq}`;
     this.memo.set(p.idempotencyKey, { ref });
     return { ok: true, ref };
+  }
+
+  async initiateRepayment(p: RepaymentRequest): Promise<RepaymentResult> {
+    const prior = this.memo.get(p.idempotencyKey);
+    if (prior) return { ok: true, ref: prior.ref, status: prior.status ?? "settled" };
+    this.repaySeq += 1;
+    const ref = `mock-repay-${this.repaySeq}`;
+    this.memo.set(p.idempotencyKey, { ref, status: this.repaymentMode });
+    return { ok: true, ref, status: this.repaymentMode };
   }
 }

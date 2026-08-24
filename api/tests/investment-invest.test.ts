@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
 import { MockPaymentProvider } from "../src/lib/payments";
-import { accounts, projects, investments } from "../src/db/schema";
+import { accounts, projects, investments, wallets } from "../src/db/schema";
 import type { PaymentProvider } from "../src/lib/payments";
 
 const COOKIE = "kpital_sess";
@@ -279,6 +279,9 @@ describe("POST /projects/:id/invest", () => {
       async refundEscrow() {
         return { ok: false, ref: "" };
       },
+      async initiateRepayment() {
+        return { ok: false, ref: "", status: "settled" as const };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const cookie = await loginAs(app, "i@a.co");
@@ -335,6 +338,36 @@ describe("POST /projects/:id/invest", () => {
     const [p] = await db.select().from(projects).where(eq(projects.id, pid));
     expect(p!.raisedMinor).toBe(980000);
     expect(p!.status).toBe("collecting");
+
+    await app.close();
+  });
+
+  it("a wallet invest that funds a project (porteur wallet present) reports repaying + released", async () => {
+    const { app, db } = await buildTestApp();
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    const [investor] = await db.select().from(accounts).where(eq(accounts.email, "i@a.co"));
+    // Needs exactly 50_000 more to hit the target.
+    const pid = await seedProject(db, { targetMinor: 1000000, raisedMinor: 950000 });
+    // Seed a porteur wallet so releaseProject can disburse: release completes, the
+    // startRepayment hook flips the project to repaying and the investment to released.
+    const [proj] = await db.select().from(projects).where(eq(projects.id, pid));
+    await db.insert(wallets).values({ accountId: proj!.ownerAccountId });
+    const { credit } = await import("../src/modules/wallet/service");
+    await credit(db, { accountId: investor!.id, amountMinor: 50000, type: "repayment", reference: "seed" });
+
+    const r = await app.inject({
+      method: "POST",
+      url: `/projects/${pid}/invest`,
+      cookies: { [COOKIE]: cookie },
+      payload: { amountMinor: 50000, source: "wallet" },
+    });
+    expect(r.statusCode).toBe(201);
+    const body = r.json();
+    // The response reflects the ACTUAL post-release state, not the phase-1 snapshot.
+    expect(body.raisedMinor).toBe(1000000);
+    expect(body.projectStatus).toBe("repaying");
+    expect(body.status).toBe("released");
 
     await app.close();
   });

@@ -34,6 +34,9 @@ describe("error normalization", () => {
       async refundEscrow() {
         return { ok: false, ref: "x" };
       },
+      async initiateRepayment() {
+        return { ok: false, ref: "", status: "settled" as const };
+      },
     };
     const { app, db } = await buildTestApp({ payments: failingPayments });
     const { accountId, cookie } = await registerAndLogin(app, "err-payout@a.co");

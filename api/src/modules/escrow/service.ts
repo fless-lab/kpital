@@ -2,6 +2,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import { projects, wallets, walletEntries, investments } from "../../db/schema";
 import type { PaymentProvider } from "../../lib/payments";
+import { startRepayment } from "../repayment/service";
 
 // The target project is not in the "collecting" state (includes an already
 // cancelled project on a re-cancel). Route maps this to 409 invalid_state.
@@ -223,6 +224,13 @@ export async function releaseProject(
       console.error(`escrow release failed for investment ${inv.id}, continuing`, err);
     }
   }
+
+  // Release complete: transition the project into repayment. startRepayment is a
+  // no-op unless EVERY investment has left escrow (a partial release leaves a
+  // straggler, so the project stays `funded` for a resumed pass to finish), and
+  // its funded -> repaying flip is guarded, so a replay generates no second
+  // schedule. This is the one-way escrow -> repayment runtime edge.
+  await startRepayment(db, { projectId: args.projectId });
 }
 
 // Admin cancel: guarded collecting -> cancelled, then refund every pending or
