@@ -236,4 +236,98 @@ describe("settleRepayment", () => {
       }
     });
   });
+
+  it("breaks an equal-fractional-part tie deterministically by lower investment.id", async () => {
+    await withTestDb(async (db) => {
+      // Two equal principals -> equal fractional parts; the single leftover unit
+      // must go to the lower investment.id (deterministic, replay-stable).
+      const { installments, investors } = await seedRepaying(db, {
+        investorAmounts: [100000, 100000],
+        installmentAmounts: [100001], // floor 50000 each, remainder 1
+      });
+      await settleRepayment(db, { installmentId: installments[0].id });
+      const dists = await db
+        .select()
+        .from(repaymentDistributions)
+        .where(eq(repaymentDistributions.installmentId, installments[0].id));
+      const total = dists.reduce((s: number, d: any) => s + d.amountMinor, 0);
+      expect(total).toBe(100001); // conservation holds
+      const lowerId = [investors[0]!.invId, investors[1]!.invId].sort()[0]!;
+      const byInv = Object.fromEntries(dists.map((d: any) => [d.investmentId, d.amountMinor]));
+      expect(byInv[lowerId]).toBe(50001); // lower id gets the +1 unit
+    });
+  });
+
+  it("distributes nothing to a zero-share investor (no row, no wallet entry)", async () => {
+    await withTestDb(async (db) => {
+      // A dust investor whose floor is 0 and who does not win a remainder unit.
+      const { installments, investors } = await seedRepaying(db, {
+        investorAmounts: [1000000, 1],
+        installmentAmounts: [100],
+      });
+      await settleRepayment(db, { installmentId: installments[0].id });
+      const dists = await db
+        .select()
+        .from(repaymentDistributions)
+        .where(eq(repaymentDistributions.installmentId, installments[0].id));
+      const total = dists.reduce((s: number, d: any) => s + d.amountMinor, 0);
+      expect(total).toBe(100); // conservation
+      const dust = investors[1]!; // amount 1
+      const dustDist = await db
+        .select()
+        .from(repaymentDistributions)
+        .where(and(eq(repaymentDistributions.installmentId, installments[0].id), eq(repaymentDistributions.investmentId, dust.invId)));
+      expect(dustDist).toHaveLength(0); // no distribution row
+      const dustEntries = await db.select().from(walletEntries).where(eq(walletEntries.walletId, dust.walletId));
+      expect(dustEntries).toHaveLength(0); // no wallet entry
+    });
+  });
+
+  it("does NOT mark paid when a distribution fails, and resumes on retry", async () => {
+    await withTestDb(async (db) => {
+      // Seed two released investors but give only ONE a wallet: the walletless
+      // investor's distribution throws (caught), so the installment must stay
+      // `pending` (not silently paid), and a retry after the wallet exists completes.
+      const [owner] = await db.insert(accounts).values({ email: "o@a.co", passwordHash: "x",
+        firstName: "O", lastName: "A", country: "Togo", roles: ["porteur"] }).returning();
+      await db.insert(wallets).values({ accountId: owner!.id });
+      const [p] = await db.insert(projects).values({ ownerAccountId: owner!.id, category: "commerce",
+        title: "P", city: "L", description: "d", targetMinor: 200000, durationMonths: 6, roiPct: "16",
+        fundsUsage: "u", cautionType: "a", status: "repaying", raisedMinor: 200000 }).returning();
+      const [a0] = await db.insert(accounts).values({ email: "i0@a.co", passwordHash: "x",
+        firstName: "I", lastName: "0", country: "Togo", roles: ["investor"] }).returning();
+      const [w0] = await db.insert(wallets).values({ accountId: a0!.id }).returning();
+      const [inv0] = await db.insert(investments).values({ projectId: p!.id, investorAccountId: a0!.id,
+        amountMinor: 100000, source: "payment", paymentRef: "d0", status: "released" }).returning();
+      const [a1] = await db.insert(accounts).values({ email: "i1@a.co", passwordHash: "x",
+        firstName: "I", lastName: "1", country: "Togo", roles: ["investor"] }).returning();
+      // a1 has NO wallet -> its distribution throws.
+      const [inv1] = await db.insert(investments).values({ projectId: p!.id, investorAccountId: a1!.id,
+        amountMinor: 100000, source: "payment", paymentRef: "d1", status: "released" }).returning();
+      const [ins] = await db.insert(repaymentInstallments).values({ projectId: p!.id, seq: 1,
+        amountMinor: 100000, dueAt: new Date(), status: "pending", repaymentRef: "r1" }).returning();
+
+      await settleRepayment(db, { installmentId: ins!.id });
+      // The installment stays pending (a1 failed); inv0 is credited, inv1 is not.
+      const [after] = await db.select().from(repaymentInstallments).where(eq(repaymentInstallments.id, ins!.id));
+      expect(after!.status).toBe("pending");
+      const d0 = await db.select().from(repaymentDistributions).where(eq(repaymentDistributions.investmentId, inv0!.id));
+      expect(d0).toHaveLength(1);
+      const d1 = await db.select().from(repaymentDistributions).where(eq(repaymentDistributions.investmentId, inv1!.id));
+      expect(d1).toHaveLength(0);
+
+      // Provision the missing wallet and retry: inv1 is credited (inv0 skipped via
+      // the unique guard), and the installment is now paid.
+      const [w1] = await db.insert(wallets).values({ accountId: a1!.id }).returning();
+      await settleRepayment(db, { installmentId: ins!.id });
+      const [after2] = await db.select().from(repaymentInstallments).where(eq(repaymentInstallments.id, ins!.id));
+      expect(after2!.status).toBe("paid");
+      const d1b = await db.select().from(repaymentDistributions).where(eq(repaymentDistributions.investmentId, inv1!.id));
+      expect(d1b).toHaveLength(1);
+      const e0 = await db.select().from(walletEntries).where(eq(walletEntries.walletId, w0!.id));
+      const e1 = await db.select().from(walletEntries).where(eq(walletEntries.walletId, w1!.id));
+      expect(e0).toHaveLength(1); // inv0 credited exactly once (not double)
+      expect(e1).toHaveLength(1); // inv1 credited on the retry
+    });
+  });
 });

@@ -178,6 +178,9 @@ export async function settleRepayment(db: Db, args: { installmentId: string }): 
   // distribution rows and skips the rest. A share of 0 distributes nothing. Each row
   // is isolated in try/catch: one poison investment (e.g. a missing wallet) must not
   // strand the rest, and the guard keeps a later retry idempotent.
+  // Tracks whether any per-investor distribution failed (caught below). If so we
+  // do NOT mark the installment paid, so a later replay resumes the stragglers.
+  let anyFailed = false;
   for (const { inv, share } of shares) {
     if (share <= 0) continue;
     try {
@@ -206,13 +209,20 @@ export async function settleRepayment(db: Db, args: { installmentId: string }): 
         });
       });
     } catch (err) {
+      anyFailed = true;
       // eslint-disable-next-line no-console
       console.error(`repayment distribution failed for investment ${inv.id}, continuing`, err);
     }
   }
 
-  // Mark the installment paid ONLY after the distribution loop: a crash mid-loop
-  // leaves it `pending` so a replay re-runs distribution for the stragglers. Guarded
+  // If any distribution failed (a caught per-investor fault) OR the process crashed
+  // mid-loop, do NOT mark the installment paid: leaving it `pending` keeps the resume
+  // signal so a replay re-runs distribution for the stragglers (spec 7: an installment
+  // is never `paid` before its distribution is complete). The per-investor UNIQUE guard
+  // keeps that replay idempotent (already-credited rows are skipped).
+  if (anyFailed) return;
+
+  // Mark the installment paid only after a fully-successful distribution loop. Guarded
   // pending -> paid; a replay on an already-paid installment changes zero rows.
   await db
     .update(repaymentInstallments)
