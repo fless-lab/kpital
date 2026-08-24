@@ -227,6 +227,26 @@ export async function createInvestment(
     // outside the invest lock, so release never runs network I/O under the lock.
     if (phase1.projectStatus === "funded") {
       await releaseProject(db, payments, { projectId: input.projectId });
+      // releaseProject (and its startRepayment hook) can flip the project to
+      // repaying and this investment to released, so re-read the actual state for
+      // the response instead of the stale phase-1 snapshot (parity with the
+      // settled-payment read-back below).
+      const [pj] = await db
+        .select({ raisedMinor: projects.raisedMinor, status: projects.status })
+        .from(projects)
+        .where(eq(projects.id, input.projectId));
+      const [inv] = await db
+        .select({ status: investments.status })
+        .from(investments)
+        .where(eq(investments.id, investmentId));
+      return {
+        investmentId,
+        amountMinor: phase1.amountMinor,
+        status: inv?.status ?? "escrowed",
+        raisedMinor: pj?.raisedMinor ?? phase1.raisedMinor,
+        projectStatus: pj?.status ?? phase1.projectStatus,
+        depositRef: null,
+      };
     }
     return {
       investmentId,
