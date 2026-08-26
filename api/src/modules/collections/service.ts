@@ -219,12 +219,19 @@ export async function runRepaymentSweep(
     .where(and(eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
 
   if (defaultedProjects.length > 0) {
+    // A grace-exceeded installment counts as still-delinquent whether it is `due`
+    // OR `pending` (a collection initiated but not yet settled). Recovering while
+    // an overdue installment is `pending` would flip the project to `repaying` on
+    // in-flight money; if that collection then fails (webhook -> back to `due`),
+    // the next sweep re-defaults and re-notifies investors. Waiting for the money
+    // to actually settle (installment becomes `paid`, so neither due nor pending)
+    // avoids that flap and matches /repay, which only lifts on a settled collection.
     const stillDelinquentRows = await db
       .selectDistinct({ projectId: repaymentInstallments.projectId })
       .from(repaymentInstallments)
       .where(
         and(
-          eq(repaymentInstallments.status, "due"),
+          inArray(repaymentInstallments.status, ["due", "pending"]),
           lt(repaymentInstallments.dueAt, graceCutoff),
         ),
       );

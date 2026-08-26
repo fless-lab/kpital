@@ -259,6 +259,24 @@ describe("runRepaymentSweep", () => {
     });
   });
 
+  it("does NOT recover a defaulted project while a grace-exceeded installment is still pending", async () => {
+    await withTestDb(async (db) => {
+      const { notifier } = capturingNotifier();
+      const owner = await seedAccount(db, { channels: ["email"] });
+      const project = await seedProject(db, owner.id, "defaulted", daysAgo(3));
+      // The overdue installment is mid-collection (pending, money not settled), not
+      // paid. It must count as still-delinquent so the project stays defaulted until
+      // the collection actually settles (avoids a recover -> fail -> re-default flap).
+      await seedInstallment(db, project, { dueAt: daysAgo(40), status: "pending" });
+
+      const r = await runRepaymentSweep(db, notifier, new NoPenaltyPolicy(), { ...opts30 });
+      expect(r.recovered).toBe(0);
+
+      const [p] = await db.select({ status: projects.status }).from(projects).where(eq(projects.id, project));
+      expect(p!.status).toBe("defaulted");
+    });
+  });
+
   it("defaults to email when the porteur has no notification_pref row", async () => {
     await withTestDb(async (db) => {
       const { notifier, sent } = capturingNotifier();
