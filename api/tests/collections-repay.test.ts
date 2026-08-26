@@ -197,4 +197,44 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
     const [p] = await db.select({ status: projects.status }).from(projects).where(eq(projects.id, pid));
     expect(p!.status).toBe("defaulted");
   });
+
+  it("closes a defaulted project when its final installment is paid (fully repaid is terminal)", async () => {
+    const { app, db } = await buildTestApp();
+    // A defaulted project whose ONLY installment is now paid must reach `closed`,
+    // not get stuck in repaying: settleRepayment closes from repaying OR defaulted.
+    const { pid, ownerCookie, installments } = await seedProject(app, db, {
+      projectStatus: "defaulted",
+      defaultedAt: daysAgo(3),
+      installments: [{ seq: 1, amountMinor: 100000, dueAt: daysAgo(40) }],
+    });
+
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    expect(r.statusCode).toBe(201);
+    expect(r.json().status).toBe("paid");
+    expect(r.json().projectStatus).toBe("closed");
+
+    const [ins] = await db.select({ status: repaymentInstallments.status }).from(repaymentInstallments).where(eq(repaymentInstallments.id, installments[0]!.id));
+    expect(ins!.status).toBe("paid");
+    const [p] = await db.select({ status: projects.status }).from(projects).where(eq(projects.id, pid));
+    expect(p!.status).toBe("closed");
+  });
+
+  it("closes an admin-defaulted project too when fully repaid (closed is terminal, sticky governs the active axis)", async () => {
+    const { app, db } = await buildTestApp();
+    const { pid, ownerCookie } = await seedProject(app, db, {
+      projectStatus: "defaulted",
+      adminDefaulted: true,
+      defaultedAt: daysAgo(3),
+      installments: [{ seq: 1, amountMinor: 100000, dueAt: daysAgo(40) }],
+    });
+
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    expect(r.statusCode).toBe(201);
+    expect(r.json().status).toBe("paid");
+    // Fully repaid closes even when admin-defaulted: the sticky flag blocks the
+    // repaying auto-lift (active axis), not the terminal close.
+    expect(r.json().projectStatus).toBe("closed");
+    const [p] = await db.select({ status: projects.status }).from(projects).where(eq(projects.id, pid));
+    expect(p!.status).toBe("closed");
+  });
 });
