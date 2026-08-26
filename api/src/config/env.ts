@@ -16,6 +16,7 @@ const schema = z.object({
   KYC_URL_TTL_SECONDS: z.coerce.number().int().positive().default(120),
   KYC_MAX_FILE_MB: z.coerce.number().int().positive().default(10),
   ESCROW_WEBHOOK_SECRET: z.string().default(""),
+  DEFAULT_GRACE_DAYS: z.coerce.number().int().positive().default(30),
 });
 
 export type Config = {
@@ -39,6 +40,7 @@ export type Config = {
   // Empty by default: an unset secret means the escrow webhook rejects all
   // callers, which is the safe prod default until a real secret is configured.
   escrowWebhookSecret: string;
+  defaultGraceDays: number;
 };
 
 // Parse TRUST_PROXY: unset/""/"false" -> false; "true" -> true; digits -> hop
@@ -71,5 +73,6 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     kycUrlTtlSeconds: e.KYC_URL_TTL_SECONDS,
     kycMaxFileMb: e.KYC_MAX_FILE_MB,
     escrowWebhookSecret: e.ESCROW_WEBHOOK_SECRET,
+    defaultGraceDays: e.DEFAULT_GRACE_DAYS,
   };
 }

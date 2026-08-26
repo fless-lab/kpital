@@ -9,6 +9,8 @@ import type { Notifier } from "./lib/notifier";
 import { makeDefaultNotifier } from "./lib/notifier";
 import type { PaymentProvider } from "./lib/payments";
 import { MockPaymentProvider } from "./lib/payments";
+import type { PenaltyPolicy } from "./lib/penalty";
+import { NoPenaltyPolicy } from "./lib/penalty";
 import type { StorageProvider } from "./lib/storage";
 import { makeStorage } from "./lib/storage";
 import type { KycVerifier } from "./lib/kyc/verifier";
@@ -27,12 +29,14 @@ import projectAdminRoutes from "./modules/projects/admin-routes";
 import investmentRoutes from "./modules/investments/routes";
 import escrowRoutes from "./modules/escrow/routes";
 import repaymentRoutes from "./modules/repayment/routes";
+import collectionsRoutes from "./modules/collections/routes";
 
 export function buildApp(opts: {
   db: Db;
   config: Config;
   notifier?: Notifier;
   payments?: PaymentProvider;
+  penalty?: PenaltyPolicy;
   // Storage + KYC verifier are constructed ONCE per app (makeStorage mints a
   // fresh S3 client, so never per-request). Tests inject a MemoryStorage.
   storage?: StorageProvider;
@@ -53,6 +57,7 @@ export function buildApp(opts: {
   app.decorate("config", opts.config);
   app.decorate("notifier", opts.notifier ?? makeDefaultNotifier(opts.config));
   app.decorate("payments", opts.payments ?? new MockPaymentProvider());
+  app.decorate("penalty", opts.penalty ?? new NoPenaltyPolicy());
   app.decorate("storage", opts.storage ?? makeStorage(opts.config));
   app.decorate("verifier", opts.verifier ?? new ManualVerifier());
 
@@ -92,6 +97,7 @@ export function buildApp(opts: {
   app.register(investmentRoutes);
   app.register(escrowRoutes);
   app.register(repaymentRoutes);
+  app.register(collectionsRoutes);
   app.get("/health", async () => ({ status: "ok" }));
   return app;
 }

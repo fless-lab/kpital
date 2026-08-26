@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD COLUMN "admin_defaulted" boolean DEFAULT false NOT NULL;

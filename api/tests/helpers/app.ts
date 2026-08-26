@@ -4,6 +4,7 @@ import { loadConfig } from "../../src/config/env";
 import type { Db } from "../../src/db/client";
 import type { Notifier } from "../../src/lib/notifier";
 import type { PaymentProvider } from "../../src/lib/payments";
+import type { PenaltyPolicy } from "../../src/lib/penalty";
 import { MemoryStorage } from "../../src/lib/storage/memory";
 import { db, ensureMigrated } from "./db";
 
@@ -38,6 +39,7 @@ function makeCapturingNotifier(): {
 
 export async function buildTestApp(opts?: {
   payments?: PaymentProvider;
+  penalty?: PenaltyPolicy;
   rateLimitMax?: number;
   // Override the capturing notifier (e.g. to assert on arbitrary messages, not
   // just OTP codes/reset links). Additive: existing callers are unaffected.
@@ -73,6 +75,7 @@ export async function buildTestApp(opts?: {
     notifier,
     storage,
     ...(opts?.payments ? { payments: opts.payments } : {}),
+    ...(opts?.penalty ? { penalty: opts.penalty } : {}),
     ...(opts?.rateLimitMax !== undefined ? { rateLimitMax: opts.rateLimitMax } : {}),
   });
   return { app, db, sentCodes, sentLinks, sentMessages, storage };

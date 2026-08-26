@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import {
   projects,
@@ -229,9 +229,12 @@ export async function settleRepayment(db: Db, args: { installmentId: string }): 
     .set({ status: "paid", settledAt: new Date() })
     .where(and(eq(repaymentInstallments.id, installmentId), eq(repaymentInstallments.status, "pending")));
 
-  // Close the project once EVERY installment is `paid`. Guarded repaying -> closed so
-  // a replay closes exactly once; the length > 0 check stops an empty set (a project
-  // with no schedule) from closing on `[].every`.
+  // Close the project once EVERY installment is `paid`. A project can be `repaying`
+  // OR `defaulted` at this point (#7 lets a defaulted project be repaid), and a
+  // fully-repaid project must reach the terminal `closed` state either way: the
+  // sticky admin_defaulted flag governs the active repaying<->defaulted axis, not
+  // the terminal close. Guarded so a replay closes exactly once; the length > 0
+  // check stops an empty set (a project with no schedule) from closing on `[].every`.
   const all = await db
     .select({ status: repaymentInstallments.status })
     .from(repaymentInstallments)
@@ -240,7 +243,7 @@ export async function settleRepayment(db: Db, args: { installmentId: string }): 
     await db
       .update(projects)
       .set({ status: "closed", updatedAt: new Date() })
-      .where(and(eq(projects.id, projectId), eq(projects.status, "repaying")));
+      .where(and(eq(projects.id, projectId), inArray(projects.status, ["repaying", "defaulted"])));
   }
 }
 

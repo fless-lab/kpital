@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { and, asc, eq, ne } from "drizzle-orm";
+import { and, asc, eq, ne, lt } from "drizzle-orm";
 import { projects, repaymentInstallments } from "../../db/schema";
 import { settleRepayment, failRepaymentSettlement, repayKey } from "./service";
 
@@ -48,7 +48,10 @@ export default async function repaymentRoutes(app: FastifyInstance) {
     if (project.ownerAccountId !== accountId) {
       return reply.code(403).send({ error: { code: "forbidden", message: "Not your project" } });
     }
-    if (project.status !== "repaying") {
+    // A `defaulted` project is still in the repayment cycle: the porteur may repay
+    // it, and clearing its retards auto-recovers it below (spec 3, 6). Any other
+    // status (collecting, closed, ...) stays 409.
+    if (project.status !== "repaying" && project.status !== "defaulted") {
       return reply.code(409).send({ error: { code: "invalid_state", message: "Project is not repaying" } });
     }
 
@@ -106,6 +109,36 @@ export default async function repaymentRoutes(app: FastifyInstance) {
     // arrived; the webhook settles it later).
     if (committed.depStatus === "settled") {
       await settleRepayment(app.db, { installmentId: committed.installmentId });
+
+      // Auto-recovery: a `defaulted` project whose retards are now cleared is
+      // lifted back to `repaying`. Only a `settled` collection reaches here (the
+      // money has landed), so this never lifts on a pending collection whose
+      // settlement could still fail. The recovery condition MATCHES the sweep's
+      // recovery phase EXACTLY: no `due` installment of the project remains past
+      // the grace cutoff, AND admin_defaulted = false (a sticky admin default is
+      // only cleared by /undefault). The UPDATE is a guarded standalone statement
+      // (WHERE status='defaulted' AND admin_defaulted=false), so it never rolls
+      // back the settle: it just reflects recovery in the response.
+      if (project.status === "defaulted") {
+        const graceCutoff = new Date(Date.now() - app.config.defaultGraceDays * 24 * 60 * 60 * 1000);
+        const [blocker] = await app.db
+          .select({ id: repaymentInstallments.id })
+          .from(repaymentInstallments)
+          .where(
+            and(
+              eq(repaymentInstallments.projectId, id),
+              eq(repaymentInstallments.status, "due"),
+              lt(repaymentInstallments.dueAt, graceCutoff),
+            ),
+          )
+          .limit(1);
+        if (!blocker) {
+          await app.db
+            .update(projects)
+            .set({ status: "repaying", defaultedAt: null, updatedAt: new Date() })
+            .where(and(eq(projects.id, id), eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
+        }
+      }
     }
 
     // Read back the ACTUAL statuses: settleRepayment may have moved the installment
@@ -148,17 +181,32 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: { code: "forbidden", message: "Not your project" } });
     }
 
-    const installments = await app.db
+    const rows = await app.db
       .select({
         seq: repaymentInstallments.seq,
         amountMinor: repaymentInstallments.amountMinor,
         dueAt: repaymentInstallments.dueAt,
         status: repaymentInstallments.status,
         settledAt: repaymentInstallments.settledAt,
+        remindedAt: repaymentInstallments.remindedAt,
       })
       .from(repaymentInstallments)
       .where(eq(repaymentInstallments.projectId, id))
       .orderBy(asc(repaymentInstallments.seq));
+
+    // `overdue` is derived server-side (never stored, never from the body): a `due`
+    // installment whose due date has passed. A paid or future installment is not
+    // overdue. Matches the sweep's selection (status = 'due' AND due_at < now).
+    const now = Date.now();
+    const installments = rows.map((r) => ({
+      seq: r.seq,
+      amountMinor: r.amountMinor,
+      dueAt: r.dueAt,
+      status: r.status,
+      settledAt: r.settledAt,
+      overdue: r.status === "due" && r.dueAt.getTime() < now,
+      remindedAt: r.remindedAt,
+    }));
 
     const totalOwedMinor = installments.reduce((sum, i) => sum + i.amountMinor, 0);
     const paidCount = installments.filter((i) => i.status === "paid").length;
