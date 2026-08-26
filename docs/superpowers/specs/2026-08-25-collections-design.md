@@ -95,18 +95,21 @@ Le resume `{ remindersSent, defaulted, recovered }` sert l'observabilite et les 
 Enveloppe d'erreur uniforme `{ error: { code, message, details? } }`.
 
 - `POST /admin/repayment/sweep` (requireAdmin) : lance `runRepaymentSweep`, `200 { remindersSent, defaulted, recovered }`.
-- `POST /admin/projects/:id/default` (requireAdmin) : garde `repaying -> defaulted` (sinon `409 invalid_state`) ; pose `defaulted_at` ; notifie les investisseurs ; `200 { ok: true }`. Non-UUID -> 404 ; projet absent -> 404.
-- `POST /admin/projects/:id/undefault` (requireAdmin) : garde `defaulted -> repaying` (sinon `409 invalid_state`) ; efface `defaulted_at` ; `200 { ok: true }`.
-- `POST /projects/:id/repay` (existant #6, auth + owner) : **modifie** pour accepter `status IN (repaying, defaulted)` (sinon `409 invalid_state`) ; apres un `settled` qui laisse zero tranche overdue-au-dela-de-grace, **auto-lift** garde `defaulted -> repaying` (helper #7). Le reste du flux (deux phases, strict sequentiel) inchange.
+- `POST /admin/projects/:id/default` (requireAdmin) : garde `repaying -> defaulted` (sinon `409 invalid_state`) ; pose `defaulted_at` et **`admin_defaulted = true`** ; notifie les investisseurs ; `200 { ok: true }`. Non-UUID -> 404 ; projet absent -> 404.
+- `POST /admin/projects/:id/undefault` (requireAdmin) : garde `defaulted -> repaying` (sinon `409 invalid_state`) ; efface `defaulted_at` et remet **`admin_defaulted = false`** ; `200 { ok: true }`.
+- `POST /projects/:id/repay` (existant #6, auth + owner) : **modifie** pour accepter `status IN (repaying, defaulted)` (sinon `409 invalid_state`) ; apres un `settled` qui laisse zero tranche overdue-au-dela-de-grace **et si `admin_defaulted = false`**, **auto-lift** garde `defaulted -> repaying` (helper #7). Le reste du flux (deux phases, strict sequentiel) inchange.
+
+**Defaut admin collant (`admin_defaulted`).** Decision issue de la revue de #7 : un defaut prononce a la main par un admin (`POST /admin/projects/:id/default`) est **collant** et n'est jamais leve automatiquement (ni par la reprise du sweep, ni par l'auto-lift de `/repay`), seulement par `POST /admin/projects/:id/undefault`. La couture : une colonne `project.admin_defaulted` (bool, defaut false) posee `true` par la voie admin ; la phase de reprise du sweep (section 5.3) et l'auto-lift de `/repay` excluent `admin_defaulted = true` de leurs candidats. Le defaut par le sweep (section 5.2, driven par l'echeancier) laisse `admin_defaulted = false`, donc reste auto-reprenable. Ainsi les deux leviers sont coherents : le sweep gere le defaut/reprise pilote par l'echeancier ; l'admin gere le defaut/reprise manuel (pour les cas que l'echeancier ne capte pas : fraude, porteur disparu).
 - `GET /projects/:id/repayment-schedule` (existant #6, owner) : ajouter par tranche `overdue` (derive `status="due" && due_at < maintenant`) et `remindedAt`. Toujours pas de PII investisseur. Le statut projet `defaulted` est visible cote porteur (schedule) et investisseur (`/me/investments` projette `project.status`).
 
 ---
 
-## 7. Modele de donnees (une migration, additive)
+## 7. Modele de donnees (migrations additives)
 
-- `repayment_installment` : ajouter `reminded_at` timestamptz null.
-- `project` : ajouter `defaulted_at` timestamptz null (audit).
-- `project_status` enum : ajouter la valeur `defaulted`.
+- `repayment_installment` : ajouter `reminded_at` timestamptz null (migration 0015).
+- `project` : ajouter `defaulted_at` timestamptz null (audit, migration 0015).
+- `project_status` enum : ajouter la valeur `defaulted` (migration 0015).
+- `project` : ajouter `admin_defaulted` boolean not null default false (migration 0016 ; defaut admin collant, voir section 6).
 - Reutilise `entry_type`, `notification_pref`, le notifier. `PenaltyPolicy` = interface en code (`api/src/lib/penalty/`), pas une table.
 
 ---
