@@ -29,6 +29,7 @@ import projectAdminRoutes from "./modules/projects/admin-routes";
 import investmentRoutes from "./modules/investments/routes";
 import escrowRoutes from "./modules/escrow/routes";
 import repaymentRoutes from "./modules/repayment/routes";
+import collectionsRoutes from "./modules/collections/routes";
 
 export function buildApp(opts: {
   db: Db;
@@ -96,6 +97,7 @@ export function buildApp(opts: {
   app.register(investmentRoutes);
   app.register(escrowRoutes);
   app.register(repaymentRoutes);
+  app.register(collectionsRoutes);
   app.get("/health", async () => ({ status: "ok" }));
   return app;
 }

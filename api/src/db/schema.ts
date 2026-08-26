@@ -139,6 +139,10 @@ export const projects = pgTable("project", {
   publishedAt: timestamp("published_at", { withTimezone: true }),
   collectingOpenedAt: timestamp("collecting_opened_at", { withTimezone: true }),
   defaultedAt: timestamp("defaulted_at", { withTimezone: true }),
+  // Set true when an admin defaults the project by hand (POST /admin/projects/:id/default).
+  // The sweep's auto-recovery phase excludes these, so an admin default is STICKY:
+  // only schedule-driven defaults (this stays false) are auto-recovered. Cleared by undefault.
+  adminDefaulted: boolean("admin_defaulted").notNull().default(false),
   upvoteCount: integer("upvote_count").notNull().default(0),
   followCount: integer("follow_count").notNull().default(0),
   raisedMinor: bigint("raised_minor", { mode: "number" }).notNull().default(0),

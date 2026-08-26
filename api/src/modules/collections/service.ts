@@ -34,6 +34,45 @@ function recipientFor(
   return to;
 }
 
+// Notify a defaulted project's investors (released stakes only), best-effort and
+// deduped by account so an investor with several released investments is notified
+// once. Mirrors the sweep's phase-2 inline block so the admin-default route and the
+// schedule-default sweep notify identically; a send failure is swallowed (the
+// caller's status transition has already committed and must not roll back).
+export async function notifyProjectDefaulted(
+  db: Db,
+  notifier: Notifier,
+  projectId: string,
+  notifyChannels: Channel[],
+): Promise<void> {
+  try {
+    const investors = await db
+      .selectDistinct({
+        accountId: investments.investorAccountId,
+        email: accounts.email,
+        phone: accounts.phone,
+        channels: notificationPrefs.channels,
+      })
+      .from(investments)
+      .innerJoin(accounts, eq(accounts.id, investments.investorAccountId))
+      .leftJoin(notificationPrefs, eq(notificationPrefs.accountId, investments.investorAccountId))
+      .where(and(eq(investments.projectId, projectId), eq(investments.status, "released")));
+
+    await Promise.all(
+      investors.map((inv) => {
+        const to = recipientFor(inv, notifyChannels);
+        if (!to) return Promise.resolve();
+        return notifier.send(to, {
+          subject: "Projet en defaut de remboursement",
+          body: "Un projet KPITAL dans lequel vous avez investi est en defaut de remboursement. Nos equipes assurent le suivi.",
+        });
+      }),
+    );
+  } catch {
+    // best-effort: the transition is durable regardless of delivery.
+  }
+}
+
 // Daily-cron mock. Idempotent: reminders are guarded by reminded_at, the project
 // transitions by a status guard, so a re-run sends nothing new and re-transitions
 // nothing. No money moves here (the PenaltyPolicy seam returns 0). Notifications
@@ -171,10 +210,13 @@ export async function runRepaymentSweep(
   // Re-query current state (AFTER the default phase). A defaulted project recovers
   // when NO `due` installment remains past the grace cutoff. Projects with such an
   // installment are excluded; the rest are flipped back under a status guard.
+  // admin_defaulted = false: only auto-recover schedule-driven defaults. An admin
+  // default is sticky (POST /admin/projects/:id/default sets the marker), so the
+  // sweep's global auto-recovery cannot silently undo it; only undefault clears it.
   const defaultedProjects = await db
     .select({ id: projects.id })
     .from(projects)
-    .where(eq(projects.status, "defaulted"));
+    .where(and(eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
 
   if (defaultedProjects.length > 0) {
     const stillDelinquentRows = await db
