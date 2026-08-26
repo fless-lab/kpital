@@ -181,17 +181,32 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: { code: "forbidden", message: "Not your project" } });
     }
 
-    const installments = await app.db
+    const rows = await app.db
       .select({
         seq: repaymentInstallments.seq,
         amountMinor: repaymentInstallments.amountMinor,
         dueAt: repaymentInstallments.dueAt,
         status: repaymentInstallments.status,
         settledAt: repaymentInstallments.settledAt,
+        remindedAt: repaymentInstallments.remindedAt,
       })
       .from(repaymentInstallments)
       .where(eq(repaymentInstallments.projectId, id))
       .orderBy(asc(repaymentInstallments.seq));
+
+    // `overdue` is derived server-side (never stored, never from the body): a `due`
+    // installment whose due date has passed. A paid or future installment is not
+    // overdue. Matches the sweep's selection (status = 'due' AND due_at < now).
+    const now = Date.now();
+    const installments = rows.map((r) => ({
+      seq: r.seq,
+      amountMinor: r.amountMinor,
+      dueAt: r.dueAt,
+      status: r.status,
+      settledAt: r.settledAt,
+      overdue: r.status === "due" && r.dueAt.getTime() < now,
+      remindedAt: r.remindedAt,
+    }));
 
     const totalOwedMinor = installments.reduce((sum, i) => sum + i.amountMinor, 0);
     const paidCount = installments.filter((i) => i.status === "paid").length;

@@ -96,6 +96,96 @@ describe("GET /projects/:id/repayment-schedule", () => {
     await app.close();
   });
 
+  it("exposes overdue + remindedAt per installment on the schedule", async () => {
+    const { app, db } = await buildTestApp();
+    const ownerCookie = await loginAs(app, "owner@a.co");
+    const [owner] = await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.email, "owner@a.co"));
+
+    const [p] = await db
+      .insert(projects)
+      .values({
+        ownerAccountId: owner!.id,
+        category: "commerce",
+        title: "P",
+        city: "L",
+        description: "d",
+        targetMinor: 1000000,
+        durationMonths: 6,
+        roiPct: "16",
+        fundsUsage: "u",
+        cautionType: "a",
+        status: "repaying",
+        raisedMinor: 1000000,
+      })
+      .returning();
+
+    // Dates relative to now so the overdue derivation is self-evident and never
+    // drifts with the wall clock.
+    const past = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+    const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const remindedAt = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+    const settledAt = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
+
+    await db.insert(repaymentInstallments).values([
+      // seq 1: due + past -> overdue true, remindedAt passes through.
+      { projectId: p!.id, seq: 1, amountMinor: 30000, dueAt: past, status: "due", remindedAt },
+      // seq 2: due + future -> overdue false.
+      { projectId: p!.id, seq: 2, amountMinor: 40000, dueAt: future, status: "due" },
+      // seq 3: paid + past -> overdue false regardless of due date.
+      { projectId: p!.id, seq: 3, amountMinor: 50000, dueAt: past, status: "paid", settledAt },
+    ]);
+
+    const res = await app.inject({
+      method: "GET",
+      url: `/projects/${p!.id}/repayment-schedule`,
+      cookies: { [COOKIE]: ownerCookie },
+    });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json() as {
+      installments: Array<Record<string, unknown>>;
+      totalOwedMinor: number;
+      paidCount: number;
+      totalCount: number;
+    };
+
+    const [i1, i2, i3] = body.installments;
+
+    // overdue derivation.
+    expect(i1!.overdue).toBe(true); // due + past
+    expect(i2!.overdue).toBe(false); // due + future
+    expect(i3!.overdue).toBe(false); // paid + past
+
+    // remindedAt passthrough (by value), null elsewhere.
+    expect(i1!.remindedAt).toBe(remindedAt.toISOString());
+    expect(i2!.remindedAt).toBeNull();
+    expect(i3!.remindedAt).toBeNull();
+
+    // Existing fields intact.
+    expect(i1!.seq).toBe(1);
+    expect(i1!.amountMinor).toBe(30000);
+    expect(i1!.status).toBe("due");
+    expect(i1!.settledAt).toBeNull();
+    expect(i3!.status).toBe("paid");
+    expect(typeof i3!.settledAt).toBe("string");
+
+    // Totals unchanged.
+    expect(body.totalOwedMinor).toBe(120000);
+    expect(body.paidCount).toBe(1);
+    expect(body.totalCount).toBe(3);
+
+    // No investor PII / internal fields leak.
+    for (const ins of body.installments) {
+      expect(ins).not.toHaveProperty("repaymentRef");
+      expect(ins).not.toHaveProperty("projectId");
+      expect(ins).not.toHaveProperty("id");
+      expect(ins).not.toHaveProperty("investmentId");
+      expect(ins).not.toHaveProperty("investorAccountId");
+    }
+
+    await app.close();
+  });
+
   it("forbids a non-owner from reading the schedule", async () => {
     const { app, db } = await buildTestApp();
     const { pid } = await seedScheduled(app, db);
