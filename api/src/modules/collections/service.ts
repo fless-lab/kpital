@@ -210,8 +210,9 @@ export async function runRepaymentSweep(
 
   // ---- Phase 3: recovery (defaulted -> repaying) ----
   // Re-query current state (AFTER the default phase). A defaulted project recovers
-  // when NO `due` installment remains past the grace cutoff. Projects with such an
-  // installment are excluded; the rest are flipped back under a status guard.
+  // when NO not-fully-paid installment (paid_minor < amount_minor) remains past the
+  // grace cutoff. Projects with such an installment are excluded; the rest are
+  // flipped back under a status guard.
   // admin_defaulted = false: only auto-recover schedule-driven defaults. An admin
   // default is sticky (POST /admin/projects/:id/default sets the marker), so the
   // sweep's global auto-recovery cannot silently undo it; only undefault clears it.
