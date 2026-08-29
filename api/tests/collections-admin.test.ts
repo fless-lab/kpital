@@ -67,17 +67,24 @@ async function seedProject(
   return p.id;
 }
 
+const INSTALLMENT_AMOUNT_MINOR = 100_000;
+
 async function seedInstallment(
   db: any,
   projectId: string,
-  opts: { dueAt: Date; status?: "due" | "pending" | "paid"; s?: number },
+  opts: { dueAt: Date; status?: "due" | "pending" | "paid"; s?: number; paidMinor?: number },
 ): Promise<void> {
+  const status = opts.status ?? "due";
+  // #7 delinquency keys on paid_minor < amount_minor, so a "paid" seed must carry a
+  // full paid_minor to read as settled; derive the default from the status.
+  const paidMinor = opts.paidMinor ?? (status === "paid" ? INSTALLMENT_AMOUNT_MINOR : 0);
   await db.insert(repaymentInstallments).values({
     projectId,
     seq: opts.s ?? 1,
-    amountMinor: 100_000,
+    amountMinor: INSTALLMENT_AMOUNT_MINOR,
     dueAt: opts.dueAt,
-    status: opts.status ?? "due",
+    status,
+    paidMinor,
   });
 }
 

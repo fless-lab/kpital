@@ -92,10 +92,11 @@ export async function runRepaymentSweep(
   let recovered = 0;
 
   // ---- Phase 1: reminders (once per overdue installment) ----
-  // An overdue installment is a `due` one whose due_at has passed, on a project
-  // still in the repayment cycle (repaying OR defaulted). reminded_at IS NULL is
-  // both a filter and the guard the UPDATE re-checks, so concurrent sweeps cannot
-  // double-remind.
+  // An overdue installment is a not-fully-paid one (paid_minor < amount_minor) whose
+  // due_at has passed, on a project still in the repayment cycle (repaying OR
+  // defaulted). Keying on paid_minor (not status) means a partially-paid installment
+  // is still delinquent. reminded_at IS NULL is both a filter and the guard the
+  // UPDATE re-checks, so concurrent sweeps cannot double-remind.
   const overdue = await db
     .select({
       installmentId: repaymentInstallments.id,
@@ -107,7 +108,7 @@ export async function runRepaymentSweep(
     .innerJoin(projects, eq(projects.id, repaymentInstallments.projectId))
     .where(
       and(
-        eq(repaymentInstallments.status, "due"),
+        lt(repaymentInstallments.paidMinor, repaymentInstallments.amountMinor),
         lt(repaymentInstallments.dueAt, now),
         isNull(repaymentInstallments.remindedAt),
         inArray(projects.status, ["repaying", "defaulted"]),
@@ -152,15 +153,16 @@ export async function runRepaymentSweep(
   }
 
   // ---- Phase 2: default (repaying -> defaulted) ----
-  // Distinct projects that have at least one grace-exceeded `due` installment and
-  // are still `repaying`. Guarded UPDATE flips exactly the ones still repaying.
+  // Distinct projects that have at least one grace-exceeded not-fully-paid
+  // installment (paid_minor < amount_minor) and are still `repaying`. Guarded UPDATE
+  // flips exactly the ones still repaying.
   const defaultCandidates = await db
     .selectDistinct({ projectId: repaymentInstallments.projectId })
     .from(repaymentInstallments)
     .innerJoin(projects, eq(projects.id, repaymentInstallments.projectId))
     .where(
       and(
-        eq(repaymentInstallments.status, "due"),
+        lt(repaymentInstallments.paidMinor, repaymentInstallments.amountMinor),
         lt(repaymentInstallments.dueAt, graceCutoff),
         eq(projects.status, "repaying"),
       ),
@@ -219,19 +221,20 @@ export async function runRepaymentSweep(
     .where(and(eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
 
   if (defaultedProjects.length > 0) {
-    // A grace-exceeded installment counts as still-delinquent whether it is `due`
-    // OR `pending` (a collection initiated but not yet settled). Recovering while
-    // an overdue installment is `pending` would flip the project to `repaying` on
-    // in-flight money; if that collection then fails (webhook -> back to `due`),
-    // the next sweep re-defaults and re-notifies investors. Waiting for the money
-    // to actually settle (installment becomes `paid`, so neither due nor pending)
-    // avoids that flap and matches /repay, which only lifts on a settled collection.
+    // A grace-exceeded installment counts as still-delinquent while
+    // paid_minor < amount_minor (not yet fully paid). This naturally covers an
+    // in-flight collection: a `pending` collection has not incremented paid_minor
+    // yet, so the installment still reads as delinquent. Recovering on in-flight
+    // money would flip the project to `repaying`; if that collection then fails,
+    // the next sweep re-defaults and re-notifies investors. Waiting for paid_minor
+    // to reach amount_minor (money actually settled) avoids that flap and matches
+    // /repay, which only lifts once paid_minor covers the amount.
     const stillDelinquentRows = await db
       .selectDistinct({ projectId: repaymentInstallments.projectId })
       .from(repaymentInstallments)
       .where(
         and(
-          inArray(repaymentInstallments.status, ["due", "pending"]),
+          lt(repaymentInstallments.paidMinor, repaymentInstallments.amountMinor),
           lt(repaymentInstallments.dueAt, graceCutoff),
         ),
       );
