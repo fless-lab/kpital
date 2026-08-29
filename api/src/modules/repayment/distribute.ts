@@ -9,19 +9,19 @@ import {
 } from "../../db/schema";
 
 // The transaction handle passed to a db.transaction callback. Derived from Db so
-// this module never imports anything runtime from service (settleRepayment is not
-// exported for reuse; the #6 flow retires in Task 3). Same shape as service.ts's Tx.
+// this module never imports anything runtime from service (the pro-rata math lives
+// here, not there). Same shape as service.ts's Tx.
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 // Distribute one applied portion pro-rata across a project's released investors,
-// WITHIN the caller's transaction `tx`. The share math is byte-identical to #6
-// settleRepayment (released-only investor set, BigInt A*p_i product, floor +
-// largest-remainder with investment.id ASC tiebreak), so sum(share_i) === A is a
-// proven invariant (money-critical invariant (c)). Unlike settleRepayment this
-// writes every distribution + wallet credit in the SAME passed transaction (no
-// per-investor sub-transaction, no onConflictDoNothing): idempotency is the
-// caller's, provided by its single atomic settle + the payment status guard. A
-// missing wallet throws and aborts the caller's transaction (no partial credit).
+// WITHIN the caller's transaction `tx`. The share math is byte-identical to the
+// original #6 distribution (released-only investor set, BigInt A*p_i product, floor
+// + largest-remainder with investment.id ASC tiebreak), so sum(share_i) === A is a
+// proven invariant (money-critical invariant (c)). This writes every distribution +
+// wallet credit in the SAME passed transaction (no per-investor sub-transaction, no
+// onConflictDoNothing): idempotency is the caller's, provided by its single atomic
+// settlePayment plus the payment status guard. A missing wallet throws and aborts
+// the caller's transaction (no partial credit).
 export async function distributePortion(
   tx: Tx,
   args: { projectId: string; applicationId: string; installmentId: string; amountMinor: number },

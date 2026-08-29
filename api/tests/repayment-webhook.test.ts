@@ -9,17 +9,18 @@ import {
   wallets,
   walletEntries,
   repaymentInstallments,
+  repaymentPayments,
+  repaymentApplications,
   repaymentDistributions,
 } from "../src/db/schema";
 
-// Seed a `repaying` project with a frozen (all released) investor set and one
-// `pending` installment carrying repaymentRef "r9", all via direct inserts
-// (mirrors repayment-settle.test.ts seeding). Each investor gets a wallet so a
-// distribution can credit. The porteur also gets a wallet for symmetry with the
-// release/disburse flows.
-async function seedRepaying(db: Db, opts: { investorAmounts?: number[]; installmentAmount?: number } = {}) {
+// Seed a `repaying` project with a frozen (all released) investor set, one `due`
+// installment, and one `pending` repayment_payment carrying ref "r9". The webhook
+// resolves the payment by that ref.
+async function seedPending(db: Db, opts: { investorAmounts?: number[]; installmentAmount?: number; paymentAmount?: number } = {}) {
   const investorAmounts = opts.investorAmounts ?? [500000, 300000, 200000];
   const installmentAmount = opts.installmentAmount ?? 193333;
+  const paymentAmount = opts.paymentAmount ?? installmentAmount;
   const raised = investorAmounts.reduce((s, a) => s + a, 0);
 
   const [owner] = await db
@@ -61,16 +62,20 @@ async function seedRepaying(db: Db, opts: { investorAmounts?: number[]; installm
 
   const [ins] = await db
     .insert(repaymentInstallments)
-    .values({ projectId: p!.id, seq: 1, amountMinor: installmentAmount, dueAt: new Date(), status: "pending", repaymentRef: "r9" })
+    .values({ projectId: p!.id, seq: 1, amountMinor: installmentAmount, dueAt: new Date(), status: "due" })
+    .returning();
+  const [pay] = await db
+    .insert(repaymentPayments)
+    .values({ projectId: p!.id, amountMinor: paymentAmount, ref: "r9", status: "pending" })
     .returning();
 
-  return { pid: p!.id, ownerId: owner!.id, investors, installmentId: ins!.id };
+  return { pid: p!.id, investors, installmentId: ins!.id, paymentId: pay!.id };
 }
 
 describe("POST /escrow/repayment (webhook)", () => {
-  it("settles a pending installment via the webhook and is idempotent on replay", async () => {
+  it("settles a pending payment via the webhook and is idempotent on replay (applied once)", async () => {
     const { app, db } = await buildTestApp({});
-    const { investors, installmentId } = await seedRepaying(db);
+    const { investors, installmentId, paymentId } = await seedPending(db);
 
     const call = () =>
       app.inject({
@@ -85,10 +90,17 @@ describe("POST /escrow/repayment (webhook)", () => {
     expect(r1.json()).toEqual({ ok: true });
 
     const r2 = await call();
-    expect(r2.statusCode).toBe(200); // replay is a no-op
+    expect(r2.statusCode).toBe(200); // replay no-ops
     expect(r2.json()).toEqual({ ok: true });
 
-    // Distributed exactly once: one wallet entry per investor, summing to A.
+    // Applied exactly once: one application summing to the payment amount, and no
+    // extra distributions (payment status guard).
+    const apps = await db.select().from(repaymentApplications).where(eq(repaymentApplications.paymentId, paymentId));
+    expect(apps).toHaveLength(1);
+    expect(apps.reduce((s, a) => s + a.amountMinor, 0)).toBe(193333);
+
+    const dists = await db.select().from(repaymentDistributions).where(eq(repaymentDistributions.installmentId, installmentId));
+    expect(dists).toHaveLength(3); // one per released investor, not doubled
     let sum = 0;
     for (const inv of investors) {
       const entries = await db.select().from(walletEntries).where(eq(walletEntries.walletId, inv.walletId));
@@ -100,23 +112,41 @@ describe("POST /escrow/repayment (webhook)", () => {
 
     const [ins] = await db.select().from(repaymentInstallments).where(eq(repaymentInstallments.id, installmentId));
     expect(ins!.status).toBe("paid");
+    expect(ins!.paidMinor).toBe(193333);
+    const [pay] = await db.select().from(repaymentPayments).where(eq(repaymentPayments.id, paymentId));
+    expect(pay!.status).toBe("settled");
+  });
+
+  it("cascades a partial webhook settle (paid_minor advances, not paid)", async () => {
+    const { app, db } = await buildTestApp({});
+    const { installmentId, paymentId } = await seedPending(db, { installmentAmount: 100000, paymentAmount: 40000 });
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/escrow/repayment",
+      headers: { "x-escrow-signature": "test-secret" },
+      payload: { repaymentRef: "r9", status: "settled" },
+    });
+    expect(res.statusCode).toBe(200);
+
+    const [ins] = await db.select().from(repaymentInstallments).where(eq(repaymentInstallments.id, installmentId));
+    expect(ins!.paidMinor).toBe(40000);
+    expect(ins!.status).toBe("due");
+    const apps = await db.select().from(repaymentApplications).where(eq(repaymentApplications.paymentId, paymentId));
+    expect(apps.reduce((s, a) => s + a.amountMinor, 0)).toBe(40000);
   });
 
   it("rejects a missing signature header with 401", async () => {
     const { app, db } = await buildTestApp({});
-    await seedRepaying(db);
-    const res = await app.inject({
-      method: "POST",
-      url: "/escrow/repayment",
-      payload: { repaymentRef: "r9", status: "settled" },
-    });
+    await seedPending(db);
+    const res = await app.inject({ method: "POST", url: "/escrow/repayment", payload: { repaymentRef: "r9", status: "settled" } });
     expect(res.statusCode).toBe(401);
     expect(res.json()).toEqual({ error: { code: "unauthorized", message: "bad signature" } });
   });
 
   it("rejects a wrong signature with 401", async () => {
     const { app, db } = await buildTestApp({});
-    await seedRepaying(db);
+    await seedPending(db);
     const res = await app.inject({
       method: "POST",
       url: "/escrow/repayment",
@@ -127,11 +157,8 @@ describe("POST /escrow/repayment (webhook)", () => {
   });
 
   it("rejects every caller when the configured secret is empty (safe prod default)", async () => {
-    // With ESCROW_WEBHOOK_SECRET empty the webhook must reject all callers, even
-    // one presenting an empty signature, so a misconfigured deployment cannot be
-    // driven by an unauthenticated request.
     const { app, db } = await buildTestApp({ env: { ESCROW_WEBHOOK_SECRET: "" } });
-    await seedRepaying(db);
+    await seedPending(db);
     const res = await app.inject({
       method: "POST",
       url: "/escrow/repayment",
@@ -143,7 +170,7 @@ describe("POST /escrow/repayment (webhook)", () => {
 
   it("returns 404 for an unknown repaymentRef", async () => {
     const { app, db } = await buildTestApp({});
-    await seedRepaying(db);
+    await seedPending(db);
     const res = await app.inject({
       method: "POST",
       url: "/escrow/repayment",
@@ -154,9 +181,9 @@ describe("POST /escrow/repayment (webhook)", () => {
     expect(res.json().error.code).toBe("not_found");
   });
 
-  it("resets pending->due on status=failed and distributes nothing", async () => {
+  it("marks the payment failed on status=failed and applies nothing", async () => {
     const { app, db } = await buildTestApp({});
-    const { investors, installmentId } = await seedRepaying(db);
+    const { investors, installmentId, paymentId } = await seedPending(db);
     const res = await app.inject({
       method: "POST",
       url: "/escrow/repayment",
@@ -166,9 +193,11 @@ describe("POST /escrow/repayment (webhook)", () => {
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ ok: true });
 
+    const [pay] = await db.select().from(repaymentPayments).where(eq(repaymentPayments.id, paymentId));
+    expect(pay!.status).toBe("failed");
     const [ins] = await db.select().from(repaymentInstallments).where(eq(repaymentInstallments.id, installmentId));
+    expect(ins!.paidMinor).toBe(0);
     expect(ins!.status).toBe("due");
-
     const dists = await db.select().from(repaymentDistributions).where(eq(repaymentDistributions.installmentId, installmentId));
     expect(dists).toHaveLength(0);
     for (const inv of investors) {
@@ -179,7 +208,7 @@ describe("POST /escrow/repayment (webhook)", () => {
 
   it("rejects an invalid body with 400 validation_error", async () => {
     const { app, db } = await buildTestApp({});
-    await seedRepaying(db);
+    await seedPending(db);
     const res = await app.inject({
       method: "POST",
       url: "/escrow/repayment",

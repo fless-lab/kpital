@@ -1,13 +1,13 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, lt, ne } from "drizzle-orm";
 import type { Db } from "../../db/client";
 import {
   projects,
   investments,
   repaymentInstallments,
-  repaymentDistributions,
-  wallets,
-  walletEntries,
+  repaymentPayments,
+  repaymentApplications,
 } from "../../db/schema";
+import { distributePortion } from "./distribute";
 
 // The transaction handle passed to a db.transaction callback. Derived from Db so
 // this module never imports anything runtime from escrow/service (escrow ->
@@ -91,169 +91,158 @@ export async function startRepayment(db: Db, args: { projectId: string }): Promi
 }
 
 // Deterministic provider idempotency key for a repayment collection. A replayed
-// /repay carries the SAME key so the provider dedupes rather than collecting
-// twice. Keyed by the installment id, never a timestamp (mirrors escrow idemKey).
-export function repayKey(installmentId: string): string {
-  return `repay:${installmentId}`;
+// /repay carries the SAME key so the provider dedupes rather than collecting the
+// versement twice. Keyed by the PAYMENT id (the #8 collection unit), never a
+// timestamp (mirrors escrow idemKey).
+export function repayKey(paymentId: string): string {
+  return `repay:${paymentId}`;
 }
 
-// Distribute a settled installment pro-rata to the project's investors, idempotent
-// and resumable, then mark it `paid` and close the project once every installment
-// is `paid`. The investor set is FROZEN (project funded, all investments released),
-// so the pro-rata base (raised_minor, parts p_i) is stable with no concurrency.
-// Called only after the money has settled (route settled-branch / webhook settled),
-// never for a `pending` collection: distribution never precedes the money.
-export async function settleRepayment(db: Db, args: { installmentId: string }): Promise<void> {
-  const { installmentId } = args;
+// Apply a settled repayment payment to the schedule in ONE atomic transaction
+// under the project lock (spec section 3). The payment amount cascades over the
+// non-`paid` installments in `seq` order: each portion is persisted in
+// repayment_application, distributed pro-rata via distributePortion, and added to
+// the installment's paid_minor (flipping it to `paid` at equality). The payment is
+// then flipped `pending -> settled`, and the project closes if fully repaid or is
+// auto-lifted out of `defaulted` otherwise.
+//
+// MONEY CRUX (invariant d). The allocation is decided ONCE, inside this single
+// transaction, and the whole cascade (applications + distributions + paid_minor
+// bumps + payment flip + project transition) commits or rolls back as a unit. The
+// entry guard `payment.status !== "pending" -> return` makes a replay (webhook
+// re-delivery, re-call) a wholesale no-op: it never recomputes the allocation from
+// mutable paid_minor, so it can never over-apply (a crash mid-cascade rolls back
+// everything, leaving the payment `pending` for a clean retry, never a partial
+// state). `A <= project remaining` (enforced at /repay) plus one-pending-payment
+// guarantee the cascade absorbs the whole amount; the post-loop `reste !== 0`
+// throw makes conservation invariant (a) unreachable in code, not just in prose.
+//
+// graceCutoffMs: the #7 grace boundary (Date.now() - graceDays*86400000), passed
+// by the caller (the route/webhook has app.config, this module does not). The
+// auto-lift treats an installment as still-delinquent when
+// `paid_minor < amount_minor AND due_at < graceCutoff`.
+export async function settlePayment(
+  db: Db,
+  args: { paymentId: string; graceCutoffMs: number },
+): Promise<void> {
+  const { paymentId, graceCutoffMs } = args;
 
-  const [installment] = await db
-    .select({
-      projectId: repaymentInstallments.projectId,
-      amountMinor: repaymentInstallments.amountMinor,
-      status: repaymentInstallments.status,
-    })
-    .from(repaymentInstallments)
-    .where(eq(repaymentInstallments.id, installmentId));
-  if (!installment) return;
+  await db.transaction(async (tx) => {
+    // Resolve the payment's project id first (a cheap read, just to know what to
+    // lock). The status is NOT trusted yet: it is re-read AFTER the lock below.
+    const [pre] = await tx.select({ projectId: repaymentPayments.projectId }).from(repaymentPayments).where(eq(repaymentPayments.id, paymentId));
+    if (!pre) return;
+    const projectId = pre.projectId;
 
-  // NEVER distribute a `due` installment: the money has not been collected. This
-  // enforces spec section 8 ("la distribution n'arrive jamais avant l'argent; seul
-  // settled declenche"). It is reachable: failRepaymentSettlement resets pending ->
-  // due but leaves repayment_ref populated, and the Task 6 webhook resolves by that
-  // ref, so a stray `settled` callback carrying it must NOT credit uncollected money.
-  // `pending` (normal settle) and `paid` (replay / straggler resume) both proceed, so
-  // resumability is untouched.
-  if (installment.status === "due") return;
+    // Lock the project row FOR UPDATE BEFORE reading the payment status: serialises
+    // this settle against a concurrent /repay and against another settle of the same
+    // payment/project. Two concurrent webhook deliveries for one ref both block here;
+    // the loser proceeds only after the winner commits, then re-reads the payment as
+    // `settled` and no-ops. Reading the status before the lock (on a snapshot taken
+    // pre-block) would let the loser cascade a second time (invariant d, concurrent
+    // form). Lock-then-read mirrors startRepayment.
+    const [project] = await tx.select().from(projects).where(eq(projects.id, projectId)).for("update");
+    if (!project) return;
 
-  const projectId = installment.projectId;
-  const A = installment.amountMinor;
+    // Idempotent entry, re-read UNDER the lock: a `settled` payment is already
+    // applied (no-op); a `failed` payment never applies. Only a `pending` payment
+    // cascades. Under READ COMMITTED this SELECT sees the winner's committed flip.
+    const [payment] = await tx.select().from(repaymentPayments).where(eq(repaymentPayments.id, paymentId));
+    if (!payment || payment.status !== "pending") return;
 
-  const [project] = await db
-    .select({ raisedMinor: projects.raisedMinor })
-    .from(projects)
-    .where(eq(projects.id, projectId));
-  if (!project) return;
-  const R = project.raisedMinor;
+    // Non-`paid` installments in seq order. The `portion <= 0` guard below skips a
+    // row that is already full (paid_minor == amount_minor) but not yet flipped, so
+    // this status-based load stays consistent with the paid_minor-based math.
+    const installments = await tx
+      .select()
+      .from(repaymentInstallments)
+      .where(and(eq(repaymentInstallments.projectId, projectId), ne(repaymentInstallments.status, "paid")))
+      .orderBy(asc(repaymentInstallments.seq));
 
-  // The frozen investor set: only RELEASED investments contributed to raised_minor
-  // (R). A funded project can still carry `failed` deposit rows that never advanced
-  // the raise; including them would make sum(p_i) > R, drive `remainder` negative,
-  // and over-distribute. Filtering to `released` is a tightening of the brief's
-  // "all investments" that reduces to it under the spec's premise (a repaying
-  // project has every investment released), and it keeps sum(p_i) === R exact.
-  const invs = await db
-    .select({ id: investments.id, amountMinor: investments.amountMinor, investorAccountId: investments.investorAccountId })
-    .from(investments)
-    .where(and(eq(investments.projectId, projectId), eq(investments.status, "released")));
+    let reste = payment.amountMinor;
+    for (const ins of installments) {
+      if (reste <= 0) break;
+      const portion = Math.min(reste, ins.amountMinor - ins.paidMinor);
+      if (portion <= 0) continue;
 
-  // Unreachable for a legitimate `repaying` project (it has released investments and
-  // raised_minor > 0), but a no-op here beats a BigInt divide-by-zero or an empty-array
-  // remainder walk if either ever holds.
-  if (invs.length === 0 || R <= 0) return;
+      const [application] = await tx
+        .insert(repaymentApplications)
+        .values({ paymentId, installmentId: ins.id, amountMinor: portion })
+        .returning({ id: repaymentApplications.id });
 
-  // Deterministic pro-rata split. BigInt for the A * p_i product so the floor and
-  // fractional part are exact even past 2^53 (plausible at FCFA magnitudes), which
-  // makes sum(share_i) === A a proven invariant rather than an empirical one.
-  const An = BigInt(A);
-  const Rn = BigInt(R);
-  const shares = invs.map((inv) => {
-    const prod = An * BigInt(inv.amountMinor);
-    return { inv, share: Number(prod / Rn), frac: Number(prod % Rn) };
-  });
-  const floorSum = shares.reduce((s, x) => s + x.share, 0);
-  const remainder = A - floorSum;
+      await distributePortion(tx, { projectId, applicationId: application!.id, installmentId: ins.id, amountMinor: portion });
 
-  // Largest fractional remainder wins the leftover units; tiebreak investment.id
-  // ASC for a replay-stable order. A zero-floor investor with a large fractional
-  // part can legitimately collect a +1 unit, so this ranks BEFORE the share > 0
-  // filter in the distribution loop.
-  const order = [...shares].sort((a, b) => b.frac - a.frac || (a.inv.id < b.inv.id ? -1 : a.inv.id > b.inv.id ? 1 : 0));
-  for (let k = 0; k < remainder; k += 1) {
-    order[k]!.share += 1;
-  }
+      const newPaid = ins.paidMinor + portion;
+      await tx
+        .update(repaymentInstallments)
+        .set(newPaid === ins.amountMinor ? { paidMinor: newPaid, status: "paid", settledAt: new Date() } : { paidMinor: newPaid })
+        .where(eq(repaymentInstallments.id, ins.id));
 
-  // Per-investment SHORT transactions, OUTSIDE any long lock (mirrors releaseProject:
-  // no I/O held under a row lock). The UNIQUE(installment_id, investment_id) guard
-  // makes each credit exactly-once: a replay/crash re-run inserts only the missing
-  // distribution rows and skips the rest. A share of 0 distributes nothing. Each row
-  // is isolated in try/catch: one poison investment (e.g. a missing wallet) must not
-  // strand the rest, and the guard keeps a later retry idempotent.
-  // Tracks whether any per-investor distribution failed (caught below). If so we
-  // do NOT mark the installment paid, so a later replay resumes the stragglers.
-  let anyFailed = false;
-  for (const { inv, share } of shares) {
-    if (share <= 0) continue;
-    try {
-      await db.transaction(async (tx) => {
-        // Insert the distribution and credit the wallet in the SAME transaction so
-        // they commit together. onConflictDoNothing + empty .returning() means the
-        // row already existed (already distributed) -> skip the credit.
-        const [dist] = await tx
-          .insert(repaymentDistributions)
-          .values({ installmentId, investmentId: inv.id, amountMinor: share })
-          .onConflictDoNothing()
-          .returning({ id: repaymentDistributions.id });
-        if (!dist) return;
-
-        const [w] = await tx
-          .select({ id: wallets.id })
-          .from(wallets)
-          .where(eq(wallets.accountId, inv.investorAccountId));
-        if (!w) throw new Error("investor wallet not found for repayment distribution");
-
-        await tx.insert(walletEntries).values({
-          walletId: w.id,
-          type: "repayment",
-          amountMinor: share,
-          reference: dist.id,
-        });
-      });
-    } catch (err) {
-      anyFailed = true;
-      // eslint-disable-next-line no-console
-      console.error(`repayment distribution failed for investment ${inv.id}, continuing`, err);
+      reste -= portion;
     }
-  }
 
-  // If any distribution failed (a caught per-investor fault) OR the process crashed
-  // mid-loop, do NOT mark the installment paid: leaving it `pending` keeps the resume
-  // signal so a replay re-runs distribution for the stragglers (spec 7: an installment
-  // is never `paid` before its distribution is complete). The per-investor UNIQUE guard
-  // keeps that replay idempotent (already-credited rows are skipped).
-  if (anyFailed) return;
+    // Conservation invariant (a), enforced in code: the whole payment MUST be
+    // applied. `A <= remaining` (cap at /repay) plus one-pending-payment make this
+    // unreachable; if it ever held, the throw rolls the transaction back (a stuck
+    // `pending` payment is safer than an unaccounted-for one).
+    if (reste !== 0) {
+      throw new Error(`settlePayment: unallocated remainder ${reste} for payment ${paymentId} (invariant a)`);
+    }
 
-  // Mark the installment paid only after a fully-successful distribution loop. Guarded
-  // pending -> paid; a replay on an already-paid installment changes zero rows.
-  await db
-    .update(repaymentInstallments)
-    .set({ status: "paid", settledAt: new Date() })
-    .where(and(eq(repaymentInstallments.id, installmentId), eq(repaymentInstallments.status, "pending")));
+    // Guarded pending -> settled. FOR UPDATE already serialises this; the guard
+    // keeps the flip single-shot across any replay path.
+    await tx
+      .update(repaymentPayments)
+      .set({ status: "settled", settledAt: new Date() })
+      .where(and(eq(repaymentPayments.id, paymentId), eq(repaymentPayments.status, "pending")));
 
-  // Close the project once EVERY installment is `paid`. A project can be `repaying`
-  // OR `defaulted` at this point (#7 lets a defaulted project be repaid), and a
-  // fully-repaid project must reach the terminal `closed` state either way: the
-  // sticky admin_defaulted flag governs the active repaying<->defaulted axis, not
-  // the terminal close. Guarded so a replay closes exactly once; the length > 0
-  // check stops an empty set (a project with no schedule) from closing on `[].every`.
-  const all = await db
-    .select({ status: repaymentInstallments.status })
-    .from(repaymentInstallments)
-    .where(eq(repaymentInstallments.projectId, projectId));
-  if (all.length > 0 && all.every((i) => i.status === "paid")) {
-    await db
-      .update(projects)
-      .set({ status: "closed", updatedAt: new Date() })
-      .where(and(eq(projects.id, projectId), inArray(projects.status, ["repaying", "defaulted"])));
-  }
+    // Close once EVERY installment is `paid` (from repaying OR defaulted: a fully
+    // repaid project is terminal either way, #7). Guarded so a replay closes once;
+    // the length check stops an empty schedule from closing on `[].every`.
+    const all = await tx
+      .select({ status: repaymentInstallments.status })
+      .from(repaymentInstallments)
+      .where(eq(repaymentInstallments.projectId, projectId));
+    if (all.length > 0 && all.every((i) => i.status === "paid")) {
+      await tx
+        .update(projects)
+        .set({ status: "closed", updatedAt: new Date() })
+        .where(and(eq(projects.id, projectId), inArray(projects.status, ["repaying", "defaulted"])));
+      return;
+    }
+
+    // Auto-lift #7: a schedule-defaulted project (admin_defaulted = false) whose
+    // grace-exceeded delinquency is now cleared recovers to `repaying`. Delinquency
+    // is keyed on paid_minor (a partially paid installment is still delinquent). A
+    // sticky admin default is only cleared by /undefault, so it is excluded here.
+    if (project.status === "defaulted" && !project.adminDefaulted) {
+      const [blocker] = await tx
+        .select({ id: repaymentInstallments.id })
+        .from(repaymentInstallments)
+        .where(
+          and(
+            eq(repaymentInstallments.projectId, projectId),
+            lt(repaymentInstallments.paidMinor, repaymentInstallments.amountMinor),
+            lt(repaymentInstallments.dueAt, new Date(graceCutoffMs)),
+          ),
+        )
+        .limit(1);
+      if (!blocker) {
+        await tx
+          .update(projects)
+          .set({ status: "repaying", defaultedAt: null, updatedAt: new Date() })
+          .where(and(eq(projects.id, projectId), eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
+      }
+    }
+  });
 }
 
-// Mark a failed installment settlement. Guarded pending -> due (retryable by the
-// porteur). Distributes nothing: a failed settlement never moved money. If the
-// installment is not `pending` (already paid, or already due), the guard changes
-// zero rows.
-export async function failRepaymentSettlement(db: Db, args: { installmentId: string }): Promise<void> {
+// Mark a failed repayment collection. Guarded `pending -> failed`: applies nothing
+// (a failed collection never moved money). A payment already `settled` or `failed`
+// is untouched by the guard (a replay changes zero rows).
+export async function failPayment(db: Db, args: { paymentId: string }): Promise<void> {
   await db
-    .update(repaymentInstallments)
-    .set({ status: "due" })
-    .where(and(eq(repaymentInstallments.id, args.installmentId), eq(repaymentInstallments.status, "pending")));
+    .update(repaymentPayments)
+    .set({ status: "failed" })
+    .where(and(eq(repaymentPayments.id, args.paymentId), eq(repaymentPayments.status, "pending")));
 }

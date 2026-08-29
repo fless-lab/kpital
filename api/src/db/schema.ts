@@ -252,10 +252,12 @@ export const repaymentDistributions = pgTable("repayment_distribution", {
   id: uuid("id").defaultRandom().primaryKey(),
   installmentId: uuid("installment_id").notNull().references(() => repaymentInstallments.id),
   investmentId: uuid("investment_id").notNull().references(() => investments.id),
-  applicationId: uuid("application_id").references(() => repaymentApplications.id),
+  // #8: a payment applies portions to an installment, so one installment can now
+  // receive several distributions (one per portion). The old UNIQUE(installment_id,
+  // investment_id) is dropped for that reason; exactly-once is instead guaranteed
+  // by settlePayment's single atomic transaction plus the payment.status guard, so
+  // application_id is a plain (now mandatory) FK, not a uniqueness carrier.
+  applicationId: uuid("application_id").notNull().references(() => repaymentApplications.id),
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  perInvestmentUnique: uniqueIndex("repayment_distribution_installment_investment_unique")
-    .on(t.installmentId, t.investmentId),
-}));
+});

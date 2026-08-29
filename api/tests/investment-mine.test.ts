@@ -2,7 +2,18 @@ import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { buildTestApp, loginAs } from "./helpers/app";
 import { MockPaymentProvider } from "../src/lib/payments";
-import { accounts, projects, investments, repaymentInstallments, repaymentDistributions } from "../src/db/schema";
+import { accounts, projects, investments, repaymentInstallments, repaymentDistributions, repaymentPayments, repaymentApplications } from "../src/db/schema";
+
+// Insert a settled payment + one application per installment so a directly-seeded
+// distribution has the (now mandatory) application_id FK. Returns the application
+// id to hang the distribution off. #8 made repayment_distribution.application_id
+// NOT NULL; these read-path tests seed distributions by hand, so they mint the
+// application chain here rather than driving the full settle flow.
+async function seedApplication(db: Awaited<ReturnType<typeof buildTestApp>>["db"], projectId: string, installmentId: string, amountMinor: number): Promise<string> {
+  const [pay] = await db.insert(repaymentPayments).values({ projectId, amountMinor, status: "settled" }).returning();
+  const [appRow] = await db.insert(repaymentApplications).values({ paymentId: pay!.id, installmentId, amountMinor }).returning();
+  return appRow!.id;
+}
 
 const COOKIE = "kpital_sess";
 
@@ -242,9 +253,11 @@ describe("GET /me/investments", () => {
       .insert(repaymentInstallments)
       .values({ projectId: pid, seq: 2, amountMinor: 96666, dueAt: new Date(), status: "paid", settledAt: new Date() })
       .returning();
+    const app1 = await seedApplication(db, pid, ins1!.id, 48333);
+    const app2 = await seedApplication(db, pid, ins2!.id, 48333);
     await db.insert(repaymentDistributions).values([
-      { installmentId: ins1!.id, investmentId: inv!.id, amountMinor: 48333 },
-      { installmentId: ins2!.id, investmentId: inv!.id, amountMinor: 48333 },
+      { installmentId: ins1!.id, investmentId: inv!.id, amountMinor: 48333, applicationId: app1 },
+      { installmentId: ins2!.id, investmentId: inv!.id, amountMinor: 48333, applicationId: app2 },
     ]);
 
     // After: repaidMinor is the sum of the caller's distributions.
@@ -278,9 +291,11 @@ describe("GET /me/investments", () => {
       .insert(repaymentInstallments)
       .values({ projectId: pid, seq: 1, amountMinor: 100000, dueAt: new Date(), status: "paid", settledAt: new Date() })
       .returning();
+    const appMine = await seedApplication(db, pid, ins1!.id, 50000);
+    const appOther = await seedApplication(db, pid, ins1!.id, 50000);
     await db.insert(repaymentDistributions).values([
-      { installmentId: ins1!.id, investmentId: mineInv!.id, amountMinor: 50000 },
-      { installmentId: ins1!.id, investmentId: otherInv!.id, amountMinor: 50000 },
+      { installmentId: ins1!.id, investmentId: mineInv!.id, amountMinor: 50000, applicationId: appMine },
+      { installmentId: ins1!.id, investmentId: otherInv!.id, amountMinor: 50000, applicationId: appOther },
     ]);
 
     const mine = await app.inject({ method: "GET", url: "/me/investments", cookies: { [COOKIE]: cookie } });
