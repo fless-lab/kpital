@@ -144,4 +144,28 @@ describe("distributePortion", () => {
       expect(entries).toHaveLength(0);
     });
   });
+
+  it("THROWS (never silently returns) when the project has no released investors", async () => {
+    // A silent return here would let the caller settle the payment and mark the
+    // installment paid with nobody credited (silent money loss). distributePortion
+    // must throw so the atomic settle rolls back and the payment stays pending.
+    await withTestDb(async (db) => {
+      const [owner] = await db.insert(accounts).values({ email: "o@a.co", passwordHash: "x",
+        firstName: "O", lastName: "A", country: "Togo", roles: ["porteur"] }).returning();
+      // A repaying project with raisedMinor > 0 but NO released investment (artificial:
+      // the normal flow guarantees released investors, this exercises the guard).
+      const [p] = await db.insert(projects).values({ ownerAccountId: owner!.id, category: "commerce",
+        title: "P", city: "L", description: "d", targetMinor: 100000, durationMonths: 6, roiPct: "16",
+        fundsUsage: "u", cautionType: "a", status: "repaying", raisedMinor: 100000 }).returning();
+      const [ins] = await db.insert(repaymentInstallments).values({ projectId: p!.id, seq: 1, amountMinor: 100000, dueAt: new Date() }).returning();
+      const [pay] = await db.insert(repaymentPayments).values({ projectId: p!.id, amountMinor: 100000, ref: "mp-x", status: "pending" }).returning();
+      const [app] = await db.insert(repaymentApplications).values({ paymentId: pay!.id, installmentId: ins!.id, amountMinor: 100000 }).returning();
+
+      await expect(
+        db.transaction(async (tx) => {
+          await distributePortion(tx as any, { projectId: p!.id, applicationId: app!.id, installmentId: ins!.id, amountMinor: 100000 });
+        }),
+      ).rejects.toThrow(/no released investors/);
+    });
+  });
 });

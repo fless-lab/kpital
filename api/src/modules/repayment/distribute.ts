@@ -32,7 +32,14 @@ export async function distributePortion(
     .select({ raisedMinor: projects.raisedMinor })
     .from(projects)
     .where(eq(projects.id, args.projectId));
-  if (!project) return;
+  // Contract: distributePortion distributes the FULL portion or throws. It must
+  // never return silently, because the caller (settlePayment) has already inserted
+  // the application row and will bump paid_minor / flip the installment to `paid`
+  // in the same transaction. A silent no-op here would settle the payment (porteur
+  // debited, installment paid) with NObody credited, and no error: silent money
+  // loss. Throwing rolls back the whole atomic settle and leaves the payment
+  // `pending` (retryable). Same failure discipline as the missing-wallet throw below.
+  if (!project) throw new Error("project not found for repayment distribution");
   const R = project.raisedMinor;
 
   // The frozen investor set: only RELEASED investments contributed to raised_minor
@@ -45,9 +52,14 @@ export async function distributePortion(
     .where(and(eq(investments.projectId, args.projectId), eq(investments.status, "released")));
 
   // Unreachable for a legitimate `repaying` project (it has released investments and
-  // raised_minor > 0), but a no-op here beats a BigInt divide-by-zero or an empty-array
-  // remainder walk if either ever holds.
-  if (invs.length === 0 || R <= 0) return;
+  // raised_minor > 0). But if it ever holds, THROW (do not silently return): the
+  // caller has already recorded the application and is about to mark the installment
+  // paid, so a silent skip would settle the portion with no investor credited and no
+  // signal. The throw aborts the atomic settle (payment stays `pending`), which is
+  // the only money-safe outcome.
+  if (invs.length === 0 || R <= 0) {
+    throw new Error("no released investors or non-positive raise for repayment distribution");
+  }
 
   // Deterministic pro-rata split. BigInt for the A * p_i product so the floor and
   // fractional part are exact even past 2^53 (plausible at FCFA magnitudes), which
