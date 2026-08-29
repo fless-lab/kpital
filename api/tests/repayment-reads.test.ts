@@ -186,6 +186,90 @@ describe("GET /projects/:id/repayment-schedule", () => {
     await app.close();
   });
 
+  it("exposes paidMinor + remainingMinor per installment on the schedule", async () => {
+    const { app, db } = await buildTestApp();
+    const ownerCookie = await loginAs(app, "owner@a.co");
+    const [owner] = await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.email, "owner@a.co"));
+
+    const [p] = await db
+      .insert(projects)
+      .values({
+        ownerAccountId: owner!.id,
+        category: "commerce",
+        title: "P",
+        city: "L",
+        description: "d",
+        targetMinor: 1000000,
+        durationMonths: 6,
+        roiPct: "16",
+        fundsUsage: "u",
+        cautionType: "a",
+        status: "repaying",
+        raisedMinor: 1000000,
+      })
+      .returning();
+
+    const settledAt = new Date("2026-03-01T00:00:00.000Z");
+    await db.insert(repaymentInstallments).values([
+      // seq 1: nothing paid -> paidMinor 0, remainingMinor = amount.
+      { projectId: p!.id, seq: 1, amountMinor: 30000, dueAt: new Date("2026-01-01T00:00:00.000Z"), status: "due", paidMinor: 0 },
+      // seq 2: partial -> paidMinor 40000, remainingMinor 60000.
+      { projectId: p!.id, seq: 2, amountMinor: 100000, dueAt: new Date("2026-02-01T00:00:00.000Z"), status: "due", paidMinor: 40000 },
+      // seq 3: fully paid -> paidMinor 100000, remainingMinor 0.
+      { projectId: p!.id, seq: 3, amountMinor: 100000, dueAt: new Date("2026-03-01T00:00:00.000Z"), status: "paid", settledAt, paidMinor: 100000 },
+    ]);
+
+    const res = await app.inject({
+      method: "GET",
+      url: `/projects/${p!.id}/repayment-schedule`,
+      cookies: { [COOKIE]: ownerCookie },
+    });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json() as {
+      installments: Array<Record<string, unknown>>;
+      totalOwedMinor: number;
+      paidCount: number;
+      totalCount: number;
+    };
+
+    const [i1, i2, i3] = body.installments;
+
+    // paidMinor + remainingMinor per row.
+    expect(i1!.paidMinor).toBe(0);
+    expect(i1!.remainingMinor).toBe(30000);
+    expect(i2!.paidMinor).toBe(40000);
+    expect(i2!.remainingMinor).toBe(60000);
+    expect(i3!.paidMinor).toBe(100000);
+    expect(i3!.remainingMinor).toBe(0);
+
+    // Existing fields intact.
+    expect(i1!.seq).toBe(1);
+    expect(i1!.amountMinor).toBe(30000);
+    expect(i1!.status).toBe("due");
+    expect(i1!.settledAt).toBeNull();
+    expect(i1!.overdue).toBe(true); // due + past
+    expect(i2!.amountMinor).toBe(100000);
+    expect(i3!.status).toBe("paid");
+    expect(typeof i3!.settledAt).toBe("string");
+
+    // Totals unchanged (sum of amountMinor, not paidMinor).
+    expect(body.totalOwedMinor).toBe(230000);
+    expect(body.paidCount).toBe(1);
+    expect(body.totalCount).toBe(3);
+
+    // No investor PII / internal fields leak.
+    for (const ins of body.installments) {
+      expect(ins).not.toHaveProperty("repaymentRef");
+      expect(ins).not.toHaveProperty("projectId");
+      expect(ins).not.toHaveProperty("id");
+      expect(ins).not.toHaveProperty("investmentId");
+      expect(ins).not.toHaveProperty("investorAccountId");
+    }
+
+    await app.close();
+  });
+
   it("forbids a non-owner from reading the schedule", async () => {
     const { app, db } = await buildTestApp();
     const { pid } = await seedScheduled(app, db);

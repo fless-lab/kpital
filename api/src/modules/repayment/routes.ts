@@ -205,6 +205,7 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       .select({
         seq: repaymentInstallments.seq,
         amountMinor: repaymentInstallments.amountMinor,
+        paidMinor: repaymentInstallments.paidMinor,
         dueAt: repaymentInstallments.dueAt,
         status: repaymentInstallments.status,
         settledAt: repaymentInstallments.settledAt,
@@ -221,6 +222,8 @@ export default async function repaymentRoutes(app: FastifyInstance) {
     const installments = rows.map((r) => ({
       seq: r.seq,
       amountMinor: r.amountMinor,
+      paidMinor: r.paidMinor,
+      remainingMinor: r.amountMinor - r.paidMinor,
       dueAt: r.dueAt,
       status: r.status,
       settledAt: r.settledAt,
