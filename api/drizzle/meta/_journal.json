@@ -120,6 +120,20 @@
       "when": 1787710055923,
       "tag": "0016_slippery_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788008508174,
+      "tag": "0017_old_rocket_raccoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788009871593,
+      "tag": "0018_talented_blue_blade",
+      "breakpoints": true
     }
   ]
 }

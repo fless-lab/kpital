@@ -17,6 +17,7 @@ import { NoPenaltyPolicy } from "../src/lib/penalty";
 import { runRepaymentSweep } from "../src/modules/collections/service";
 
 const DAY = 24 * 60 * 60 * 1000;
+const INSTALLMENT_AMOUNT_MINOR = 100_000;
 
 function daysAgo(n: number): Date {
   return new Date(Date.now() - n * DAY);
@@ -90,17 +91,30 @@ async function seedProject(
 async function seedInstallment(
   db: Db,
   projectId: string,
-  opts: { dueAt: Date; status?: "due" | "pending" | "paid"; remindedAt?: Date | null; s?: number },
+  opts: {
+    dueAt: Date;
+    status?: "due" | "pending" | "paid";
+    remindedAt?: Date | null;
+    s?: number;
+    paidMinor?: number;
+  },
 ): Promise<string> {
+  const status = opts.status ?? "due";
+  // A "paid" installment is fully paid by definition, so default paid_minor to the
+  // full amount unless the test states otherwise. #7 delinquency keys on
+  // paid_minor < amount_minor, so a "paid" seed with paid_minor 0 would look
+  // delinquent; deriving the default from the status keeps the seed consistent.
+  const paidMinor = opts.paidMinor ?? (status === "paid" ? INSTALLMENT_AMOUNT_MINOR : 0);
   const [ins] = await db
     .insert(repaymentInstallments)
     .values({
       projectId,
       seq: opts.s ?? 1,
-      amountMinor: 100_000,
+      amountMinor: INSTALLMENT_AMOUNT_MINOR,
       dueAt: opts.dueAt,
-      status: opts.status ?? "due",
+      status,
       remindedAt: opts.remindedAt ?? null,
+      paidMinor,
     })
     .returning({ id: repaymentInstallments.id });
   return ins!.id;
@@ -277,6 +291,55 @@ describe("runRepaymentSweep", () => {
     });
   });
 
+  it("treats a partially-paid overdue installment as delinquent (reminds + defaults past grace)", async () => {
+    await withTestDb(async (db) => {
+      const { notifier, sent } = capturingNotifier();
+      const owner = await seedAccount(db, { channels: ["email"] });
+      const project = await seedProject(db, owner.id, "repaying");
+      // Partially paid (40k of 100k) and 40 days overdue. Its collection is still
+      // in-flight (status "pending"), so the old status="due" predicate would miss
+      // it; keyed on paid_minor < amount_minor it is delinquent -> reminds AND defaults.
+      await seedInstallment(db, project, { dueAt: daysAgo(40), status: "pending", paidMinor: 40_000 });
+
+      const r = await runRepaymentSweep(db, notifier, new NoPenaltyPolicy(), { ...opts30 });
+      expect(r.remindersSent).toBe(1);
+      expect(r.defaulted).toBe(1);
+      expect(sent).toHaveLength(1);
+      expect(sent[0]!.to.email).toBe(owner.email);
+
+      const [p] = await db
+        .select({ status: projects.status })
+        .from(projects)
+        .where(eq(projects.id, project));
+      expect(p!.status).toBe("defaulted");
+    });
+  });
+
+  it("recovers once every overdue installment is fully paid (paid_minor == amount_minor)", async () => {
+    await withTestDb(async (db) => {
+      const { notifier, sent } = capturingNotifier();
+      const owner = await seedAccount(db, { channels: ["email"] });
+      const project = await seedProject(db, owner.id, "defaulted", daysAgo(3));
+      // Fully paid (paid_minor == amount_minor) but status still "due" (#8 flips the
+      // status only on settlement). The old inArray(["due","pending"]) predicate would
+      // keep it delinquent and block recovery; keyed on paid_minor it is not
+      // delinquent, so the project recovers and no reminder fires.
+      await seedInstallment(db, project, { dueAt: daysAgo(40), status: "due", paidMinor: 100_000 });
+
+      const r = await runRepaymentSweep(db, notifier, new NoPenaltyPolicy(), { ...opts30 });
+      expect(r.recovered).toBe(1);
+      expect(r.remindersSent).toBe(0);
+      expect(sent).toHaveLength(0);
+
+      const [p] = await db
+        .select({ status: projects.status, defaultedAt: projects.defaultedAt })
+        .from(projects)
+        .where(eq(projects.id, project));
+      expect(p!.status).toBe("repaying");
+      expect(p!.defaultedAt).toBeNull();
+    });
+  });
+
   it("defaults to email when the porteur has no notification_pref row", async () => {
     await withTestDb(async (db) => {
       const { notifier, sent } = capturingNotifier();
@@ -334,12 +397,13 @@ describe("runRepaymentSweep", () => {
     });
   });
 
-  it("ignores non-due installments (a paid overdue installment neither reminds nor defaults)", async () => {
+  it("ignores fully-paid installments (a paid overdue installment neither reminds nor defaults)", async () => {
     await withTestDb(async (db) => {
       const { notifier, sent } = capturingNotifier();
       const owner = await seedAccount(db, { channels: ["email"] });
       const project = await seedProject(db, owner.id, "repaying");
-      // 40 days overdue but already paid: the status='due' filter must exclude it.
+      // 40 days overdue but fully paid (paid_minor == amount_minor): the
+      // paid_minor < amount_minor predicate must exclude it.
       await seedInstallment(db, project, { dueAt: daysAgo(40), status: "paid" });
 
       const r = await runRepaymentSweep(db, notifier, new NoPenaltyPolicy(), { ...opts30 });

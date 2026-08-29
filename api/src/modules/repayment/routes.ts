@@ -1,35 +1,50 @@
 import type { FastifyInstance } from "fastify";
-import { and, asc, eq, ne, lt } from "drizzle-orm";
-import { projects, repaymentInstallments } from "../../db/schema";
-import { settleRepayment, failRepaymentSettlement, repayKey } from "./service";
+import { and, asc, eq, ne } from "drizzle-orm";
+import { projects, repaymentInstallments, repaymentPayments, repaymentApplications } from "../../db/schema";
+import { settlePayment, failPayment, repayKey } from "./service";
 
 // Canonical UUID shape. A non-UUID :id would otherwise reach pg and throw 22P02
 // (-> 500), so reject it as a 404 (unknown project) first, mirroring
 // investments/routes.ts.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Thrown from inside the two-phase transaction so the ROLLBACK undoes the
-// `due -> pending` guard. The message doubles as the error code because drizzle
-// may re-wrap a throw from the transaction callback, so the mapper below matches
-// on BOTH the class and the message code (mirrors investments/routes.ts).
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Thrown from inside the /repay transaction so the ROLLBACK undoes the payment
+// insert. The message doubles as the error code because drizzle may re-wrap a
+// throw from the transaction callback, so the mapper matches on BOTH the class and
+// the message code (mirrors investments/routes.ts).
+class ValidationError extends Error {
+  constructor() {
+    super("validation_error");
+  }
+}
 class InvalidStateError extends Error {
   constructor() {
     super("invalid_state");
   }
 }
-class RepaymentFailedError extends Error {
+class ExceedsRemainingError extends Error {
   constructor() {
-    super("repayment_failed");
+    super("exceeds_remaining");
+  }
+}
+class PaymentFailedError extends Error {
+  constructor() {
+    super("payment_failed");
   }
 }
 
 export default async function repaymentRoutes(app: FastifyInstance) {
-  // POST /projects/:id/repay: the porteur collects the next due installment. Two
-  // phase: (1) a transaction holding the target installment row FOR UPDATE guards
-  // `due -> pending` and calls the provider (a decline rolls the guard back); (2)
-  // after commit, a `settled` collection distributes pro-rata and may close the
-  // project. The provider call sits UNDER the row lock on purpose: the rollback is
-  // exactly what returns the installment to `due` on a decline (see spec 6).
+  // POST /projects/:id/repay { amountMinor, confirmCapToRemaining? }: the porteur
+  // makes a free-amount repayment (partial or advance) that cascades over the
+  // schedule (spec section 6). Two phase: (1) a transaction holding the project row
+  // FOR UPDATE rejects a second concurrent payment (one pending payment per
+  // project), caps the amount to the project remaining, inserts the pending payment
+  // and calls the provider (a decline rolls the whole thing back -> no payment
+  // row); (2) after commit, a `settled` collection applies the cascade via
+  // settlePayment. The provider call sits UNDER the lock on purpose: its rollback
+  // is what removes the payment row on a decline.
   app.post("/projects/:id/repay", { preHandler: app.requireAuth }, async (req, reply) => {
     const accountId = req.accountId;
     if (!accountId) {
@@ -49,112 +64,117 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: { code: "forbidden", message: "Not your project" } });
     }
     // A `defaulted` project is still in the repayment cycle: the porteur may repay
-    // it, and clearing its retards auto-recovers it below (spec 3, 6). Any other
-    // status (collecting, closed, ...) stays 409.
+    // it, and clearing its retards auto-recovers it (spec 3, 6). Any other status
+    // (collecting, closed, ...) stays 409.
     if (project.status !== "repaying" && project.status !== "defaulted") {
       return reply.code(409).send({ error: { code: "invalid_state", message: "Project is not repaying" } });
     }
 
-    let committed: { installmentId: string; depStatus: "pending" | "settled" };
+    const body = (req.body ?? {}) as { amountMinor?: unknown; confirmCapToRemaining?: unknown };
+    const confirmCap = body.confirmCapToRemaining === true;
+
+    // `remainingMinor` is captured in the closure so it survives drizzle's possible
+    // re-wrap of the thrown error (the class/message may be lost, this value is not).
+    let remainingForError = 0;
+
+    let committed: { paymentId: string; amountMinor: number; depStatus: "pending" | "settled" };
     try {
       committed = await app.db.transaction(async (tx) => {
-        // Lowest-seq NON-paid installment, locked FOR UPDATE to serialise two
-        // concurrent /repay calls: the loser blocks, then re-reads the row and
-        // sees `pending` (strict sequential, one collection in flight at a time).
-        const [installment] = await tx
-          .select()
+        // Lock the project: serialises two concurrent /repay calls so the second
+        // sees the first's pending payment and 409s (strict-sequential).
+        await tx.select({ id: projects.id }).from(projects).where(eq(projects.id, id)).for("update");
+
+        // One pending payment per project (spec section 8): a collection already in
+        // flight blocks a new one.
+        const [pending] = await tx
+          .select({ id: repaymentPayments.id })
+          .from(repaymentPayments)
+          .where(and(eq(repaymentPayments.projectId, id), eq(repaymentPayments.status, "pending")))
+          .limit(1);
+        if (pending) throw new InvalidStateError();
+
+        // Remaining = Sigma(amount_minor - paid_minor) over the non-`paid` schedule.
+        const insList = await tx
+          .select({ amountMinor: repaymentInstallments.amountMinor, paidMinor: repaymentInstallments.paidMinor })
           .from(repaymentInstallments)
           .where(and(eq(repaymentInstallments.projectId, id), ne(repaymentInstallments.status, "paid")))
-          .orderBy(asc(repaymentInstallments.seq))
-          .limit(1)
-          .for("update");
-        if (!installment) throw new InvalidStateError(); // nothing left to pay
-        if (installment.status === "pending") throw new InvalidStateError(); // settlement in flight
+          .orderBy(asc(repaymentInstallments.seq));
+        const remaining = insList.reduce((s, i) => s + (i.amountMinor - i.paidMinor), 0);
+        remainingForError = remaining;
 
-        // It is `due`. Guarded due -> pending under the row lock.
-        await tx
-          .update(repaymentInstallments)
-          .set({ status: "pending" })
-          .where(and(eq(repaymentInstallments.id, installment.id), eq(repaymentInstallments.status, "due")));
+        // amountMinor must be a positive integer.
+        const raw = body.amountMinor;
+        if (typeof raw !== "number" || !Number.isInteger(raw) || raw <= 0) throw new ValidationError();
+
+        let amountMinor = raw;
+        if (amountMinor > remaining) {
+          // Over the remaining: reject unless the caller confirmed capping.
+          if (!confirmCap) throw new ExceedsRemainingError();
+          amountMinor = remaining;
+        }
+        // A capped amount of 0 (nothing left to pay) is invalid; a solde project is
+        // already `closed`.
+        if (amountMinor <= 0) throw new InvalidStateError();
+
+        const [payment] = await tx
+          .insert(repaymentPayments)
+          .values({ projectId: id, amountMinor, status: "pending" })
+          .returning({ id: repaymentPayments.id });
 
         const dep = await app.payments.initiateRepayment({
           payerAccountId: project.ownerAccountId,
-          amountMinor: installment.amountMinor,
-          idempotencyKey: repayKey(installment.id),
+          amountMinor,
+          idempotencyKey: repayKey(payment!.id),
         });
-        // A decline throws so the transaction rolls the `due -> pending` back and
-        // leaves the ref null; the porteur can retry.
-        if (!dep.ok) throw new RepaymentFailedError();
+        // A decline throws so the transaction rolls back: the payment row never
+        // persists and the porteur can retry.
+        if (!dep.ok) throw new PaymentFailedError();
 
-        await tx
-          .update(repaymentInstallments)
-          .set({ repaymentRef: dep.ref })
-          .where(eq(repaymentInstallments.id, installment.id));
+        await tx.update(repaymentPayments).set({ ref: dep.ref }).where(eq(repaymentPayments.id, payment!.id));
 
-        return { installmentId: installment.id, depStatus: dep.status };
+        return { paymentId: payment!.id, amountMinor, depStatus: dep.status };
       });
     } catch (err) {
       const code = (err as Error)?.message;
-      if (err instanceof InvalidStateError || code === "invalid_state") {
-        return reply.code(409).send({ error: { code: "invalid_state", message: "No installment to repay" } });
+      if (err instanceof ValidationError || code === "validation_error") {
+        return reply.code(400).send({ error: { code: "validation_error", message: "amountMinor must be a positive integer" } });
       }
-      if (err instanceof RepaymentFailedError || code === "repayment_failed") {
-        return reply.code(402).send({ error: { code: "repayment_failed", message: "Repayment collection failed" } });
+      if (err instanceof ExceedsRemainingError || code === "exceeds_remaining") {
+        return reply
+          .code(409)
+          .send({ error: { code: "exceeds_remaining", message: "Amount exceeds the project remaining", details: { remainingMinor: remainingForError } } });
+      }
+      if (err instanceof InvalidStateError || code === "invalid_state") {
+        return reply.code(409).send({ error: { code: "invalid_state", message: "Cannot repay in this state" } });
+      }
+      if (err instanceof PaymentFailedError || code === "payment_failed") {
+        return reply.code(402).send({ error: { code: "payment_failed", message: "Repayment collection failed" } });
       }
       throw err;
     }
 
-    // Phase 2, OUTSIDE the lock: a settled collection distributes pro-rata and may
-    // close the project. `pending` returns without distributing (the money has not
-    // arrived; the webhook settles it later).
+    // Phase 2, OUTSIDE the lock: a settled collection applies the whole cascade
+    // (section 3). A `pending` collection applies nothing; the webhook settles it
+    // later. graceCutoffMs is the #7 grace boundary for the settle's auto-lift.
     if (committed.depStatus === "settled") {
-      await settleRepayment(app.db, { installmentId: committed.installmentId });
-
-      // Auto-recovery: a `defaulted` project whose retards are now cleared is
-      // lifted back to `repaying`. Only a `settled` collection reaches here (the
-      // money has landed), so this never lifts on a pending collection whose
-      // settlement could still fail. The recovery condition MATCHES the sweep's
-      // recovery phase EXACTLY: no `due` installment of the project remains past
-      // the grace cutoff, AND admin_defaulted = false (a sticky admin default is
-      // only cleared by /undefault). The UPDATE is a guarded standalone statement
-      // (WHERE status='defaulted' AND admin_defaulted=false), so it never rolls
-      // back the settle: it just reflects recovery in the response.
-      if (project.status === "defaulted") {
-        const graceCutoff = new Date(Date.now() - app.config.defaultGraceDays * 24 * 60 * 60 * 1000);
-        const [blocker] = await app.db
-          .select({ id: repaymentInstallments.id })
-          .from(repaymentInstallments)
-          .where(
-            and(
-              eq(repaymentInstallments.projectId, id),
-              eq(repaymentInstallments.status, "due"),
-              lt(repaymentInstallments.dueAt, graceCutoff),
-            ),
-          )
-          .limit(1);
-        if (!blocker) {
-          await app.db
-            .update(projects)
-            .set({ status: "repaying", defaultedAt: null, updatedAt: new Date() })
-            .where(and(eq(projects.id, id), eq(projects.status, "defaulted"), eq(projects.adminDefaulted, false)));
-        }
-      }
+      await settlePayment(app.db, { paymentId: committed.paymentId, graceCutoffMs: Date.now() - app.config.defaultGraceDays * DAY_MS });
     }
 
-    // Read back the ACTUAL statuses: settleRepayment may have moved the installment
-    // to `paid` and closed the project (concurrent close is possible too), so never
-    // hardcode either value.
-    const [ins] = await app.db
-      .select({ seq: repaymentInstallments.seq, amountMinor: repaymentInstallments.amountMinor, status: repaymentInstallments.status })
-      .from(repaymentInstallments)
-      .where(eq(repaymentInstallments.id, committed.installmentId));
+    // Read back the ACTUAL state: settlePayment may have flipped the payment,
+    // advanced paid_minor, and closed/lifted the project, so never hardcode either.
+    const [pay] = await app.db.select({ status: repaymentPayments.status }).from(repaymentPayments).where(eq(repaymentPayments.id, committed.paymentId));
     const [proj] = await app.db.select({ status: projects.status }).from(projects).where(eq(projects.id, id));
+    const applied = await app.db
+      .select({ amountMinor: repaymentApplications.amountMinor })
+      .from(repaymentApplications)
+      .where(eq(repaymentApplications.paymentId, committed.paymentId));
+    const appliedMinor = applied.reduce((s, a) => s + a.amountMinor, 0);
 
     return reply.code(201).send({
-      installmentId: committed.installmentId,
-      seq: ins!.seq,
-      amountMinor: ins!.amountMinor,
-      status: ins!.status,
+      paymentId: committed.paymentId,
+      amountMinor: committed.amountMinor,
+      status: pay!.status,
+      appliedMinor,
       projectStatus: proj!.status,
     });
   });
@@ -185,6 +205,7 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       .select({
         seq: repaymentInstallments.seq,
         amountMinor: repaymentInstallments.amountMinor,
+        paidMinor: repaymentInstallments.paidMinor,
         dueAt: repaymentInstallments.dueAt,
         status: repaymentInstallments.status,
         settledAt: repaymentInstallments.settledAt,
@@ -201,6 +222,8 @@ export default async function repaymentRoutes(app: FastifyInstance) {
     const installments = rows.map((r) => ({
       seq: r.seq,
       amountMinor: r.amountMinor,
+      paidMinor: r.paidMinor,
+      remainingMinor: r.amountMinor - r.paidMinor,
       dueAt: r.dueAt,
       status: r.status,
       settledAt: r.settledAt,
@@ -219,10 +242,9 @@ export default async function repaymentRoutes(app: FastifyInstance) {
   // so it is verified by a shared secret carried in the x-escrow-signature header,
   // compared against config.escrowWebhookSecret. An unset secret (empty) rejects
   // every caller, the safe prod default until a real secret is configured. Mirrors
-  // escrow/routes.ts POST /escrow/settlement. Idempotent: the guarded transitions
-  // in settleRepayment/failRepaymentSettlement make a replay a no-op (a second
-  // `settled` re-runs distribution but the UNIQUE(installment, investment) guard
-  // credits each investor exactly once).
+  // escrow/routes.ts POST /escrow/settlement. Resolves the two-phase collection by
+  // the PAYMENT ref (spec section 6). Idempotent: the guarded transitions in
+  // settlePayment/failPayment make a replay a wholesale no-op.
   app.post("/escrow/repayment", async (req, reply) => {
     // A header sent more than once arrives as an array, which never equals the
     // string secret, so it is rejected as a bad signature.
@@ -241,20 +263,20 @@ export default async function repaymentRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: { code: "validation_error", message: "status must be one of settled, failed" } });
     }
 
-    const [installment] = await app.db
-      .select({ id: repaymentInstallments.id })
-      .from(repaymentInstallments)
-      .where(eq(repaymentInstallments.repaymentRef, repaymentRef));
-    if (!installment) {
-      return reply.code(404).send({ error: { code: "not_found", message: "Installment not found" } });
+    const [payment] = await app.db
+      .select({ id: repaymentPayments.id })
+      .from(repaymentPayments)
+      .where(eq(repaymentPayments.ref, repaymentRef));
+    if (!payment) {
+      return reply.code(404).send({ error: { code: "not_found", message: "Payment not found" } });
     }
 
     if (status === "failed") {
-      await failRepaymentSettlement(app.db, { installmentId: installment.id });
+      await failPayment(app.db, { paymentId: payment.id });
       return reply.send({ ok: true });
     }
 
-    await settleRepayment(app.db, { installmentId: installment.id });
+    await settlePayment(app.db, { paymentId: payment.id, graceCutoffMs: Date.now() - app.config.defaultGraceDays * DAY_MS });
     return reply.send({ ok: true });
   });
 }

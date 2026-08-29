@@ -99,11 +99,14 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       ],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
     const body = r.json();
-    expect(body.installmentId).toBe(installments[0]!.id);
-    expect(body.status).toBe("paid");
+    expect(body.status).toBe("settled");
+    // The lowest-seq grace-exceeded installment is now fully paid.
+    const [ins] = await db.select({ paidMinor: repaymentInstallments.paidMinor, status: repaymentInstallments.status }).from(repaymentInstallments).where(eq(repaymentInstallments.id, installments[0]!.id));
+    expect(ins!.paidMinor).toBe(100000);
+    expect(ins!.status).toBe("paid");
   });
 
   it("auto-recovers a defaulted project to repaying when the last grace-exceeded due is cleared", async () => {
@@ -117,10 +120,10 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       ],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
     const body = r.json();
-    expect(body.status).toBe("paid");
+    expect(body.status).toBe("settled");
     expect(body.projectStatus).toBe("repaying");
 
     const [p] = await db.select({ status: projects.status, defaultedAt: projects.defaultedAt }).from(projects).where(eq(projects.id, pid));
@@ -139,10 +142,10 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       ],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
     const body = r.json();
-    expect(body.status).toBe("paid");
+    expect(body.status).toBe("settled");
     expect(body.projectStatus).toBe("defaulted");
 
     const [p] = await db.select({ status: projects.status, defaultedAt: projects.defaultedAt }).from(projects).where(eq(projects.id, pid));
@@ -162,10 +165,10 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       ],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
     const body = r.json();
-    expect(body.status).toBe("paid");
+    expect(body.status).toBe("settled");
     // Sticky admin default: the auto-lift's admin_defaulted=false guard blocks it.
     expect(body.projectStatus).toBe("defaulted");
 
@@ -184,16 +187,17 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       installments: [{ seq: 1, amountMinor: 100000, dueAt: daysAgo(40) }],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
     const body = r.json();
     expect(body.status).toBe("pending");
-    // A pending collection distributes nothing and must not lift the default: the
-    // grace-exceeded due is still `pending`, and the money has not settled.
+    // A pending collection applies nothing and must not lift the default: no money
+    // has settled, so paid_minor stays 0 and the grace-exceeded installment remains.
     expect(body.projectStatus).toBe("defaulted");
 
-    const [ins] = await db.select({ status: repaymentInstallments.status }).from(repaymentInstallments).where(eq(repaymentInstallments.id, installments[0]!.id));
-    expect(ins!.status).toBe("pending");
+    const [ins] = await db.select({ status: repaymentInstallments.status, paidMinor: repaymentInstallments.paidMinor }).from(repaymentInstallments).where(eq(repaymentInstallments.id, installments[0]!.id));
+    expect(ins!.status).toBe("due");
+    expect(ins!.paidMinor).toBe(0);
     const [p] = await db.select({ status: projects.status }).from(projects).where(eq(projects.id, pid));
     expect(p!.status).toBe("defaulted");
   });
@@ -201,16 +205,16 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
   it("closes a defaulted project when its final installment is paid (fully repaid is terminal)", async () => {
     const { app, db } = await buildTestApp();
     // A defaulted project whose ONLY installment is now paid must reach `closed`,
-    // not get stuck in repaying: settleRepayment closes from repaying OR defaulted.
+    // not get stuck in repaying: settlePayment closes from repaying OR defaulted.
     const { pid, ownerCookie, installments } = await seedProject(app, db, {
       projectStatus: "defaulted",
       defaultedAt: daysAgo(3),
       installments: [{ seq: 1, amountMinor: 100000, dueAt: daysAgo(40) }],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
-    expect(r.json().status).toBe("paid");
+    expect(r.json().status).toBe("settled");
     expect(r.json().projectStatus).toBe("closed");
 
     const [ins] = await db.select({ status: repaymentInstallments.status }).from(repaymentInstallments).where(eq(repaymentInstallments.id, installments[0]!.id));
@@ -228,9 +232,9 @@ describe("POST /projects/:id/repay (collections: defaulted + auto-recovery)", ()
       installments: [{ seq: 1, amountMinor: 100000, dueAt: daysAgo(40) }],
     });
 
-    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie } });
+    const r = await app.inject({ method: "POST", url: `/projects/${pid}/repay`, cookies: { [COOKIE]: ownerCookie }, payload: { amountMinor: 100000 } });
     expect(r.statusCode).toBe(201);
-    expect(r.json().status).toBe("paid");
+    expect(r.json().status).toBe("settled");
     // Fully repaid closes even when admin-defaulted: the sticky flag blocks the
     // repaying auto-lift (active axis), not the terminal close.
     expect(r.json().projectStatus).toBe("closed");

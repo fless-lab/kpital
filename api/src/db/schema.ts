@@ -206,6 +206,7 @@ export const repaymentInstallments = pgTable("repayment_installment", {
   projectId: uuid("project_id").notNull().references(() => projects.id),
   seq: integer("seq").notNull(),
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  paidMinor: bigint("paid_minor", { mode: "number" }).notNull().default(0),
   dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
   status: repaymentInstallmentStatus("status").notNull().default("due"),
   repaymentRef: text("repayment_ref"),
@@ -219,14 +220,44 @@ export const repaymentInstallments = pgTable("repayment_installment", {
   repaymentRefUnique: uniqueIndex("repayment_installment_ref_unique")
     .on(t.repaymentRef)
     .where(sql`${t.repaymentRef} IS NOT NULL`),
+  // Partial repayment (#8): paid_minor accumulates applied portions and can never
+  // exceed the installment amount (conservation invariant (b)).
+  paidWithinAmount: check(
+    "repayment_installment_paid_within_amount",
+    sql`${t.paidMinor} >= 0 AND ${t.paidMinor} <= ${t.amountMinor}`,
+  ),
+}));
+export const repaymentPaymentStatus = pgEnum("repayment_payment_status", ["pending", "settled", "failed"]);
+export const repaymentPayments = pgTable("repayment_payment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  ref: text("ref"),
+  status: repaymentPaymentStatus("status").notNull().default("pending"),
+  settledAt: timestamp("settled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  refUnique: uniqueIndex("repayment_payment_ref_unique").on(t.ref).where(sql`${t.ref} IS NOT NULL`),
+}));
+export const repaymentApplications = pgTable("repayment_application", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  paymentId: uuid("payment_id").notNull().references(() => repaymentPayments.id),
+  installmentId: uuid("installment_id").notNull().references(() => repaymentInstallments.id),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  perInstallmentUnique: uniqueIndex("repayment_application_payment_installment_unique").on(t.paymentId, t.installmentId),
 }));
 export const repaymentDistributions = pgTable("repayment_distribution", {
   id: uuid("id").defaultRandom().primaryKey(),
   installmentId: uuid("installment_id").notNull().references(() => repaymentInstallments.id),
   investmentId: uuid("investment_id").notNull().references(() => investments.id),
+  // #8: a payment applies portions to an installment, so one installment can now
+  // receive several distributions (one per portion). The old UNIQUE(installment_id,
+  // investment_id) is dropped for that reason; exactly-once is instead guaranteed
+  // by settlePayment's single atomic transaction plus the payment.status guard, so
+  // application_id is a plain (now mandatory) FK, not a uniqueness carrier.
+  applicationId: uuid("application_id").notNull().references(() => repaymentApplications.id),
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  perInvestmentUnique: uniqueIndex("repayment_distribution_installment_investment_unique")
-    .on(t.installmentId, t.investmentId),
-}));
+});

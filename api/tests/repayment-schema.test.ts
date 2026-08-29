@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { withTestDb } from "./helpers/db";
-import { accounts, projects, investments, repaymentInstallments, repaymentDistributions } from "../src/db/schema";
+import { accounts, projects, investments, repaymentInstallments, repaymentDistributions, repaymentPayments, repaymentApplications } from "../src/db/schema";
 
 describe("repayment schema", () => {
-  it("records an installment schedule and a distribution with a unique guard", async () => {
+  it("records an installment schedule and a distribution keyed by its application", async () => {
     await withTestDb(async (db) => {
       const [owner] = await db.insert(accounts).values({ email: "o@a.co", passwordHash: "x",
         firstName: "O", lastName: "A", country: "Togo", roles: ["porteur"] }).returning();
@@ -20,12 +20,17 @@ describe("repayment schema", () => {
       const [ins] = await db.insert(repaymentInstallments).values({ projectId: p!.id, seq: 1,
         amountMinor: 193333, dueAt: new Date(), repaymentRef: "r1" }).returning();
       expect(ins!.status).toBe("due");
+      // #8: a distribution is born from a payment application (application_id is now
+      // NOT NULL; the old UNIQUE(installment, investment) is gone, since one
+      // installment can receive several portions).
+      const [pay] = await db.insert(repaymentPayments).values({ projectId: p!.id, amountMinor: 193333, status: "settled" }).returning();
+      const [appRow] = await db.insert(repaymentApplications).values({ paymentId: pay!.id, installmentId: ins!.id, amountMinor: 193333 }).returning();
       const [dist] = await db.insert(repaymentDistributions).values({ installmentId: ins!.id,
-        investmentId: inv!.id, amountMinor: 193333 }).returning();
+        investmentId: inv!.id, amountMinor: 193333, applicationId: appRow!.id }).returning();
       expect(dist!.amountMinor).toBe(193333);
-      // The unique guard blocks a second distribution for the same (installment, investment).
+      // application_id is mandatory: a distribution without it is rejected (NOT NULL).
       await expect(
-        db.insert(repaymentDistributions).values({ installmentId: ins!.id, investmentId: inv!.id, amountMinor: 1 }),
+        db.insert(repaymentDistributions).values({ installmentId: ins!.id, investmentId: inv!.id, amountMinor: 1 } as never),
       ).rejects.toThrow();
     });
   });
