@@ -3,6 +3,7 @@ layout: base.njk
 title: "Forgot password | KPITAL"
 description: "Reset your KPITAL password. Get a link by email or a code by SMS to set a new password securely."
 pageCss: connexion
+pageJs: auth-reset
 ---
 
 <!-- AUTH · FORGOT PASSWORD -->
@@ -12,11 +13,13 @@ pageCss: connexion
     <div class="auth-card form-card">
       <p class="eyebrow">Account recovery</p>
       <h1 class="auth-title">Forgot password</h1>
-      <p class="auth-sub">Enter your email or phone number. We will send you what you need to set a new password.</p>
+      <p class="auth-sub">Enter your account email. We will send you a link to set a new password.</p>
 
       <!-- ===== STATE 1 · REQUEST ===== -->
+      <!-- SMS reset is supported by the API but not wired here yet: the channel
+           choice is hidden so we do not expose a dead-end path. -->
       <form class="auth-form" id="reqForm" novalidate>
-        <div class="otp-seg" role="group" aria-label="Send via">
+        <div class="otp-seg" role="group" aria-label="Send via" hidden>
           <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
           <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Phone</button>
         </div>
@@ -117,6 +120,9 @@ pageCss: connexion
     }
     rpErr.hidden = true;
     reqForm.hidden = true;
+    // Fire the request and ALWAYS show the neutral sent state regardless of the
+    // result (anti-enumeration: never reveal whether an account exists).
+    if (window.__kpAuth) { window.__kpAuth.api.post("/auth/password/forgot", { identifier: v }).catch(function () {}); }
     if (method === "email") {
       sentAddr.textContent = v;
       sentEmail.hidden = false;

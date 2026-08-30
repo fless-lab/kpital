@@ -13,6 +13,9 @@ const schema = z.object({
   MINIO_SECRET_KEY: z.string().min(1),
   MINIO_BUCKET: z.string().min(1),
   MINIO_REGION: z.string().default("us-east-1"),
+  // Server-side encryption for stored objects (KYC docs). AES256 (SSE-S3) in
+  // prod; set empty to disable on a KMS-less dev store (plain MinIO).
+  STORAGE_SSE: z.string().default("AES256"),
   KYC_URL_TTL_SECONDS: z.coerce.number().int().positive().default(120),
   KYC_MAX_FILE_MB: z.coerce.number().int().positive().default(10),
   ESCROW_WEBHOOK_SECRET: z.string().default(""),
@@ -35,6 +38,7 @@ export type Config = {
   minioSecretKey: string;
   minioBucket: string;
   minioRegion: string;
+  storageSse: string;
   kycUrlTtlSeconds: number;
   kycMaxFileMb: number;
   // Empty by default: an unset secret means the escrow webhook rejects all
@@ -70,6 +74,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     minioSecretKey: e.MINIO_SECRET_KEY,
     minioBucket: e.MINIO_BUCKET,
     minioRegion: e.MINIO_REGION,
+    storageSse: e.STORAGE_SSE,
     kycUrlTtlSeconds: e.KYC_URL_TTL_SECONDS,
     kycMaxFileMb: e.KYC_MAX_FILE_MB,
     escrowWebhookSecret: e.ESCROW_WEBHOOK_SECRET,

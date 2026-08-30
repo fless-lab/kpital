@@ -3,6 +3,7 @@ layout: base.njk
 title: "Mot de passe oublié | KPITAL"
 description: "Réinitialisez votre mot de passe KPITAL. Recevez un lien par email ou un code par SMS pour définir un nouveau mot de passe en toute sécurité."
 pageCss: connexion
+pageJs: auth-reset
 ---
 
 <!-- AUTH · FORGOT PASSWORD -->
@@ -12,11 +13,13 @@ pageCss: connexion
     <div class="auth-card form-card">
       <p class="eyebrow">Récupération de compte</p>
       <h1 class="auth-title">Mot de passe oublié</h1>
-      <p class="auth-sub">Indiquez votre email ou votre numéro. Nous vous envoyons de quoi définir un nouveau mot de passe.</p>
+      <p class="auth-sub">Indiquez l'adresse email de votre compte. Nous vous envoyons un lien pour définir un nouveau mot de passe.</p>
 
       <!-- ===== STATE 1 · REQUEST ===== -->
+      <!-- Reset par SMS pris en charge côté API mais pas encore câblé ici : le
+           choix du canal est masqué pour ne pas exposer un parcours sans issue. -->
       <form class="auth-form" id="reqForm" novalidate>
-        <div class="otp-seg" role="group" aria-label="Recevoir par">
+        <div class="otp-seg" role="group" aria-label="Recevoir par" hidden>
           <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
           <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Téléphone</button>
         </div>
@@ -117,6 +120,9 @@ pageCss: connexion
     }
     rpErr.hidden = true;
     reqForm.hidden = true;
+    // Fire the request and ALWAYS show the neutral sent state regardless of the
+    // result (anti-enumeration: never reveal whether an account exists).
+    if (window.__kpAuth) { window.__kpAuth.api.post("/auth/password/forgot", { identifier: v }).catch(function () {}); }
     if (method === "email") {
       sentAddr.textContent = v;
       sentEmail.hidden = false;

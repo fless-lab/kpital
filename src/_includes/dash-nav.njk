@@ -17,7 +17,9 @@
       {%- endfor %}
     </ul>
     <div class="dash-nav-side">
-      <span class="pill is-pending"><i></i>{{ "KYC pending" if isEn else "KYC en vérification" }}</span>
+      <span class="pill is-pending" id="kyc-pill"><i></i>{{ "In review" if isEn else "En vérification" }}</span>
+      <button type="button" class="dash-logout" id="logout-btn">{{ "Log out" if isEn else "Déconnexion" }}</button>
     </div>
   </div>
 </nav>
+<div class="dash-kyc-banner" id="kyc-banner" role="status" hidden></div>

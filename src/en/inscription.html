@@ -3,6 +3,7 @@ layout: base.njk
 title: "Sign Up | KPITAL"
 description: "Create your KPITAL account: choose your profile (investor and/or project owner) and verify your identity (KYC). Free sign-up, funds secured in escrow."
 pageCss: inscription
+pageJs: auth-register
 ---
 
 <!-- AUTH / ONBOARDING -->
@@ -196,7 +197,7 @@ pageCss: inscription
 
         <div class="pane-foot">
           <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Back</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(4)">✓ Create my account</button>
+          <button type="button" class="btn btn-primary" id="createAccountBtn">✓ Create my account</button>
         </div>
       </div>
 

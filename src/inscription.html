@@ -3,6 +3,7 @@ layout: base.njk
 title: "Inscription | KPITAL"
 description: "Créez votre compte KPITAL : choisissez votre profil (investisseur et/ou porteur) et vérifiez votre identité (KYC). Inscription gratuite, fonds sécurisés en séquestre."
 pageCss: inscription
+pageJs: auth-register
 ---
 
 <!-- AUTH / ONBOARDING -->
@@ -196,7 +197,7 @@ pageCss: inscription
 
         <div class="pane-foot">
           <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Retour</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(4)">✓ Créer mon compte</button>
+          <button type="button" class="btn btn-primary" id="createAccountBtn">✓ Créer mon compte</button>
         </div>
       </div>
 
