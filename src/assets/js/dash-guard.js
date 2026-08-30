@@ -74,7 +74,8 @@ function applyKyc(status) {
     if (status === "verified") {
       banner.hidden = true;
     } else {
-      banner.textContent = isEn ? BANNER[status].en : BANNER[status].fr;
+      const copy = BANNER[status] || BANNER.pending;
+      banner.textContent = isEn ? copy.en : copy.fr;
       banner.hidden = false;
     }
   }

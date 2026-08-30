@@ -13,11 +13,13 @@ pageJs: auth-reset
     <div class="auth-card form-card">
       <p class="eyebrow">Récupération de compte</p>
       <h1 class="auth-title">Mot de passe oublié</h1>
-      <p class="auth-sub">Indiquez votre email ou votre numéro. Nous vous envoyons de quoi définir un nouveau mot de passe.</p>
+      <p class="auth-sub">Indiquez l'adresse email de votre compte. Nous vous envoyons un lien pour définir un nouveau mot de passe.</p>
 
       <!-- ===== STATE 1 · REQUEST ===== -->
+      <!-- Reset par SMS pris en charge côté API mais pas encore câblé ici : le
+           choix du canal est masqué pour ne pas exposer un parcours sans issue. -->
       <form class="auth-form" id="reqForm" novalidate>
-        <div class="otp-seg" role="group" aria-label="Recevoir par">
+        <div class="otp-seg" role="group" aria-label="Recevoir par" hidden>
           <button type="button" class="otp-seg-btn is-on" data-method="email" aria-pressed="true">Email</button>
           <button type="button" class="otp-seg-btn" data-method="phone" aria-pressed="false">Téléphone</button>
         </div>
