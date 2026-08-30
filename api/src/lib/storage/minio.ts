@@ -14,10 +14,12 @@ import type { StorageProvider } from "./index";
 export class MinioStorage implements StorageProvider {
   private readonly client: S3Client;
   private readonly bucket: string;
+  private readonly sse: string;
   private ensureBucketPromise: Promise<void> | null = null;
 
   constructor(config: Config) {
     this.bucket = config.minioBucket;
+    this.sse = config.storageSse;
     this.client = new S3Client({
       endpoint: config.minioEndpoint,
       region: config.minioRegion,
@@ -56,7 +58,9 @@ export class MinioStorage implements StorageProvider {
         Key: key,
         Body: body,
         ContentType: contentType,
-        ServerSideEncryption: "AES256",
+        // SSE-S3 (AES256) at rest for KYC docs in prod; skip when disabled for a
+        // KMS-less dev store (config.storageSse empty).
+        ...(this.sse ? { ServerSideEncryption: this.sse as "AES256" } : {}),
       }),
     );
   }
