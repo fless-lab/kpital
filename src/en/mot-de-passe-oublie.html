@@ -3,6 +3,7 @@ layout: base.njk
 title: "Forgot password | KPITAL"
 description: "Reset your KPITAL password. Get a link by email or a code by SMS to set a new password securely."
 pageCss: connexion
+pageJs: auth-reset
 ---
 
 <!-- AUTH · FORGOT PASSWORD -->
@@ -117,6 +118,9 @@ pageCss: connexion
     }
     rpErr.hidden = true;
     reqForm.hidden = true;
+    // Fire the request and ALWAYS show the neutral sent state regardless of the
+    // result (anti-enumeration: never reveal whether an account exists).
+    if (window.__kpAuth) { window.__kpAuth.api.post("/auth/password/forgot", { identifier: v }).catch(function () {}); }
     if (method === "email") {
       sentAddr.textContent = v;
       sentEmail.hidden = false;

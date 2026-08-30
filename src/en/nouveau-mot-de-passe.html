@@ -3,6 +3,7 @@ layout: base.njk
 title: "New password | KPITAL"
 description: "Set a new password for your KPITAL account. Secure single-use link."
 pageCss: connexion
+pageJs: auth-reset
 ---
 
 <!-- AUTH · RESET PASSWORD -->
@@ -145,9 +146,19 @@ pageCss: connexion
     }
     lbl.style.color = "";
     if (!checkMatch()) { pw2.focus(); return; }
-    resetPane.hidden = true;
-    successPane.hidden = false;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.__kpAuth.api.post("/auth/password/reset", { token: token, password: pw1.value })
+      .then(function () {
+        resetPane.hidden = true; successPane.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+      .catch(function (err) {
+        if (err && err.code === "validation_error") {
+          lbl.textContent = "Password too weak: at least 8 characters, one uppercase and one digit.";
+          lbl.style.color = "#B23B2E"; return;
+        }
+        resetPane.hidden = true; invalidPane.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
   });
 })();
 </script>
