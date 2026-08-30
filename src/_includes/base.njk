@@ -22,5 +22,6 @@
 {{ content | safe }}
 {% if not hideFooter %}{% include "footer.njk" %}{% endif %}
 <script src="/assets/js/app.js" defer></script>
+{% if pageJs %}<script type="module" src="/assets/js/{{ pageJs }}.js"></script>{% endif %}
 </body>
 </html>
