@@ -7,6 +7,7 @@
 const MAP = {
   validation_error: { fr: "Certaines informations sont invalides.", en: "Some information is invalid." },
   invalid_credentials: { fr: "Identifiant ou mot de passe incorrect.", en: "Incorrect identifier or password." },
+  otp_invalid: { fr: "Code invalide ou expire.", en: "Invalid or expired code." },
   email_taken: { fr: "Cet email est deja utilise.", en: "This email is already registered." },
   account_suspended: { fr: "Ce compte n'est pas actif.", en: "This account is not active." },
   kyc_required: { fr: "Verification d'identite requise.", en: "Identity verification required." },
