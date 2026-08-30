@@ -15,12 +15,16 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = "GET", body, headers, multipart } = {}) {
+  const hasBody = body !== undefined;
   const opts = {
     method,
     credentials: "same-origin",
-    headers: { ...(multipart ? {} : { "Content-Type": "application/json" }), ...headers },
+    // Only declare a JSON content-type when we actually send a JSON body: Fastify
+    // rejects an empty body when content-type is application/json (a bodyless
+    // POST like /auth/logout would 400). Multipart lets the browser set its own.
+    headers: { ...(hasBody && !multipart ? { "Content-Type": "application/json" } : {}), ...headers },
   };
-  if (body !== undefined) opts.body = multipart ? body : JSON.stringify(body);
+  if (hasBody) opts.body = multipart ? body : JSON.stringify(body);
   const res = await fetch("/api" + path, opts);
   const data = await res.json().catch(() => null);
   if (!res.ok) {
