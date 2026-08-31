@@ -2,16 +2,18 @@
 // projet.njk is the SEO + no-JS fallback (raw minor amounts, static progress);
 // on load this fetches the live project, reformats amounts, renders the
 // gallery/documents from short-lived signed URLs, and wires follow/upvote for
-// signed-in visitors. The invest panel behavior itself is wired by Task 5 via
-// window.__kpInvest, called at the very end once the live project is known.
+// signed-in visitors. The invest panel behavior (window.__kpInvest, defined
+// below) is invoked last by hydrate(), once the live project is known: it
+// gates the invest button on auth then KYC before ever calling the API.
 import { api, session, ApiError } from "./api.js";
-import { money, progressPct, escapeHtml } from "./fmt.js";
+import { money, progressPct, estRoi, escapeHtml } from "./fmt.js";
 import { localizeError, pageLang } from "./errors.js";
 
 const root = document.querySelector(".proj");
 const id = root && root.dataset.projectId;
 const lang = pageLang();
 const isEn = lang === "en";
+const prefix = isEn ? "/en" : "";
 
 function setMoney(elId, minor) {
   const el = document.getElementById(elId);
@@ -147,6 +149,202 @@ async function wireEngagement(p) {
   }
 }
 
+// Invest panel: only present in the DOM on a collecting-status fiche (a
+// showcase fiche renders a "not open yet" note instead and none of these
+// elements exist), so every lookup here is guarded. Defined before hydrate()
+// is ever invoked below so `window.__kpInvest` is always ready by the time
+// hydrate() reaches its `if (window.__kpInvest) window.__kpInvest(p);` call.
+window.__kpInvest = function (p) {
+  const amountEl = document.getElementById("amount");
+  const sourceEl = document.getElementById("investSource");
+  const btn = document.getElementById("investBtn");
+  const msg = document.getElementById("investMsg");
+  const gate = document.getElementById("kycGate");
+  if (!amountEl || !sourceEl || !btn) return; // showcase fiche: nothing to wire
+
+  const btnAmount = btn.querySelector(".num");
+
+  function moneyNum(minor) {
+    // Grouped digits only, no " FCFA" suffix, for the button label span
+    // (the surrounding "FCFA →" text already lives in the static markup).
+    return money(minor, lang).replace(/ FCFA$/, "");
+  }
+
+  function updateRoi() {
+    const amount = Math.max(0, parseInt(amountEl.value, 10) || 0);
+    const gain = estRoi(amount, p.roiPct, p.durationMonths);
+    const total = amount + gain;
+    const capitalEl = document.getElementById("roiCapital");
+    const gainEl = document.getElementById("roiGain");
+    const totalEl = document.getElementById("roiTotal");
+    if (capitalEl) capitalEl.textContent = money(amount, lang);
+    if (gainEl) gainEl.textContent = "+ " + money(gain, lang);
+    if (totalEl) totalEl.textContent = money(total, lang);
+    if (btnAmount) btnAmount.textContent = moneyNum(amount);
+  }
+
+  amountEl.addEventListener("input", updateRoi);
+  document.querySelectorAll(".quick-amt").forEach((qb) => {
+    qb.addEventListener("click", () => {
+      amountEl.value = qb.dataset.amt;
+      document.querySelectorAll(".quick-amt").forEach((x) => x.classList.remove("is-active"));
+      qb.classList.add("is-active");
+      updateRoi();
+    });
+  });
+  updateRoi();
+
+  let submitting = false;
+  // True only while the inline exceeds_remaining prompt is on screen. Kept
+  // separate from `submitting` (which is false again once the request that
+  // raised the prompt has settled) so the submit button stays disabled and
+  // cannot be clicked with the stale, over-limit amount while the prompt is
+  // up (a click there would just re-raise the same prompt).
+  let capOpen = false;
+
+  function hideCapPrompt() {
+    const el = document.getElementById("investCapPrompt");
+    if (el) el.remove();
+    capOpen = false;
+    // Only re-enable here when nothing else currently owns the disabled
+    // state: a submit() in flight will set the final state itself in its
+    // `finally`, and the KYC gate keeps the button disabled permanently.
+    if (!submitting && (!gate || gate.hidden)) btn.disabled = false;
+  }
+
+  // Inline "invest the remaining amount instead?" affordance for
+  // exceeds_remaining. Never the browser confirm() dialog.
+  function showCapPrompt(remainingMinor, onAccept) {
+    hideCapPrompt();
+    capOpen = true;
+    btn.disabled = true;
+    const wrap = document.createElement("div");
+    wrap.id = "investCapPrompt";
+    wrap.setAttribute("role", "group");
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:8px;margin:-6px 0 14px";
+
+    const text = document.createElement("p");
+    text.className = "invest-msg";
+    text.style.color = "inherit";
+    text.hidden = false;
+    text.textContent = isEn
+      ? "Only " + money(remainingMinor, lang) + " remain to be raised. Invest that amount instead?"
+      : "Il ne reste que " + money(remainingMinor, lang) + " à collecter. Investir ce montant ?";
+
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+
+    const yes = document.createElement("button");
+    yes.type = "button";
+    yes.className = "btn btn-primary btn-sm";
+    yes.textContent = isEn ? "Invest the remaining amount" : "Investir le montant restant";
+    yes.addEventListener("click", () => {
+      hideCapPrompt();
+      onAccept();
+    });
+
+    const no = document.createElement("button");
+    no.type = "button";
+    no.className = "btn btn-ghost btn-sm";
+    no.textContent = isEn ? "Cancel" : "Annuler";
+    no.addEventListener("click", hideCapPrompt);
+
+    actions.appendChild(yes);
+    actions.appendChild(no);
+    wrap.appendChild(text);
+    wrap.appendChild(actions);
+    if (msg) msg.insertAdjacentElement("afterend", wrap);
+    else btn.insertAdjacentElement("beforebegin", wrap);
+  }
+
+  function showInvestError(err) {
+    hideCapPrompt();
+    if (!msg) return;
+    msg.textContent = localizeError(err, lang);
+    msg.hidden = false;
+  }
+
+  // confirmCap === true marks a resubmit already capped to the server's
+  // remainingMinor: exceeds_remaining on THAT response is never re-prompted
+  // (the `!confirmCap` guard below), so this can trigger at most one inline
+  // prompt per submit chain and cannot loop.
+  async function submit(amountOverride, confirmCap) {
+    if (submitting) return;
+    submitting = true;
+    btn.disabled = true;
+    if (msg) msg.hidden = true;
+    hideCapPrompt();
+    let gateShown = false;
+    try {
+      let me;
+      try {
+        me = await session.getMe();
+      } catch (e) {
+        showInvestError(e);
+        return;
+      }
+      if (!me) {
+        location.href = prefix + "/connexion/?next=" + encodeURIComponent(location.pathname);
+        return;
+      }
+      if (me.kycStatus !== "verified") {
+        gateShown = true;
+        if (gate) gate.hidden = false;
+        return;
+      }
+
+      const amountMinor = amountOverride != null ? amountOverride : parseInt(amountEl.value, 10);
+      const source = sourceEl.value; // "payment" | "wallet"
+      const body = { amountMinor, source };
+      if (confirmCap) body.confirmCapToRemaining = true;
+
+      let r;
+      try {
+        r = await api.post("/projects/" + p.id + "/invest", body);
+      } catch (e) {
+        if (!confirmCap && e instanceof ApiError && e.code === "exceeds_remaining") {
+          const rem = e.details && e.details.remainingMinor;
+          if (rem != null && rem > 0) {
+            showCapPrompt(rem, () => {
+              amountEl.value = String(rem);
+              updateRoi();
+              submit(rem, true);
+            });
+            return;
+          }
+        }
+        showInvestError(e);
+        return;
+      }
+
+      // Success: hand the confirmation page only what it needs via
+      // sessionStorage (never the URL), then navigate. Any failure above
+      // returns before this point, so a failed invest never reaches
+      // /investir/confirmation/.
+      sessionStorage.setItem(
+        "kp.invest",
+        JSON.stringify({
+          projectId: p.id,
+          title: p.title,
+          amountMinor: r.amountMinor,
+          roiPct: p.roiPct,
+          durationMonths: p.durationMonths,
+          status: r.status,
+        })
+      );
+      location.href = prefix + "/investir/confirmation/";
+    } finally {
+      submitting = false;
+      // Disabled while the KYC gate is up, or while the cap prompt raised by
+      // this very call is on screen (showCapPrompt already disabled it;
+      // this just keeps the two states from fighting over the final value).
+      btn.disabled = gateShown || capOpen;
+    }
+  }
+
+  btn.addEventListener("click", () => submit(null, false));
+};
+
 async function hydrate() {
   if (!id) return;
   // Reformat SSG raw numbers immediately, before the live fetch resolves.
@@ -171,7 +369,8 @@ async function hydrate() {
   await wireEngagement(p);
 
   // Invest panel wiring (amount input, quick amounts, ROI calc, source select,
-  // KYC gate, submit) is added by Task 5.
+  // KYC gate, submit) is defined above and called last, once the live project
+  // (with its real roiPct/durationMonths/status) is known.
   if (window.__kpInvest) window.__kpInvest(p);
 }
 
