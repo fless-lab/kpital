@@ -12,6 +12,12 @@ const MAP = {
   account_suspended: { fr: "Ce compte n'est pas actif.", en: "This account is not active." },
   kyc_required: { fr: "Verification d'identite requise.", en: "Identity verification required." },
   rate_limited: { fr: "Trop de tentatives, reessayez plus tard.", en: "Too many attempts, try again later." },
+  not_found: { fr: "Projet introuvable.", en: "Project not found." },
+  below_min_ticket: { fr: "Montant sous le ticket minimum de 10 000 FCFA.", en: "Amount is below the 10,000 FCFA minimum ticket." },
+  exceeds_remaining: { fr: "Le montant depasse le restant a collecter.", en: "Amount exceeds the remaining to collect." },
+  insufficient_funds: { fr: "Solde insuffisant.", en: "Insufficient balance." },
+  payment_failed: { fr: "Le paiement a echoue. Reessayez.", en: "Payment failed. Try again." },
+  invalid_state: { fr: "Ce projet n'est pas en collecte.", en: "This project is not collecting." },
 };
 
 export function pageLang() {

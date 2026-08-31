@@ -3,6 +3,7 @@ layout: base.njk
 title: "Investissement confirmé | KPITAL"
 description: "Votre investissement est confirmé. Fonds placés en séquestre dédié et suivi dans votre tableau de bord KPITAL."
 pageCss: connexion
+pageJs: confirmation
 noindex: true
 hideFooter: true
 permalink: "/investir/confirmation/index.html"
@@ -21,10 +22,13 @@ permalink: "/investir/confirmation/index.html"
         <h2>Investissement confirmé</h2>
         <p>Vos fonds sont placés sur un compte de séquestre dédié et suivis en temps réel dans votre tableau de bord.</p>
 
-        <p>Projet : <strong>Villa Tokoin : location longue durée</strong></p>
-        <p>Montant investi : <strong><span class="num">50&#8239;000</span> FCFA</strong></p>
-        <p>ROI attendu : <strong>+<span class="num">11&#8239;000</span> FCFA (22&#8239;% / an)</strong></p>
-        <p>Échéance : <strong>juil. 2028</strong></p>
+        <div id="cDetails">
+          <p>Projet : <strong id="cProject"></strong></p>
+          <p>Montant investi : <strong id="cAmount"></strong></p>
+          <p>ROI attendu (indicatif) : <strong id="cRoi"></strong></p>
+        </div>
+
+        <p id="cFallback" hidden>Retrouvez le détail de cet investissement dans votre tableau de bord.</p>
 
         <a class="btn btn-primary" href="/dashboard/investissements">Voir mes investissements →</a>
         <a class="auth-back" href="/projets">Explorer d'autres projets</a>

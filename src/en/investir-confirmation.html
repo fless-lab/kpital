@@ -3,6 +3,7 @@ layout: base.njk
 title: "Investment confirmed | KPITAL"
 description: "Your investment is confirmed. Funds held in a dedicated escrow account and tracked in your KPITAL dashboard."
 pageCss: connexion
+pageJs: confirmation
 noindex: true
 hideFooter: true
 permalink: "/en/investir/confirmation/index.html"
@@ -21,10 +22,13 @@ permalink: "/en/investir/confirmation/index.html"
         <h2>Investment confirmed</h2>
         <p>Your funds are held in a dedicated escrow account and tracked in real time in your dashboard.</p>
 
-        <p>Project: <strong>Villa Tokoin: long-term rental</strong></p>
-        <p>Amount invested: <strong><span class="num">50&#8239;000</span> FCFA</strong></p>
-        <p>Expected ROI: <strong>+<span class="num">11&#8239;000</span> FCFA (22&#8239;% / year)</strong></p>
-        <p>Maturity: <strong>Jul 2028</strong></p>
+        <div id="cDetails">
+          <p>Project: <strong id="cProject"></strong></p>
+          <p>Amount invested: <strong id="cAmount"></strong></p>
+          <p>Expected ROI (indicative): <strong id="cRoi"></strong></p>
+        </div>
+
+        <p id="cFallback" hidden>Find the details of this investment in your dashboard.</p>
 
         <a class="btn btn-primary" href="/en/dashboard/investissements">View my investments →</a>
         <a class="auth-back" href="/en/projets">Explore other projects</a>
