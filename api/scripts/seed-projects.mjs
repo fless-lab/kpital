@@ -9,7 +9,14 @@
 //
 // Idempotency: every run first deletes prior seed rows by a fixed marker
 // (title prefix "KPITAL_SEED::"), owned by a fixed seed account email, then
-// inserts fresh rows. Safe to re-run any number of times.
+// inserts fresh rows. Safe to re-run any number of times, including after a
+// later task has invested against COLLECTING_ID or posted repayments against
+// either seed project: investment, repayment_payment and repayment_installment
+// all FK to project.id WITHOUT ON DELETE CASCADE (and repayment_distribution /
+// repayment_application FK to those without cascade either), so the cleanup
+// deletes that whole non-cascading subtree, scoped to the seed project ids,
+// before deleting the projects themselves. project_document, project_follow
+// and project_upvote DO cascade on project_id, so they need no explicit delete.
 //
 // Usage: node api/scripts/seed-projects.mjs
 // Reads DATABASE_URL from the environment, falling back to the dev default
@@ -35,13 +42,50 @@ async function main() {
   try {
     await client.query("BEGIN");
 
-    // Clean up any prior seed rows (owner account cascades to their projects
-    // via project.owner_account_id -> account.id; delete projects first since
-    // there is no ON DELETE CASCADE on that FK).
-    await client.query(
-      `DELETE FROM project WHERE title LIKE $1`,
+    // Clean up any prior seed rows. Find the seed project ids first so every
+    // downstream delete can be scoped to them, then walk the non-cascading FK
+    // subtree leaf-first: repayment_distribution (references investment,
+    // repayment_installment and repayment_application) before
+    // repayment_application (references repayment_payment) before the direct
+    // non-cascading children of project (investment, repayment_installment,
+    // repayment_payment) before project itself. project.owner_account_id has
+    // no cascade either, so the account is deleted last.
+    const priorIdsRes = await client.query(
+      `SELECT id FROM project WHERE title LIKE $1`,
       [`${SEED_TITLE_PREFIX}%`],
     );
+    const priorProjectIds = priorIdsRes.rows.map((r) => r.id);
+
+    if (priorProjectIds.length > 0) {
+      await client.query(
+        `DELETE FROM repayment_distribution
+         WHERE investment_id IN (SELECT id FROM investment WHERE project_id = ANY($1::uuid[]))
+            OR installment_id IN (SELECT id FROM repayment_installment WHERE project_id = ANY($1::uuid[]))
+            OR application_id IN (
+                 SELECT id FROM repayment_application
+                 WHERE payment_id IN (SELECT id FROM repayment_payment WHERE project_id = ANY($1::uuid[]))
+               )`,
+        [priorProjectIds],
+      );
+      await client.query(
+        `DELETE FROM repayment_application
+         WHERE payment_id IN (SELECT id FROM repayment_payment WHERE project_id = ANY($1::uuid[]))`,
+        [priorProjectIds],
+      );
+      await client.query(
+        `DELETE FROM repayment_installment WHERE project_id = ANY($1::uuid[])`,
+        [priorProjectIds],
+      );
+      await client.query(
+        `DELETE FROM repayment_payment WHERE project_id = ANY($1::uuid[])`,
+        [priorProjectIds],
+      );
+      await client.query(
+        `DELETE FROM investment WHERE project_id = ANY($1::uuid[])`,
+        [priorProjectIds],
+      );
+      await client.query(`DELETE FROM project WHERE id = ANY($1::uuid[])`, [priorProjectIds]);
+    }
     await client.query(`DELETE FROM account WHERE email = $1`, [SEED_EMAIL]);
 
     // 1. Owner account (role: porteur).
