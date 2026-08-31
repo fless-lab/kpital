@@ -201,6 +201,15 @@ window.__kpInvest = function (p) {
   // cannot be clicked with the stale, over-limit amount while the prompt is
   // up (a click there would just re-raise the same prompt).
   let capOpen = false;
+  // Sticky latch: set the instant the invest POST comes back 201, before the
+  // `location.href` navigation, which does NOT halt script execution or
+  // unload the page synchronously. Without this the `finally` below would
+  // re-enable the button while the page is still interactive for the
+  // navigation's duration, and a second click would fire a second POST that
+  // is no longer blocked by `submitting` (already reset). Once true, `done`
+  // is never cleared, so the button can never re-enable after a committed
+  // success, on this page load.
+  let done = false;
 
   function hideCapPrompt() {
     const el = document.getElementById("investCapPrompt");
@@ -208,8 +217,9 @@ window.__kpInvest = function (p) {
     capOpen = false;
     // Only re-enable here when nothing else currently owns the disabled
     // state: a submit() in flight will set the final state itself in its
-    // `finally`, and the KYC gate keeps the button disabled permanently.
-    if (!submitting && (!gate || gate.hidden)) btn.disabled = false;
+    // `finally`, the KYC gate keeps the button disabled permanently, and a
+    // committed success (`done`) must never be undone.
+    if (!submitting && !done && (!gate || gate.hidden)) btn.disabled = false;
   }
 
   // Inline "invest the remaining amount instead?" affordance for
@@ -269,7 +279,7 @@ window.__kpInvest = function (p) {
   // (the `!confirmCap` guard below), so this can trigger at most one inline
   // prompt per submit chain and cannot loop.
   async function submit(amountOverride, confirmCap) {
-    if (submitting) return;
+    if (submitting || done) return; // done is sticky: no submit fires again after a committed success
     submitting = true;
     btn.disabled = true;
     if (msg) msg.hidden = true;
@@ -317,28 +327,43 @@ window.__kpInvest = function (p) {
         return;
       }
 
-      // Success: hand the confirmation page only what it needs via
-      // sessionStorage (never the URL), then navigate. Any failure above
-      // returns before this point, so a failed invest never reaches
-      // /investir/confirmation/.
-      sessionStorage.setItem(
-        "kp.invest",
-        JSON.stringify({
-          projectId: p.id,
-          title: p.title,
-          amountMinor: r.amountMinor,
-          roiPct: p.roiPct,
-          durationMonths: p.durationMonths,
-          status: r.status,
-        })
-      );
+      // The POST is now COMMITTED server-side (201). From this point the
+      // user must always end up on the confirmation page and the button
+      // must never re-enable, no matter what happens next in this
+      // function: latch first, before anything that could throw or before
+      // the (non-blocking) navigation.
+      done = true;
+
+      // Hand the confirmation page only what it needs via sessionStorage
+      // (never the URL). A failure here (private browsing, storage
+      // disabled, quota) must not strand the user on a committed-but-
+      // unconfirmed invest with a retryable button, so it is caught on its
+      // own and navigation proceeds regardless; confirmation.js's
+      // #cFallback already covers a visit with nothing stored. `r` is also
+      // guarded in case the API ever returns a 201 with an empty/null body.
+      try {
+        sessionStorage.setItem(
+          "kp.invest",
+          JSON.stringify({
+            projectId: p.id,
+            title: p.title,
+            amountMinor: r && r.amountMinor,
+            roiPct: p.roiPct,
+            durationMonths: p.durationMonths,
+            status: r && r.status,
+          })
+        );
+      } catch (_e) {
+        // Storage unavailable: fall through to navigation anyway.
+      }
       location.href = prefix + "/investir/confirmation/";
     } finally {
       submitting = false;
-      // Disabled while the KYC gate is up, or while the cap prompt raised by
-      // this very call is on screen (showCapPrompt already disabled it;
-      // this just keeps the two states from fighting over the final value).
-      btn.disabled = gateShown || capOpen;
+      // Disabled while the KYC gate is up, while the cap prompt raised by
+      // this very call is on screen, or once a success has been committed
+      // (`done` is sticky and never cleared, so this can never flip back to
+      // enabled after a 201, blocking a double-click double-POST).
+      btn.disabled = gateShown || capOpen || done;
     }
   }
 

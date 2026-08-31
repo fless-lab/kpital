@@ -20,7 +20,10 @@ sessionStorage.removeItem("kp.invest"); // one-shot, regardless of parse outcome
 const details = document.getElementById("cDetails");
 const fallback = document.getElementById("cFallback");
 
-if (!data || !Number.isFinite(Number(data.amountMinor))) {
+// Require a strictly positive, finite amount: Number(null) is 0 (finite),
+// so a null/missing amountMinor (e.g. a 201 with an empty body, guarded in
+// project.js) must fall back rather than render as "0 FCFA" success.
+if (!data || !(Number.isFinite(Number(data.amountMinor)) && Number(data.amountMinor) > 0)) {
   if (details) details.hidden = true;
   if (fallback) fallback.hidden = false;
 } else {
