@@ -163,4 +163,53 @@ describe("project public surfaces", () => {
     expect(docs[0]).not.toHaveProperty("storageKey");
     expect(docs.map((d) => d.kind)).not.toContain("rccm");
   });
+
+  it("funding list, showcase list and detail all expose fundsUsage + cautionType and no sensitive columns", async () => {
+    const { app, db } = await buildTestApp();
+    const owner = await seedOwner(db, "trust@a.co");
+    const [fundP] = await db
+      .insert(projects)
+      .values(
+        projectValues(owner, "collecting", {
+          fundsUsage: "Achat de stock",
+          cautionType: "Caution solidaire",
+        }),
+      )
+      .returning();
+    const [showP] = await db
+      .insert(projects)
+      .values(
+        projectValues(owner, "showcase", {
+          fundsUsage: "Travaux",
+          cautionType: "Nantissement",
+        }),
+      )
+      .returning();
+
+    const funding = await app.inject({ method: "GET", url: "/projects/funding?limit=100" });
+    const fp = (funding.json().projects as Array<Record<string, unknown>>).find((p) => p.id === fundP!.id);
+    expect(fp).toBeDefined();
+    expect(fp).toHaveProperty("fundsUsage", "Achat de stock");
+    expect(fp).toHaveProperty("cautionType", "Caution solidaire");
+    expect(fp).not.toHaveProperty("ownerAccountId");
+    expect(fp).not.toHaveProperty("rejectReason");
+    expect(fp).not.toHaveProperty("storageKey");
+
+    const showcase = await app.inject({ method: "GET", url: "/projects/showcase?limit=100" });
+    const sp = (showcase.json().projects as Array<Record<string, unknown>>).find((p) => p.id === showP!.id);
+    expect(sp).toBeDefined();
+    expect(sp).toHaveProperty("fundsUsage", "Travaux");
+    expect(sp).toHaveProperty("cautionType", "Nantissement");
+    expect(sp).not.toHaveProperty("ownerAccountId");
+    expect(sp).not.toHaveProperty("rejectReason");
+    expect(sp).not.toHaveProperty("storageKey");
+
+    const detail = await app.inject({ method: "GET", url: `/projects/${fundP!.id}` });
+    const dp = detail.json().project as Record<string, unknown>;
+    expect(dp).toHaveProperty("fundsUsage", "Achat de stock");
+    expect(dp).toHaveProperty("cautionType", "Caution solidaire");
+    expect(dp).not.toHaveProperty("ownerAccountId");
+    expect(dp).not.toHaveProperty("rejectReason");
+    expect(dp).not.toHaveProperty("storageKey");
+  });
 });
