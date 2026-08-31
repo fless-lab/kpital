@@ -9,6 +9,7 @@ import {
   PaymentFailedError,
   ProjectNotFoundError,
   InsufficientFundsError,
+  IdempotencyConflictError,
   type InvestmentSource,
 } from "./service";
 
@@ -43,6 +44,15 @@ export default async function investmentRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
     }
 
+    // Request idempotency is mandatory on this money endpoint: the caller must
+    // send a stable Idempotency-Key so a retry after a lost response replays the
+    // original investment instead of creating a second one.
+    const rawKey = req.headers["idempotency-key"];
+    const idempotencyKey = typeof rawKey === "string" ? rawKey.trim() : "";
+    if (idempotencyKey.length === 0 || idempotencyKey.length > 255) {
+      return validationError(reply, "Idempotency-Key header is required");
+    }
+
     const body = (req.body ?? {}) as InvestBody;
     if (typeof body.amountMinor !== "number" || !Number.isInteger(body.amountMinor) || body.amountMinor <= 0) {
       return validationError(reply, "amountMinor must be a positive integer");
@@ -62,6 +72,7 @@ export default async function investmentRoutes(app: FastifyInstance) {
         amountMinor: body.amountMinor,
         source: body.source as InvestmentSource,
         confirmCapToRemaining: body.confirmCapToRemaining === true,
+        idempotencyKey,
         ...(method !== undefined ? { method } : {}),
       });
       return reply.code(201).send(result);
@@ -113,6 +124,9 @@ function mapInvestError(err: unknown, reply: FastifyReply): FastifyReply {
   }
   if (err instanceof ProjectNotFoundError || code === "project_not_found") {
     return reply.code(404).send({ error: { code: "not_found", message: "Project not found" } });
+  }
+  if (err instanceof IdempotencyConflictError || code === "idempotency_conflict") {
+    return reply.code(409).send({ error: { code: "idempotency_conflict", message: "Idempotency-Key already used for a different request" } });
   }
   throw err;
 }
