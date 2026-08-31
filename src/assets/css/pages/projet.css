@@ -20,8 +20,8 @@
 .proj-head-actions{display:flex;gap:10px;flex-shrink:0;padding-top:6px}
 .btn-sm{padding:9px 15px;font-size:13px}
 
-/* ── METRICS BAR ── */
-.metrics{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--hairline)}
+/* ── METRICS BAR (4 cols: ROI, Durée, Objectif, Collecté; no ticket-minimum field) ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--hairline)}
 .metric{padding:24px 24px 24px 0;border-left:1px solid var(--hairline)}
 .metric:first-child{border-left:none}
 .metric:not(:first-child){padding-left:24px}
@@ -158,6 +158,36 @@
 .garow svg{color:var(--green);flex-shrink:0}
 .garow .num{color:var(--ink)}
 
+/* ── NOT-FOUND NOTICE ── */
+.proj-notfound{padding:80px 0;text-align:center}
+.proj-notfound .container{display:flex;flex-direction:column;align-items:center;gap:18px}
+.proj-notfound-msg{font-family:var(--display);font-weight:600;font-size:20px;color:var(--ink)}
+
+/* ── GALLERY (hydrated: hide the block entirely when there is nothing to show) ── */
+.gallery:empty{display:none;margin-bottom:0}
+.gallery{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:44px}
+.gallery img.gthumb{width:auto;height:180px;max-width:100%;object-fit:cover;flex:1 1 220px}
+
+/* ── DOCUMENTS (hide the leading hairline when the list is empty) ── */
+.docs:empty{border-top:none}
+
+/* ── HEAD ACTIONS: follow / upvote toggled state ── */
+#followBtn.is-on,#upvoteBtn.is-on{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+
+/* ── INVEST PANEL: source select + error line + KYC gate ── */
+.invest-source{margin-bottom:20px}
+.invest-msg{font-size:12.5px;color:#B0392B;line-height:1.5;margin:-8px 0 14px}
+.kyc-gate{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border:1px solid var(--hairline);border-radius:2px;background:var(--green-soft);margin-bottom:18px}
+.kyc-gate-ico{color:var(--gold);flex-shrink:0;margin-top:1px}
+.kyc-gate p{font-size:12px;color:var(--muted);line-height:1.5}
+.kyc-gate a{color:var(--green);font-weight:500}
+.kyc-gate a:hover{color:var(--green-deep)}
+
+/* [hidden] must win over the author display rules above (and over .btn's
+   display:inline-flex for the follow/upvote buttons): these three elements
+   default hidden until JS confirms auth / a KYC gap. */
+.kyc-gate[hidden],#followBtn[hidden],#upvoteBtn[hidden]{display:none}
+
 /* ── RESPONSIVE ── */
 @media (max-width:1024px){
   .proj-grid{grid-template-columns:1fr 308px;gap:44px}
@@ -170,11 +200,11 @@
   .proj-head-actions{padding-top:0}
   .proj-head-id h1 br{display:none}
 
-  /* metrics: 5 → 2 cols, wrapping ledger */
+  /* metrics: 4 → 2 cols, wrapping ledger */
   .metrics{grid-template-columns:1fr 1fr}
   .metric{padding:18px 16px;border-left:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
   .metric:nth-child(odd){padding-left:0;border-left:none}
-  .metric:nth-last-child(-n+1){border-bottom:none}
+  .metric:nth-last-child(-n+2){border-bottom:none}
 
   /* layout collapses; panel un-sticks and stacks below */
   .proj-body{padding:44px 0 64px}

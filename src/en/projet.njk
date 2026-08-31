@@ -1,0 +1,211 @@
+---
+layout: base.njk
+pagination:
+  data: projects
+  size: 1
+  alias: project
+  addAllPagesToCollections: true
+permalink: "/en/projet/{{ project.id }}/"
+pageCss: projet
+pageJs: project
+ogType: article
+eleventyComputed:
+  title: "{{ project.title | safe }} | KPITAL"
+  description: "{{ project.description | striptags | truncate(155, true, '') | safe }}"
+---
+{%- set langPrefix = "/en" -%}
+{%- set catLabels = {"immobilier": "Real estate", "commerce": "Trade", "agriculture": "Agriculture"} -%}
+{%- set catLabel = catLabels[project.category] or project.category -%}
+{%- set targetM = project.targetMinor or 0 -%}
+{%- set raisedM = project.raisedMinor or 0 -%}
+{%- set pct = ((raisedM / targetM * 100) | round) if targetM > 0 else 0 -%}
+{%- set remainingM = targetM - raisedM -%}
+{%- set roiCapitalDefault = 50000 -%}
+{%- set roiGainDefault = ((roiCapitalDefault * (project.roiPct | float) * project.durationMonths / 1200) | round) -%}
+{%- set roiTotalDefault = roiCapitalDefault + roiGainDefault -%}
+
+<article class="proj" data-project-id="{{ project.id }}" data-roi="{{ project.roiPct }}" data-duration="{{ project.durationMonths }}" data-surface="{{ project.surface }}">
+
+  <!-- NOT-FOUND NOTICE (hydrated in) -->
+  <div class="proj-notfound" id="projNotFound" hidden>
+    <div class="container">
+      <p class="proj-notfound-msg" id="projNotFoundMsg">Project not found.</p>
+      <a href="/en/projets/" class="btn btn-ghost btn-sm">Back to projects</a>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB + PROJECT HEADER -->
+  <section class="proj-head" id="projHead">
+    <div class="container">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="/en/projets/">Projects</a>
+        <span class="crumb-sep">/</span>
+        <span>{{ catLabel }}</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-now">{{ project.title }}</span>
+      </nav>
+
+      <div class="proj-head-top">
+        <div class="proj-head-id">
+          <p class="eyebrow">{{ catLabel }}{% if project.surface == "showcase" %} · Discovery{% endif %}</p>
+          <h1 class="proj-title">{{ project.title }}</h1>
+          <div class="proj-facts">
+            <span class="pf">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ project.city }}{% if project.quartier %}, {{ project.quartier }}{% endif %} · Togo
+            </span>
+            <span class="pf-div" aria-hidden="true"></span>
+            <span class="pf"><span class="num">{{ project.durationMonths }}</span> months</span>
+            {% if project.score %}
+            <span class="pf-div" aria-hidden="true"></span>
+            <span class="tag{% if (project.score | string)[0] == 'A' %} tag-green{% endif %}">Rating {{ project.score }}</span>
+            {% endif %}
+            {% if project.status == "collecting" %}<span class="tag">Fundraising</span>{% elif project.status == "showcase" %}<span class="tag">Showcase</span>{% endif %}
+          </div>
+        </div>
+        <div class="proj-head-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="followBtn" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Save
+          </button>
+          {% if project.surface == "showcase" %}
+          <button type="button" class="btn btn-ghost btn-sm" id="upvoteBtn" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Upvote (<span id="upvoteCount">{{ project.upvoteCount or 0 }}</span>)
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- METRICS BAR -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-k">Estimated ROI / yr</div>
+          <div class="metric-v num metric-green">{{ project.roiPct }}%</div>
+          <div class="metric-s">{% if project.score %}Rating {{ project.score }}{% endif %}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Duration</div>
+          <div class="metric-v num">{{ project.durationMonths }} months</div>
+          <div class="metric-s">{% if project.status == "collecting" %}Fundraising{% else %}Showcase{% endif %}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Target</div>
+          <div class="metric-v num" id="mTarget">{{ targetM }}</div>
+          <div class="metric-s">FCFA to raise</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Raised</div>
+          <div class="metric-v num metric-green" id="mRaised">{{ raisedM }}</div>
+          <div class="metric-s">FCFA received</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN LAYOUT -->
+  <section class="proj-body" id="projBody">
+    <div class="container proj-grid">
+
+      <!-- MAIN COLUMN -->
+      <div class="proj-main">
+
+        <!-- GALLERY (hydrated with signed photo URLs; empty in SSG) -->
+        <div class="block gallery" id="gallery"></div>
+
+        <!-- DESCRIPTION -->
+        <div class="block">
+          <h2 class="block-h">The project</h2>
+          <div class="prose"><p>{{ project.description }}</p></div>
+        </div>
+
+        <!-- USE OF FUNDS -->
+        <div class="block">
+          <h2 class="block-h">Use of funds</h2>
+          <div class="prose"><p>{{ project.fundsUsage }}</p></div>
+        </div>
+
+        <!-- GUARANTEE -->
+        <div class="block">
+          <h2 class="block-h">Guarantee</h2>
+          <div class="prose"><p>{{ project.cautionType }}</p></div>
+        </div>
+
+        <!-- DOCUMENTS (hydrated; empty in SSG) -->
+        <div class="block">
+          <h2 class="block-h">Documents</h2>
+          <ul class="docs" id="docs"></ul>
+        </div>
+      </div>
+
+      <!-- STICKY INVEST PANEL -->
+      <aside class="invest" aria-label="Invest in this project">
+        <div class="invest-card">
+          {% if project.status == "collecting" %}
+          <div class="invest-progress">
+            <div class="invest-progress-top">
+              <span class="invest-pct num" id="investPct">{{ pct }}%</span>
+              <span class="invest-rest"><span class="num" id="investRest">{{ remainingM }}</span> FCFA remaining</span>
+            </div>
+            <div class="pbar"><i id="investBar" style="width:{{ pct }}%"></i></div>
+            <div class="invest-progress-meta">
+              <span><span class="num" id="investRaised">{{ raisedM }}</span> FCFA raised</span>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="invest-form">
+            <div class="kyc-gate" id="kycGate" hidden>
+              <span class="kyc-gate-ico">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
+              <p>Finish your identity verification to invest. <a href="/en/dashboard/">View my status →</a></p>
+            </div>
+
+            <label class="invest-label" for="amount">Amount to invest (FCFA)</label>
+            <input class="input invest-amount num" type="number" id="amount" value="50000" min="10000" step="5000" inputmode="numeric">
+            <div class="quick">
+              <button type="button" class="quick-amt" data-amt="10000">10k</button>
+              <button type="button" class="quick-amt is-active" data-amt="50000">50k</button>
+              <button type="button" class="quick-amt" data-amt="100000">100k</button>
+              <button type="button" class="quick-amt" data-amt="250000">250k</button>
+              <button type="button" class="quick-amt" data-amt="500000">500k</button>
+            </div>
+
+            <label class="invest-label" for="investSource">Funding source</label>
+            <select class="input invest-source" id="investSource">
+              <option value="payment">Mobile payment</option>
+              <option value="wallet">KPITAL wallet</option>
+            </select>
+
+            <div class="roi">
+              <div class="roi-row">
+                <span>Capital invested</span>
+                <span class="num" id="roiCapital">{{ roiCapitalDefault }}</span>
+              </div>
+              <div class="roi-row">
+                <span>ROI <span class="num">{{ project.roiPct }}%</span> × <span class="num">{{ project.durationMonths }}</span> months</span>
+                <span class="num roi-green" id="roiGain">+ {{ roiGainDefault }}</span>
+              </div>
+              <div class="roi-row roi-total">
+                <span>Total at maturity</span>
+                <span class="num roi-green" id="roiTotal">{{ roiTotalDefault }}</span>
+              </div>
+            </div>
+
+            <p class="invest-msg" id="investMsg" hidden></p>
+
+            <button type="button" class="btn btn-primary invest-go" id="investBtn">
+              Invest <span class="num">50,000</span> FCFA →
+            </button>
+
+            <div class="seq-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <p>Your money goes into a dedicated escrow account for this project. KPITAL holds no funds. <a href="/en/securite">Learn more →</a></p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</article>
