@@ -50,6 +50,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -84,6 +85,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -115,6 +117,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -133,6 +136,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -151,6 +155,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 9999, source: "payment" },
     });
@@ -170,6 +175,7 @@ describe("POST /projects/:id/invest", () => {
     const r1 = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 900000, source: "payment" },
     });
@@ -181,6 +187,7 @@ describe("POST /projects/:id/invest", () => {
     const r2 = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 200000, source: "payment" },
     });
@@ -192,6 +199,7 @@ describe("POST /projects/:id/invest", () => {
     const r3 = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 200000, source: "payment", confirmCapToRemaining: true },
     });
@@ -204,6 +212,7 @@ describe("POST /projects/:id/invest", () => {
     const r4 = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -225,6 +234,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "wallet" },
     });
@@ -253,6 +263,7 @@ describe("POST /projects/:id/invest", () => {
     const r2 = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 999999, source: "wallet", confirmCapToRemaining: true },
     });
@@ -291,6 +302,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -324,6 +336,7 @@ describe("POST /projects/:id/invest", () => {
       app.inject({
         method: "POST",
         url: `/projects/${pid}/invest`,
+        headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
         cookies: { [COOKIE]: cookie },
         payload: { amountMinor: 80000, source: "payment" },
       });
@@ -359,6 +372,7 @@ describe("POST /projects/:id/invest", () => {
     const r = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "wallet" },
     });

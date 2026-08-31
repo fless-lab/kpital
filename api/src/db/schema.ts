@@ -190,6 +190,11 @@ export const investments = pgTable("investment", {
   settledAt: timestamp("settled_at", { withTimezone: true }),
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   status: investmentStatus("status").notNull().default("pending"),
+  // Client-supplied request idempotency key (Idempotency-Key header). A retry of
+  // the same logical invest reuses the key so a lost response after commit does
+  // not create a second investment. Nullable: rows predating this column carry
+  // null and are exempt from the partial unique index below.
+  idempotencyKey: text("idempotency_key"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   // The escrow webhook resolves a settlement/failure by payment_ref, so a
@@ -198,6 +203,13 @@ export const investments = pgTable("investment", {
   depositRefUnique: uniqueIndex("investment_payment_ref_unique")
     .on(t.paymentRef)
     .where(sql`${t.paymentRef} IS NOT NULL`),
+  // Request idempotency: at most one investment per (investor, key). The insert
+  // carries the key, so a concurrent same-key racer blocks on this index then
+  // fails with a unique violation, which the service maps to a replay of the
+  // winning investment. Partial: null keys (legacy rows) are exempt.
+  idempotencyUnique: uniqueIndex("investment_idempotency_unique")
+    .on(t.investorAccountId, t.idempotencyKey)
+    .where(sql`${t.idempotencyKey} IS NOT NULL`),
 }));
 
 export const repaymentInstallmentStatus = pgEnum("repayment_installment_status", ["due", "pending", "paid"]);

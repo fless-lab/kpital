@@ -73,6 +73,7 @@ describe("GET /me/investments", () => {
     const invest = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -121,6 +122,7 @@ describe("GET /me/investments", () => {
     const invest = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });
@@ -150,6 +152,7 @@ describe("GET /me/investments", () => {
     const invest = await app.inject({
       method: "POST",
       url: `/projects/${pid}/invest`,
+      headers: { "idempotency-key": `idem-${Math.random().toString(36).slice(2)}` },
       cookies: { [COOKIE]: cookie },
       payload: { amountMinor: 50000, source: "payment" },
     });

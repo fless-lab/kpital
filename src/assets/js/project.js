@@ -162,6 +162,16 @@ window.__kpInvest = function (p) {
   const gate = document.getElementById("kycGate");
   if (!amountEl || !sourceEl || !btn) return; // showcase fiche: nothing to wire
 
+  // One idempotency key per page load, reused across every invest POST this
+  // panel makes (including the exceeds_remaining capped resubmit). A retry after
+  // a lost response carries the same key so the server replays the original
+  // investment instead of creating a second one. A fresh page load mints a fresh
+  // key, so a deliberate new investment is never deduplicated.
+  const idempotencyKey =
+    window.crypto && crypto.randomUUID
+      ? crypto.randomUUID()
+      : "idem-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
   const btnAmount = btn.querySelector(".num");
 
   function moneyNum(minor) {
@@ -310,7 +320,7 @@ window.__kpInvest = function (p) {
 
       let r;
       try {
-        r = await api.post("/projects/" + p.id + "/invest", body);
+        r = await api.post("/projects/" + p.id + "/invest", body, { headers: { "Idempotency-Key": idempotencyKey } });
       } catch (e) {
         if (!confirmCap && e instanceof ApiError && e.code === "exceeds_remaining") {
           const rem = e.details && e.details.remainingMinor;

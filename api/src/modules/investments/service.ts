@@ -60,6 +60,29 @@ export class ProjectNotFoundError extends Error {
   }
 }
 
+// The Idempotency-Key was already used for an investment on a DIFFERENT project.
+// Returning that other project's investment would be incoherent with the URL, so
+// this is a client error rather than a replay. → 409 idempotency_conflict.
+export class IdempotencyConflictError extends Error {
+  constructor() {
+    super("idempotency_conflict");
+    this.name = "IdempotencyConflictError";
+  }
+}
+
+// True when a thrown error is the (investor, idempotency_key) unique violation,
+// as opposed to any other 23505 (e.g. the payment_ref index). Only this specific
+// violation maps to an idempotent replay.
+function isIdempotencyViolation(err: unknown): boolean {
+  const constraintOf = (e: unknown): string | undefined =>
+    typeof e === "object" && e !== null ? (e as { constraint?: string }).constraint : undefined;
+  const codeOf = (e: unknown): string | undefined =>
+    typeof e === "object" && e !== null ? (e as { code?: string }).code : undefined;
+  const cause = typeof err === "object" && err !== null ? (err as { cause?: unknown }).cause : undefined;
+  const hit = (e: unknown) => codeOf(e) === "23505" && constraintOf(e) === "investment_idempotency_unique";
+  return hit(err) || hit(cause);
+}
+
 // Re-export so route/tests can reference the wallet insufficient-funds error
 // from this module too.
 export { InsufficientFundsError };
@@ -73,6 +96,41 @@ export interface CreateInvestmentInput {
   source: InvestmentSource;
   method?: PayoutMethod;
   confirmCapToRemaining?: boolean;
+  // Client-supplied request idempotency key (required at the route layer). A
+  // retry of the same logical invest carries the same key so a lost response
+  // after commit replays the original investment instead of creating a new one.
+  idempotencyKey: string;
+}
+
+// The current state of an already-committed investment, for an idempotent replay.
+// Re-reads the project so raisedMinor/projectStatus reflect any settlement that
+// happened after the original request (e.g. a payment deposit that later settled).
+async function replayResult(
+  db: Db,
+  existing: typeof investments.$inferSelect,
+  requestedProjectId: string,
+): Promise<CreateInvestmentResult> {
+  if (existing.projectId !== requestedProjectId) throw new IdempotencyConflictError();
+  const [pj] = await db
+    .select({ raisedMinor: projects.raisedMinor, status: projects.status })
+    .from(projects)
+    .where(eq(projects.id, existing.projectId));
+  return {
+    investmentId: existing.id,
+    amountMinor: existing.amountMinor,
+    status: existing.status,
+    raisedMinor: pj?.raisedMinor ?? 0,
+    projectStatus: pj?.status ?? "collecting",
+    depositRef: existing.paymentRef,
+  };
+}
+
+async function findByIdemKey(db: Db, accountId: string, key: string) {
+  const [row] = await db
+    .select()
+    .from(investments)
+    .where(and(eq(investments.investorAccountId, accountId), eq(investments.idempotencyKey, key)));
+  return row;
 }
 
 export interface CreateInvestmentResult {
@@ -117,9 +175,16 @@ export async function createInvestment(
   payments: PaymentProvider,
   input: CreateInvestmentInput,
 ): Promise<CreateInvestmentResult> {
+  // Idempotency pre-check: a prior committed investment for (account, key) is an
+  // exact replay, returned without taking the project lock or calling the provider
+  // again. This is the fast path; the unique-violation catch below is the race
+  // backstop for two requests that pre-check concurrently and both miss.
+  const priorInvestment = await findByIdemKey(db, input.accountId, input.idempotencyKey);
+  if (priorInvestment) return replayResult(db, priorInvestment, input.projectId);
+
   const investmentId = randomUUID();
 
-  const phase1 = await db.transaction(async (tx) => {
+  const runPhase1 = () => db.transaction(async (tx) => {
     const txDb = tx as unknown as Db;
 
     // 1. KYC gate: read the caller's status.
@@ -187,6 +252,7 @@ export async function createInvestment(
         source: "wallet",
         paymentRef: null,
         status: "escrowed",
+        idempotencyKey: input.idempotencyKey,
       });
       const newRaised = project.raisedMinor + amountMinor;
       const projectStatus = newRaised === project.targetMinor ? "funded" : project.status;
@@ -208,6 +274,7 @@ export async function createInvestment(
       source: "payment",
       paymentRef: null,
       status: "pending",
+      idempotencyKey: input.idempotencyKey,
     });
     const dep = await payments.initiateDeposit({
       accountId: input.accountId,
@@ -219,6 +286,21 @@ export async function createInvestment(
     await tx.update(investments).set({ paymentRef: dep.ref }).where(eq(investments.id, investmentId));
     return { source: "payment" as const, amountMinor, depositRef: dep.ref, depositStatus: dep.status, preRaised: project.raisedMinor };
   });
+
+  let phase1: Awaited<ReturnType<typeof runPhase1>>;
+  try {
+    phase1 = await runPhase1();
+  } catch (err) {
+    // Race backstop: a concurrent same-key request committed first, so our insert
+    // hit the (investor, idempotency_key) unique index. The transaction rolled
+    // back (no partial state, no duplicate provider call), so replay the winning
+    // investment instead of surfacing the violation.
+    if (isIdempotencyViolation(err)) {
+      const winner = await findByIdemKey(db, input.accountId, input.idempotencyKey);
+      if (winner) return replayResult(db, winner, input.projectId);
+    }
+    throw err;
+  }
 
   // Phase 2 runs AFTER the invest transaction commits, never under the invest
   // lock.

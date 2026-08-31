@@ -36,9 +36,9 @@ async function request(path, { method = "GET", body, headers, multipart } = {}) 
 
 export const api = {
   get: (p) => request(p),
-  post: (p, body) => request(p, { method: "POST", body }),
-  patch: (p, body) => request(p, { method: "PATCH", body }),
-  del: (p) => request(p, { method: "DELETE" }),
+  post: (p, body, opts) => request(p, { method: "POST", body, ...opts }),
+  patch: (p, body, opts) => request(p, { method: "PATCH", body, ...opts }),
+  del: (p, opts) => request(p, { method: "DELETE", ...opts }),
 };
 
 // Multipart upload (KYC): let the browser set the multipart boundary, so no

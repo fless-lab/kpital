@@ -134,6 +134,13 @@
       "when": 1788009871593,
       "tag": "0018_talented_blue_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788170185022,
+      "tag": "0019_zippy_medusa",
+      "breakpoints": true
     }
   ]
 }
