@@ -134,6 +134,32 @@ describe("POST /projects/:id/invest idempotency", () => {
     await app.close();
   });
 
+  it("a concurrent same-key racer that loses the capacity check replays the winner, not a business error", async () => {
+    const { app, db } = await buildTestApp();
+    const cookie = await loginAs(app, "i@a.co");
+    await verify(db, "i@a.co");
+    // target == ticket: the winner reserves the whole project; the loser, once it
+    // acquires the project lock after the winner's pending deposit committed, sees
+    // zero remaining and would throw exceeds_remaining. With the same key that is a
+    // replay of the winner, not a 409.
+    const pid = await seedProject(db, { targetMinor: 50000 });
+
+    const [r1, r2] = await Promise.all([
+      invest(app, pid, cookie, KEY + "CAP", 50000),
+      invest(app, pid, cookie, KEY + "CAP", 50000),
+    ]);
+    expect(r1.statusCode).toBe(201);
+    expect(r2.statusCode).toBe(201);
+    expect(r1.json().investmentId).toBe(r2.json().investmentId);
+
+    const rows = await db.select().from(investments).where(eq(investments.projectId, pid));
+    expect(rows.length).toBe(1);
+    const [pj] = await db.select().from(projects).where(eq(projects.id, pid));
+    expect(pj!.raisedMinor).toBe(50000);
+
+    await app.close();
+  });
+
   it("reusing a key for a different project is a 409 conflict, not a wrong-project replay", async () => {
     const { app, db } = await buildTestApp();
     const cookie = await loginAs(app, "i@a.co");

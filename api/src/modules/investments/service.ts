@@ -70,18 +70,6 @@ export class IdempotencyConflictError extends Error {
   }
 }
 
-// True when a thrown error is the (investor, idempotency_key) unique violation,
-// as opposed to any other 23505 (e.g. the payment_ref index). Only this specific
-// violation maps to an idempotent replay.
-function isIdempotencyViolation(err: unknown): boolean {
-  const constraintOf = (e: unknown): string | undefined =>
-    typeof e === "object" && e !== null ? (e as { constraint?: string }).constraint : undefined;
-  const codeOf = (e: unknown): string | undefined =>
-    typeof e === "object" && e !== null ? (e as { code?: string }).code : undefined;
-  const cause = typeof err === "object" && err !== null ? (err as { cause?: unknown }).cause : undefined;
-  const hit = (e: unknown) => codeOf(e) === "23505" && constraintOf(e) === "investment_idempotency_unique";
-  return hit(err) || hit(cause);
-}
 
 // Re-export so route/tests can reference the wallet insufficient-funds error
 // from this module too.
@@ -105,6 +93,11 @@ export interface CreateInvestmentInput {
 // The current state of an already-committed investment, for an idempotent replay.
 // Re-reads the project so raisedMinor/projectStatus reflect any settlement that
 // happened after the original request (e.g. a payment deposit that later settled).
+// The key identifies the request: a replay returns the ORIGINAL investment's
+// amountMinor even if the retry sent a different amount (the same key with new
+// params is treated as a replay, not a new request). Only a DIFFERENT project is
+// rejected, since returning another project's investment would be incoherent with
+// the :id in the URL.
 async function replayResult(
   db: Db,
   existing: typeof investments.$inferSelect,
@@ -291,14 +284,19 @@ export async function createInvestment(
   try {
     phase1 = await runPhase1();
   } catch (err) {
-    // Race backstop: a concurrent same-key request committed first, so our insert
-    // hit the (investor, idempotency_key) unique index. The transaction rolled
-    // back (no partial state, no duplicate provider call), so replay the winning
-    // investment instead of surfacing the violation.
-    if (isIdempotencyViolation(err)) {
-      const winner = await findByIdemKey(db, input.accountId, input.idempotencyKey);
-      if (winner) return replayResult(db, winner, input.projectId);
-    }
+    // Race backstop for a concurrent same-key request that committed first. It can
+    // surface here two ways: our insert trips the (investor, idempotency_key)
+    // unique index, OR - because we block on the project FOR UPDATE lock BEFORE
+    // our insert - we throw a business error while validating state the winner
+    // already changed (it funded the project, reserved the remaining capacity, or
+    // drained the wallet). In BOTH cases this request is a replay of that winner,
+    // so if a committed investment now exists for (account, key), return it rather
+    // than the transient error. The transaction rolled back, so there is no
+    // partial state and no duplicate provider deposit. A cross-project key reuse
+    // still throws IdempotencyConflictError via replayResult's guard. When no
+    // winner exists the original error is genuine and propagates unchanged.
+    const winner = await findByIdemKey(db, input.accountId, input.idempotencyKey);
+    if (winner) return replayResult(db, winner, input.projectId);
     throw err;
   }
 
