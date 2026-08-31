@@ -3,7 +3,12 @@ layout: base.njk
 title: "Projets en collecte | KPITAL"
 description: "Découvrez les projets vérifiés ouverts à l'investissement : immobilier, commerce, agriculture. Dès 10 000 FCFA, sécurisé par séquestre dédié."
 pageCss: projets
+pageJs: catalog
 ---
+
+{%- set langPrefix = "/en" if lang == "en" else "" -%}
+{%- set isEn = lang == "en" -%}
+{%- set catLabels = {"immobilier": "Immobilier", "commerce": "Commerce", "agriculture": "Agriculture"} -%}
 
 <!-- PAGE HERO -->
 <section class="page-hero">
@@ -20,11 +25,9 @@ pageCss: projets
     <div class="container filterbar-inner">
       <div class="chips" role="group" aria-label="Filtrer par secteur">
         <button class="chip active" data-filter="all" aria-pressed="true">Tous</button>
-        <button class="chip" data-filter="immo" aria-pressed="false">Immobilier</button>
+        <button class="chip" data-filter="immobilier" aria-pressed="false">Immobilier</button>
         <button class="chip" data-filter="commerce" aria-pressed="false">Commerce</button>
-        <button class="chip" data-filter="agri" aria-pressed="false">Agriculture</button>
-        <button class="chip" data-filter="pme" aria-pressed="false">PME</button>
-        <button class="chip" data-filter="impact" aria-pressed="false">Impact</button>
+        <button class="chip" data-filter="agriculture" aria-pressed="false">Agriculture</button>
       </div>
       <div class="filterbar-right">
         <label class="sort">
@@ -36,34 +39,34 @@ pageCss: projets
             <option value="duration">Durée la plus courte</option>
           </select>
         </label>
-        <span class="results" id="results"><span class="num">6</span> projets</span>
+        <span class="results" id="results"><span class="num">{{ projects.length }}</span> projet{% if projects.length > 1 %}s{% endif %}</span>
       </div>
     </div>
   </div>
 
   <!-- PROJECT INDEX -->
   <div class="container">
-    <div class="projects" id="grid">
-
-      <!-- Villa Tokoin -->
-      <a class="pcard" href="/projet" data-type="immo" data-note="A" data-roi="11" data-progress="73" data-duration="24">
+    <div class="projects" id="grid-funding">
+    {%- for p in projects %}
+    {%- if p.surface == "funding" %}
+      {%- set pct = (((p.raisedMinor / p.targetMinor) * 100) | round) if p.targetMinor else 0 %}
+      <a class="pcard" href="{{ langPrefix }}/projet/{{ p.id }}/" data-type="{{ p.category }}" data-roi="{{ p.roiPct }}" data-progress="{{ pct }}" data-duration="{{ p.durationMonths }}">
         <div class="pcard-head">
-          <span class="pcard-sector">Immobilier</span>
-          <span class="tag tag-green">Note A</span>
+          <span class="pcard-sector">{{ catLabels[p.category] }}</span>
+          {%- if p.score %}<span class="tag{% if p.score[0] == "A" %} tag-green{% endif %}">Note {{ p.score }}</span>{% endif %}
         </div>
-        <h3 class="pcard-name">Villa Tokoin : location longue durée</h3>
-        <p class="pcard-meta">Tokoin, Lomé · <span class="num">24</span> mois</p>
+        <h3 class="pcard-name">{{ p.title }}</h3>
+        <p class="pcard-meta">{{ p.city }}{% if p.quartier %}, {{ p.quartier }}{% endif %} · <span class="num">{{ p.durationMonths }}</span> mois</p>
 
         <div class="pcard-roi">
-          <span class="v num">11%</span>
+          <span class="v num">{{ p.roiPct }}%</span>
           <span class="u">ROI estimé / an</span>
         </div>
 
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:73%"></i></div>
+        <div class="pcard-progress" data-raised="{{ p.raisedMinor }}" data-target="{{ p.targetMinor }}">
+          <div class="pbar"><i style="width:{{ pct }}%"></i></div>
           <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">73%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">3,3M</span> / <span class="num">4,5M</span> FCFA</span>
+            <span class="pmeta-pct"><span class="num">{{ pct }}%</span> collecté</span>
           </div>
         </div>
 
@@ -72,148 +75,43 @@ pageCss: projets
           <span class="pcard-go">Voir la fiche →</span>
         </div>
       </a>
+    {%- endif %}
+    {%- endfor %}
+    </div><!-- /grid-funding -->
 
-      <!-- Stock tissu wax -->
-      <a class="pcard" href="/projet" data-type="commerce" data-note="B" data-roi="18" data-progress="45" data-duration="4">
-        <div class="pcard-head">
-          <span class="pcard-sector">Commerce</span>
-          <span class="tag">Note B</span>
-        </div>
-        <h3 class="pcard-name">Stock tissu wax : import Lomé</h3>
-        <p class="pcard-meta">Grand Marché, Lomé · <span class="num">4</span> mois</p>
-
-        <div class="pcard-roi">
-          <span class="v num">18%</span>
-          <span class="u">ROI estimé / an</span>
-        </div>
-
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:45%"></i></div>
-          <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">45%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">540K</span> / <span class="num">1,2M</span> FCFA</span>
+    <div id="showcase-section">
+      <h2 class="registry-subhead">À découvrir</h2>
+      <p class="registry-subtext">Des projets en préparation, pas encore ouverts à la collecte.</p>
+      <div class="projects" id="grid-showcase">
+      {%- for p in projects %}
+      {%- if p.surface == "showcase" %}
+        <a class="pcard" href="{{ langPrefix }}/projet/{{ p.id }}/" data-type="{{ p.category }}" data-roi="{{ p.roiPct }}" data-progress="0" data-duration="{{ p.durationMonths }}">
+          <div class="pcard-head">
+            <span class="pcard-sector">{{ catLabels[p.category] }}</span>
+            {%- if p.score %}<span class="tag{% if p.score[0] == "A" %} tag-green{% endif %}">Note {{ p.score }}</span>{% endif %}
           </div>
-        </div>
+          <h3 class="pcard-name">{{ p.title }}</h3>
+          <p class="pcard-meta">{{ p.city }}{% if p.quartier %}, {{ p.quartier }}{% endif %} · <span class="num">{{ p.durationMonths }}</span> mois</p>
 
-        <div class="pcard-foot">
-          <span class="ticket">Ticket min · <strong class="num">10 000 FCFA</strong></span>
-          <span class="pcard-go">Voir la fiche →</span>
-        </div>
-      </a>
-
-      <!-- Campagne maïs -->
-      <a class="pcard" href="/projet" data-type="agri" data-note="B" data-roi="24" data-progress="88" data-duration="6">
-        <div class="pcard-head">
-          <span class="pcard-sector">Agriculture</span>
-          <span class="tag">Note B+</span>
-        </div>
-        <h3 class="pcard-name">Campagne maïs : Région des Plateaux</h3>
-        <p class="pcard-meta">Kpalimé, Plateaux · <span class="num">6</span> mois</p>
-
-        <div class="pcard-roi">
-          <span class="v num">24%</span>
-          <span class="u">ROI estimé / an</span>
-        </div>
-
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:88%"></i></div>
-          <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">88%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">704K</span> / <span class="num">800K</span> FCFA</span>
+          <div class="pcard-roi">
+            <span class="v num">{{ p.roiPct }}%</span>
+            <span class="u">ROI estimé / an</span>
           </div>
-        </div>
 
-        <div class="pcard-foot">
-          <span class="ticket">Ticket min · <strong class="num">10 000 FCFA</strong></span>
-          <span class="pcard-go">Voir la fiche →</span>
-        </div>
-      </a>
-
-      <!-- Épicerie Adéwi -->
-      <a class="pcard" href="/projet" data-type="commerce" data-note="A" data-roi="16" data-progress="22" data-duration="6">
-        <div class="pcard-head">
-          <span class="pcard-sector">Commerce</span>
-          <span class="tag tag-green">Note A−</span>
-        </div>
-        <h3 class="pcard-name">Épicerie moderne Adéwi</h3>
-        <p class="pcard-meta">Hédzranawoé, Lomé · <span class="num">6</span> mois</p>
-
-        <div class="pcard-roi">
-          <span class="v num">16%</span>
-          <span class="u">ROI estimé / an</span>
-        </div>
-
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:22%"></i></div>
-          <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">22%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">132K</span> / <span class="num">600K</span> FCFA</span>
+          <div class="pcard-votes">
+            <span class="pvote"><span class="num">{{ p.upvoteCount }}</span> votes</span>
+            <span class="pvote"><span class="num">{{ p.followCount }}</span> abonnés</span>
           </div>
-        </div>
 
-        <div class="pcard-foot">
-          <span class="ticket">Ticket min · <strong class="num">10 000 FCFA</strong></span>
-          <span class="pcard-go">Voir la fiche →</span>
-        </div>
-      </a>
-
-      <!-- Atelier menuiserie Koffi -->
-      <a class="pcard" href="/projet" data-type="pme" data-note="B" data-roi="14" data-progress="10" data-duration="12">
-        <div class="pcard-head">
-          <span class="pcard-sector">PME</span>
-          <span class="tag">Note B</span>
-        </div>
-        <h3 class="pcard-name">Extension atelier menuiserie Koffi</h3>
-        <p class="pcard-meta">Adétikopé, Lomé · <span class="num">12</span> mois</p>
-
-        <div class="pcard-roi">
-          <span class="v num">14%</span>
-          <span class="u">ROI estimé / an</span>
-        </div>
-
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:10%"></i></div>
-          <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">10%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">280K</span> / <span class="num">2,8M</span> FCFA</span>
+          <div class="pcard-foot">
+            <span class="ticket">Découverte</span>
+            <span class="pcard-go">Voir la fiche →</span>
           </div>
-        </div>
-
-        <div class="pcard-foot">
-          <span class="ticket">Ticket min · <strong class="num">25 000 FCFA</strong></span>
-          <span class="pcard-go">Voir la fiche →</span>
-        </div>
-      </a>
-
-      <!-- École communautaire Kpalimé -->
-      <a class="pcard pcard-impact" href="/projet" data-type="impact" data-note="A" data-roi="0" data-progress="58" data-duration="18">
-        <div class="pcard-head">
-          <span class="pcard-sector">Impact · Tier 5</span>
-          <span class="tag">Diaspora</span>
-        </div>
-        <h3 class="pcard-name">École primaire communautaire : Kpalimé</h3>
-        <p class="pcard-meta">Kpalimé, Plateaux · <span class="num">18</span> mois</p>
-
-        <div class="pcard-roi">
-          <span class="v v-impact">Impact</span>
-          <span class="u">Rapport mensuel · zéro ROI financier</span>
-        </div>
-
-        <div class="pcard-progress">
-          <div class="pbar"><i style="width:58%"></i></div>
-          <div class="pmeta">
-            <span class="pmeta-pct"><span class="num">58%</span> collecté</span>
-            <span class="pmeta-amt"><span class="num">2,9M</span> / <span class="num">5M</span> FCFA</span>
-          </div>
-        </div>
-
-        <div class="pcard-foot">
-          <span class="ticket">Don min · <strong class="num">10 000 FCFA</strong></span>
-          <span class="pcard-go">Contribuer →</span>
-        </div>
-      </a>
-
-    </div><!-- /grid -->
+        </a>
+      {%- endif %}
+      {%- endfor %}
+      </div><!-- /grid-showcase -->
+    </div><!-- /showcase-section -->
 
     <p class="empty" id="empty" hidden>Aucun projet ne correspond à ce filtre.</p>
   </div>
@@ -233,48 +131,3 @@ pageCss: projets
     </div>
   </div>
 </section>
-
-<script>
-(function () {
-  var grid = document.getElementById("grid");
-  if (!grid) return;
-  var cards = Array.prototype.slice.call(grid.querySelectorAll(".pcard"));
-  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
-  var sort = document.getElementById("sort");
-  var results = document.getElementById("results");
-  var empty = document.getElementById("empty");
-  var current = "all";
-  var order = cards.slice();
-
-  function apply() {
-    var visible = 0;
-    cards.forEach(function (c) {
-      var show = current === "all" || c.dataset.type === current;
-      c.hidden = !show;
-      if (show) visible++;
-    });
-    results.innerHTML = '<span class="num">' + visible + "</span> projet" + (visible > 1 ? "s" : "");
-    empty.hidden = visible !== 0;
-  }
-
-  function reorder(mode) {
-    var arr = order.slice();
-    if (mode === "roi") arr.sort(function (a, b) { return b.dataset.roi - a.dataset.roi; });
-    else if (mode === "progress") arr.sort(function (a, b) { return b.dataset.progress - a.dataset.progress; });
-    else if (mode === "duration") arr.sort(function (a, b) { return a.dataset.duration - b.dataset.duration; });
-    arr.forEach(function (c) { grid.appendChild(c); });
-  }
-
-  chips.forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      chips.forEach(function (c) { c.classList.remove("active"); c.setAttribute("aria-pressed", "false"); });
-      chip.classList.add("active");
-      chip.setAttribute("aria-pressed", "true");
-      current = chip.dataset.filter;
-      apply();
-    });
-  });
-
-  sort.addEventListener("change", function () { reorder(sort.value); });
-})();
-</script>

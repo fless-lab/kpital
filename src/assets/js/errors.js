@@ -12,6 +12,7 @@ const MAP = {
   account_suspended: { fr: "Ce compte n'est pas actif.", en: "This account is not active." },
   kyc_required: { fr: "Verification d'identite requise.", en: "Identity verification required." },
   rate_limited: { fr: "Trop de tentatives, reessayez plus tard.", en: "Too many attempts, try again later." },
+  not_found: { fr: "Projet introuvable.", en: "Project not found." },
 };
 
 export function pageLang() {
