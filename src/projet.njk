@@ -13,7 +13,6 @@ eleventyComputed:
   title: "{{ project.title | safe }} | KPITAL"
   description: "{{ project.description | striptags | truncate(155, true, '') | safe }}"
 ---
-{%- set langPrefix = "" -%}
 {%- set catLabels = {"immobilier": "Immobilier", "commerce": "Commerce", "agriculture": "Agriculture"} -%}
 {%- set catLabel = catLabels[project.category] or project.category -%}
 {%- set targetM = project.targetMinor or 0 -%}
@@ -131,8 +130,8 @@ eleventyComputed:
           <div class="prose"><p>{{ project.cautionType }}</p></div>
         </div>
 
-        <!-- DOCUMENTS (hydrated; empty in SSG) -->
-        <div class="block">
+        <!-- DOCUMENTS (hydrated; empty in SSG; hidden by JS when there are none) -->
+        <div class="block" id="docsBlock">
           <h2 class="block-h">Documents</h2>
           <ul class="docs" id="docs"></ul>
         </div>
@@ -152,7 +151,6 @@ eleventyComputed:
               <span><span class="num" id="investRaised">{{ raisedM }}</span> FCFA levés</span>
             </div>
           </div>
-          {% endif %}
 
           <div class="invest-form">
             <div class="kyc-gate" id="kycGate" hidden>
@@ -204,6 +202,11 @@ eleventyComputed:
               <p>Votre argent va sur un compte séquestre dédié à ce projet. KPITAL ne détient aucun fonds. <a href="/securite">En savoir plus →</a></p>
             </div>
           </div>
+          {% else %}
+          <div class="invest-form invest-closed">
+            <p class="invest-closed-note">La collecte n'est pas encore ouverte. Suivez ce projet pour être notifié à l'ouverture.</p>
+          </div>
+          {% endif %}
         </div>
       </aside>
     </div>

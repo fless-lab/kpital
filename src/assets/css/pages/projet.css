@@ -129,6 +129,8 @@
 .invest-progress-meta .num{color:var(--ink)}
 
 .invest-form{padding:22px}
+.invest-closed{display:flex;align-items:center}
+.invest-closed-note{font-size:13.5px;color:var(--muted);line-height:1.6}
 .invest-label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin-bottom:8px}
 .invest-amount{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:10px}
 .quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}

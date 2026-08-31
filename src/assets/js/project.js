@@ -49,6 +49,8 @@ function humanizeKind(kind) {
 
 function renderDocs(pdfs) {
   const list = document.getElementById("docs");
+  const block = document.getElementById("docsBlock");
+  if (block) block.hidden = pdfs.length === 0;
   if (!list) return;
   list.innerHTML = pdfs
     .map(

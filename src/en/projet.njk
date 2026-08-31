@@ -13,7 +13,6 @@ eleventyComputed:
   title: "{{ project.title | safe }} | KPITAL"
   description: "{{ project.description | striptags | truncate(155, true, '') | safe }}"
 ---
-{%- set langPrefix = "/en" -%}
 {%- set catLabels = {"immobilier": "Real estate", "commerce": "Trade", "agriculture": "Agriculture"} -%}
 {%- set catLabel = catLabels[project.category] or project.category -%}
 {%- set targetM = project.targetMinor or 0 -%}
@@ -131,8 +130,8 @@ eleventyComputed:
           <div class="prose"><p>{{ project.cautionType }}</p></div>
         </div>
 
-        <!-- DOCUMENTS (hydrated; empty in SSG) -->
-        <div class="block">
+        <!-- DOCUMENTS (hydrated; empty in SSG; hidden by JS when there are none) -->
+        <div class="block" id="docsBlock">
           <h2 class="block-h">Documents</h2>
           <ul class="docs" id="docs"></ul>
         </div>
@@ -152,7 +151,6 @@ eleventyComputed:
               <span><span class="num" id="investRaised">{{ raisedM }}</span> FCFA raised</span>
             </div>
           </div>
-          {% endif %}
 
           <div class="invest-form">
             <div class="kyc-gate" id="kycGate" hidden>
@@ -204,6 +202,11 @@ eleventyComputed:
               <p>Your money goes into a dedicated escrow account for this project. KPITAL holds no funds. <a href="/en/securite">Learn more →</a></p>
             </div>
           </div>
+          {% else %}
+          <div class="invest-form invest-closed">
+            <p class="invest-closed-note">Fundraising has not opened yet. Follow this project to be notified when it opens.</p>
+          </div>
+          {% endif %}
         </div>
       </aside>
     </div>
